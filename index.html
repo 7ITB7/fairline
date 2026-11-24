@@ -76,6 +76,9 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
 .lad td{padding:8px 4px}.lad tr[data-lad]{cursor:pointer}.lad tr.on td{background:rgba(34,211,238,.09)}
 .pos{border:1px solid var(--line);border-radius:12px;padding:9px;margin:8px 0;background:#0a0d12}
 @media (max-width:370px){.tiles{grid-template-columns:repeat(2,1fr)}}
+#lwBox{position:relative;height:560px;margin-top:8px;border-radius:10px;overflow:hidden;background:#0a0d12}
+#lwBox canvas{background:none!important;border-radius:0!important}
+.lwleg{position:absolute;left:6px;top:4px;z-index:3;font:10.5px/1.45 var(--mono);color:var(--ink);background:rgba(10,13,18,.8);padding:3px 6px;border-radius:6px;pointer-events:none;max-width:85%}
 </style></head><body>
 <div class="banner" id="banner" hidden>Preview mode: live feeds may be blocked here. Everything works once it's on GitHub Pages.</div>
 <header>
@@ -102,6 +105,8 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
  <select id="scSel" aria-label="Market"></select>
  <div id="scHead"></div>
  <div class="filters" id="scView"></div>
+ <div class="filters" id="lwTog"></div>
+ <div id="lwBox" hidden></div>
  <canvas id="scCv" aria-label="Scalp chart"></canvas>
  <div class="tiles" id="scInd"></div>
  <div id="scStrat"></div>
@@ -111,7 +116,7 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
  <div class="card lg"><b>Coin:</b> candles · <span class="am">┅ strike</span> · <span class="ok">green cone</span> = Fairline's ±1σ / ±2σ range to the close · <span class="am">amber band</span> = 60-second settlement average<br>
  <b>Contract:</b> mid-price candles · <span class="cy">blue band</span> = bid/ask · white line = Fair · <span class="am">amber dots</span> = Truth · ▲ entries ○ exits · dashed green / red = open target / stop<br>
  <b>Snap:</b> contract move minus the coin-justified move each minute (dashed = strategy trigger) · <b>Tape:</b> <span class="ok">takers buying this side ↑</span> / <span class="bad">the other side ↓</span> · <span class="cy">line</span> = order-book pressure<br>
- Tap the chart for exact values. Contract history comes from Kalshi; tape and pressure build while the app is open.</div>
+ Tap the chart for exact values. Contract history comes from Kalshi; tape and pressure build while the app is open.<br><b>TradingView chart:</b> pinch to zoom, drag to pan, drag the pane borders to resize; switch layers on and off with the buttons above it. Strategy entries show as arrows with the strategy's icon, exits as circles with the P&amp;L.</div>
 </section>
 
 <!-- MANUAL -->
@@ -210,7 +215,7 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
  <div class="card"><h2>🎯 The scalping desk</h2>
   <p class="muted">The <b>Scalp</b> tab covers Kalshi's BTC and ETH 15-minute, hourly and 5pm daily markets. Pick a timeframe and coin. On hourly and daily, tap a strike in the ladder below the chart. <b>BUY YES / BUY NO</b> loads the scalp ticket.</p>
   <h3>The chart, top to bottom</h3>
-  <p class="muted"><b>Coin:</b> candles, the strike (amber dashed), Fairline's ±1σ/±2σ cone for where it settles, and the 60-second settlement window. <b>Contract:</b> mid-price candles with the bid/ask band, the white Fair line (model) and amber Truth dots, plus ▲ entries, ○ exits and dashed target/stop lines. <b>Snap:</b> each minute, how far the contract moved beyond what the coin's move justified. <b>Tape:</b> contracts bought by takers on each side, with the cyan order-book pressure line. Tap the chart for exact values; flip YES/NO to see either side's price.</p>
+  <p class="muted"><b>Coin:</b> candles, the strike (amber dashed), Fairline's ±1σ/±2σ cone for where it settles, and the 60-second settlement window. <b>Contract:</b> mid-price candles with the bid/ask band, the white Fair line (model) and amber Truth dots, plus ▲ entries, ○ exits and dashed target/stop lines. <b>Snap:</b> each minute, how far the contract moved beyond what the coin's move justified. <b>Tape:</b> contracts bought by takers on each side, with the cyan order-book pressure line. Tap the chart for exact values; flip YES/NO to see either side's price. By default the chart is TradingView's free Lightweight Charts™ library (Apache 2.0) fed with Fairline's own data: pinch to zoom, drag to pan, resize the panes, and toggle Fair, Truth, bid/ask, cone, trades, Snap and Tape. The "Classic chart" button switches back to the original drawing.</p>
   <h3>Custom indicators</h3>
   <p class="muted"><b>Fair:</b> Fairline's model probability. <b>Truth:</b> what a contract at this price with this much time left actually won from Sep 24 to Nov 23 (11,593 fifteen-minute markets, 2,700 hourly ladders and 103 daily ladders, BTC+ETH). It's trend-neutral: BTC fell 28% and ETH 37% in that stretch, which made every NO look great, so Truth averages the YES-side and NO-side results to cancel the trend. The tile shows the cheaper side's edge after the fee. <b>Snap:</b> contract move minus model move over the last minute. <b>Θ:</b> what YES gains or loses per minute if the coin sits still. <b>Δ:</b> how far YES moves for one step in the coin: BTC $25 / $100 / $250 and ETH $1 / $5 / $10 on 15m / hourly / daily. <b>Z:</b> distance to the strike in standard deviations of the move expected before close. <b>Pressure:</b> resting YES bids vs NO bids within 3¢ of the top (−1 to +1). <b>Flow:</b> takers buying YES vs NO over 2 minutes. <b>Heat:</b> the volatility the market's prices imply divided by Fairline's forecast; above 1 means cheap contracts are extra expensive. <b>Touch:</b> how often the sell price reached +5¢ (or 2× for contracts under 15¢) from this price and time left in that history, plus the model's estimate. <b>Momentum:</b> the coin's 5-minute move in σ. <b>Lock:</b> final minute only, how much of the 60-second average is already in and what the rest needs to average.</p>
   <h3>Strategies (all paper)</h3>
@@ -247,6 +252,7 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
  <button data-t="guide"><span>📘</span>Guide</button>
 </nav>
 
+<script src="lwc.js"></script>
 <script>
 /* ================= basics ================= */
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -1058,7 +1064,7 @@ function scRender(now){if($('#t-sc').hidden)return;const coins=act().filter(a=>a
  const k=coins.join()+'|'+SC.a+'|'+SC.tf+'|'+SC.side+'|'+SC.zoom;
  if(SC.ck!==k){SC.ck=k;$('#scTf').innerHTML=[['15m','15 min'],['1h','Hourly'],['1d','Daily 5pm']].map(([t,l])=>`<button data-stf="${t}" class="${SC.tf===t?'on':''}">${l}</button>`).join('')+'<span style="flex:0 0 8px"></span>'+coins.map(a=>`<button data-sca="${a}" class="${SC.a===a?'on':''}">${a}</button>`).join('');
   const zl=SC.tf==='15m'?['Window','1 hour']:SC.tf==='1h'?['Hour','3 hours']:['3 hours','Day'];
-  $('#scView').innerHTML=['YES','NO'].map(s=>`<button data-ssd="${s}" class="${SC.side===s?'on':''}">${SC.tf==='15m'?(s==='YES'?'UP':'DOWN'):s}</button>`).join('')+'<span style="flex:0 0 8px"></span>'+zl.map((l,i)=>`<button data-szm="${i}" class="${SC.zoom===i?'on':''}">${l}</button>`).join('')}
+  lwTog();$('#scView').innerHTML=['YES','NO'].map(s=>`<button data-ssd="${s}" class="${SC.side===s?'on':''}">${SC.tf==='15m'?(s==='YES'?'UP':'DOWN'):s}</button>`).join('')+'<span style="flex:0 0 8px"></span>'+zl.map((l,i)=>`<button data-szm="${i}" class="${SC.zoom===i?'on':''}">${l}</button>`).join('')}
  const R=scFocus(now);SC.R=R;const L=scMarkets(SC.a,SC.tf,now).sort((x,y)=>(y.m.K??y.m.L??0)-(x.m.K??x.m.L??0)),ids=SC.a+SC.tf+'|'+L.map(R=>R.m.id).join('|');
  if(SC.opts!==ids){SC.opts=ids;$('#scSel').innerHTML=L.length?L.map(R=>`<option value="${esc(R.m.id)}">${esc(desc(R.m))}</option>`).join(''):`<option value="">${cfg.worker?'Loading '+SC.a+' markets…':'Needs the Kalshi proxy (Settings)'}</option>`}
  if(R&&$('#scSel').value!==R.m.id)$('#scSel').value=R.m.id;
@@ -1088,7 +1094,7 @@ function scBars(m,g){const dur=g*60000,src=g>=60?KC60[m.id]?.c:KC[m.id]?.c,bars=
  const lastT=bars.length?bars[bars.length-1].t:-1;const add=(t0,b,a)=>{if(!(b>0&&a>0&&a<=1&&a>=b))return;const t=Math.floor(t0/dur)*dur;if(t<lastT)return;const mid=(b+a)/2;let x=bars.length&&bars[bars.length-1].t===t?bars[bars.length-1]:null;
   if(!x){x={t,o:mid,h:mid,l:mid,c:mid,b,a,v:0,live:1};bars.push(x)}else{x.h=Math.max(x.h,mid);x.l=Math.min(x.l,mid);x.c=mid;x.b=b;x.a=a}};
  for(const p of HIST.get(m.id)||[])add(p.t,p.b,p.a);if(Date.now()-(m.bt||0)<30000)add(Date.now(),m.yesBid,m.yesAsk);return bars}
-function scDraw(){if($('#t-sc').hidden)return;try{scDraw0()}catch(e){try{console.log('scalp chart error',e)}catch(x){}}}
+function scDraw(){if($('#t-sc').hidden)return;const pro=SC.pro&&LW.ok;$('#lwBox').hidden=!pro;$('#scCv').hidden=pro;try{pro?lwDraw():scDraw0()}catch(e){try{console.log('scalp chart error',e)}catch(x){}}}
 function scDraw0(){const now=Date.now(),cv=$('#scCv'),dpr=window.devicePixelRatio||1,W=cv.clientWidth||360,H=470;
  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
  const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);g.font='10px ui-monospace,Menlo,Consolas,monospace';g.textBaseline='middle';g.textAlign='left';
@@ -1162,6 +1168,76 @@ window.addEventListener('resize',()=>scDraw());
 document.addEventListener('click',e=>{const b=e.target.closest('[data-chart],[data-lad2]');if(!b)return;const m=MK.get(b.dataset.chart||b.dataset.lad2);if(!m)return;
  if(m.v!=='K'||m.man||!['15m','1h','1d'].includes(m.tf)){toast('The Scalp tab covers live Kalshi 15m, hourly and daily markets');return}
  SC.tf=m.tf;SC.a=m.asset;SC.id=m.id;SC.zoom=0;SC.tixK='';store.set('fl.sctf',SC.tf);scBook(m.id);scCandles(m.id);scTrades(m.id,true);tab('sc')});
+
+/* ---- Pro chart: TradingView Lightweight Charts (Apache 2.0) with Fairline's indicators and strategy trades ---- */
+const LW={ok:typeof LightweightCharts!=='undefined',ch:null,s:{},mk:null,pl:[],key:'',fit:'',panes:'',leg:null,
+ on:{fair:true,truth:true,band:true,cone:true,trades:true,snap:true,tape:true,...store.get('fl.lwon',{})}};
+SC.pro=LW.ok&&store.get('fl.pro',true)!==false;
+const LWT=[['fair','Fair'],['truth','Truth'],['band','Bid/ask'],['cone','Cone'],['trades','Trades'],['snap','Snap'],['tape','Tape']];
+function lwBuild(){const L=LightweightCharts,el=$('#lwBox');if(LW.ch){try{LW.ch.remove()}catch(e){}}el.querySelectorAll('.lwleg').forEach(x=>x.remove());
+ const ch=L.createChart(el,{autoSize:true,layout:{background:{type:'solid',color:'#0a0d12'},textColor:'#8a97ab',fontFamily:'ui-monospace,Menlo,Consolas,monospace',fontSize:10,attributionLogo:true,panes:{separatorColor:'#222b38',enableResize:true}},
+  grid:{vertLines:{color:'#131925'},horzLines:{color:'#131925'}},crosshair:{mode:0},rightPriceScale:{borderColor:'#222b38'},
+  timeScale:{timeVisible:true,secondsVisible:false,borderColor:'#222b38',rightOffset:2,tickMarkFormatter:t=>etT(t*1000).replace(/\s?(AM|PM)/,'')},
+  localization:{timeFormatter:t=>etT(t*1000)}});
+ const S={},cents={type:'price',precision:1,minMove:0.1},line=(o,p)=>ch.addSeries(L.LineSeries,{lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false,...o},p);
+ let p=0;S.coin=ch.addSeries(L.CandlestickSeries,{upColor:'#84cc16',downColor:'#f43f5e',borderVisible:false,wickUpColor:'#84cc16',wickDownColor:'#f43f5e',priceLineVisible:false},p);
+ for(const k of['u2','l2','u1','l1'])S[k]=line({color:k.endsWith('1')?'rgba(163,230,53,.75)':'rgba(163,230,53,.4)',lineStyle:2},p);
+ p=1;S.ct=ch.addSeries(L.CandlestickSeries,{upColor:'#84cc16',downColor:'#f43f5e',borderVisible:false,wickUpColor:'#84cc16',wickDownColor:'#f43f5e',priceFormat:cents,priceLineVisible:false},p);
+ S.ask=line({color:'rgba(34,211,238,.55)',lineType:1,priceFormat:cents},p);S.bid=line({color:'rgba(34,211,238,.55)',lineType:1,priceFormat:cents},p);
+ S.fair=line({color:'#e9eef6',lineWidth:2,priceFormat:cents,title:'fair',lastValueVisible:true},p);S.truth=line({color:'#fbbf24',lineVisible:false,pointMarkersVisible:true,pointMarkersRadius:2,priceFormat:cents},p);
+ LW.mk=L.createSeriesMarkers(S.ct,[]);
+ const P={coin:0,ct:1};
+ if(LW.on.snap){p++;P.snap=p;S.snap=ch.addSeries(L.HistogramSeries,{priceFormat:cents,priceLineVisible:false,lastValueVisible:false},p)}
+ if(LW.on.tape){p++;P.tape=p;S.fy=ch.addSeries(L.HistogramSeries,{color:'rgba(163,230,53,.75)',priceLineVisible:false,lastValueVisible:false,priceFormat:{type:'volume'}},p);S.fn=ch.addSeries(L.HistogramSeries,{color:'rgba(251,113,133,.75)',priceLineVisible:false,lastValueVisible:false,priceFormat:{type:'volume'}},p);
+  S.pr=line({color:'#22d3ee',lineWidth:2,priceScaleId:'pr',priceFormat:{type:'price',precision:2,minMove:0.01}},p);try{ch.priceScale('pr',p).applyOptions({scaleMargins:{top:0.1,bottom:0.1},visible:false})}catch(e){}}
+ const ps=ch.panes(),fac=[0.30,0.42,0.13,0.15];ps.forEach((x,i)=>{try{x.setStretchFactor(i<2?fac[i]:(LW.on.snap&&i===P.snap?fac[2]:fac[3]))}catch(e){}});
+ const leg=document.createElement('div');leg.className='lwleg';el.appendChild(leg);LW.leg=leg;
+ ch.subscribeCrosshairMove(prm=>lwLegend(prm));LW.ch=ch;LW.s=S;LW.P=P;LW.pl=[];LW.key='';LW.fit='';LW.panes=JSON.stringify([LW.on.snap,LW.on.tape])}
+function lwLegend(prm){const L=LW.leg;if(!L)return;const R=SC.R;if(!R){L.innerHTML='';return}const m=R.m,lbl=m.tf==='15m'?(SC.side==='YES'?'UP':'DOWN'):SC.side;
+ const d=prm&&prm.time!=null&&prm.seriesData?prm.seriesData:null,g=s=>d&&LW.s[s]?d.get(LW.s[s]):null,c=g('coin'),k=g('ct'),f=g('fair'),t=g('truth'),sn=g('snap'),a=g('ask'),b=g('bid');
+ const when=d?etT(prm.time*1000):'now';
+ L.innerHTML=`<b>${m.asset}</b> ${c?axP(c.close):axP(R.S)} · <span class="cy">${lbl}</span> ${k?k.close.toFixed(1)+'¢':R.mid!=null?(SC.side==='YES'?R.mid*100:100-R.mid*100).toFixed(1)+'¢':'–'}${b&&a?` <span class="muted">(${b.value.toFixed(0)}/${a.value.toFixed(0)})</span>`:''}`+
+  `<br>fair ${f?f.value.toFixed(1):(R.P!=null?(SC.side==='YES'?R.P*100:100-R.P*100).toFixed(1):'–')}¢${t?` · <span class="am">truth ${t.value.toFixed(1)}¢</span>`:''}${sn?` · snap ${sn.value>=0?'+':''}${sn.value.toFixed(1)}¢`:''} · <span class="muted">${when}</span>`}
+function lwDraw(){const now=Date.now(),R=SC.R,m=R?R.m:null;if(!LW.ch||LW.panes!==JSON.stringify([LW.on.snap,LW.on.tape]))lwBuild();const S=LW.s,ch=LW.ch;
+ if(!m){for(const k in S)try{S[k].setData([])}catch(e){}LW.mk.setMarkers([]);lwLegend(null);return}
+ const a=m.asset,z=SC.zoom,side=SC.side,fl=v=>side==='YES'?v:1-v;let gb,gc,x0,x1;
+ if(m.tf==='15m'){gb=1;gc=1;x0=z?now-3600000:m.open-5*60000;x1=m.close}else if(m.tf==='1h'){gb=gc=z?5:1;x0=z?now-3*3600000:m.open;x1=m.close}else{gb=z?60:5;gc=z?15:5;x0=z?m.open:now-3*3600000;x1=z?m.close:Math.min(m.close,now+30*60000)}
+ const dur=gb*60000,sec=t=>Math.floor(t/1000),bt=t=>sec(Math.floor(t/dur)*dur),uniq=arr=>{const o=[];let last=-1;for(const x of arr.sort((p,q)=>p.time-q.time)){if(x.time===last)o[o.length-1]=x;else o.push(x);last=x.time}return o};
+ // coin
+ const CC=coinBars(a,gc).filter(r=>r[0]>=x0-gc*60000&&r[0]<=x1),Sx=comp(a)||(CC.length?CC[CC.length-1][4]:null);
+ S.coin.setData(uniq(CC.map(r=>({time:sec(r[0]),open:r[1],high:r[2],low:r[3],close:r[4]}))));S.coin.applyOptions({priceFormat:{type:'price',precision:Sx>=1000?0:2,minMove:Sx>=1000?1:0.01}});
+ for(const p of LW.pl)try{p.s.removePriceLine(p.l)}catch(e){}LW.pl=[];const pl=(s,o)=>LW.pl.push({s,l:s.createPriceLine({lineWidth:1,axisLabelVisible:true,...o})});
+ for(const k of(m.type==='range'?[m.L,m.U]:[m.K]))if(k!=null)pl(S.coin,{price:k,color:'#fbbf24',lineStyle:2,title:'strike'});
+ const cone={u1:[],l1:[],u2:[],l2:[]},cd=gc*60000;
+ if(LW.on.cone&&Sx&&R.x&&VOL[a]?.base&&m.close>now){for(let t=Math.ceil(now/cd)*cd;t<=m.close+1;t+=cd){const sd=Math.sqrt(fwdVar(a,now,t,R.x.w||0,VOL[a].base,cfg.events)*(R.x.scale||1));
+  for(const[k,v]of[['u1',sd],['l1',-sd],['u2',2*sd],['l2',-2*sd]])cone[k].push({time:sec(t),value:Sx*Math.exp(v)})}}
+ for(const k of['u1','l1','u2','l2'])S[k].setData(cone[k]);
+ // contract (cents, in the side being viewed)
+ const bars=scBars(m,gb).filter(b=>b.t>=x0-dur&&b.t<=x1);const cb=[],fa=[],tr=[],bd=[],ak=[],sn=[];let prevC=null,prevF=null;
+ for(const b of bars){const te=Math.min(b.t+dur,now),f=b.live&&te>=now-dur?R.P:fairAt(m,R,te),o=fl(b.o)*100,c=fl(b.c)*100,h=Math.max(fl(b.h),fl(b.l))*100,l=Math.min(fl(b.h),fl(b.l))*100,t=sec(b.t);
+  cb.push({time:t,open:o,high:Math.max(h,o,c),low:Math.min(l,o,c),close:c});
+  if(f!=null){fa.push({time:t,value:fl(f)*100});if(prevF!=null&&prevC!=null){const v=(b.c-prevC)-(f-prevF);const vv=(side==='YES'?v:-v)*100;sn.push({time:t,value:vv,color:Math.abs(vv)>=(m.tf==='15m'?7:6)?'#fbbf24':vv>=0?'rgba(163,230,53,.6)':'rgba(251,113,133,.6)'})}prevF=f}prevC=b.c;
+  const ask=side==='YES'?b.a:1-b.b,bid=side==='YES'?b.b:1-b.a;ak.push({time:t,value:ask*100});bd.push({time:t,value:bid*100});
+  const tt=truth(m,side,Math.round(ask*100)/100,(m.close-te)/1000);if(tt)tr.push({time:t,value:tt.w*100})}
+ S.ct.setData(uniq(cb));S.fair.setData(LW.on.fair?uniq(fa):[]);S.truth.setData(LW.on.truth?uniq(tr):[]);S.ask.setData(LW.on.band?uniq(ak):[]);S.bid.setData(LW.on.band?uniq(bd):[]);
+ if(S.snap){S.snap.setData(uniq(sn));const th=m.tf==='15m'?7:6;for(const v of[th,-th])pl(S.snap,{price:v,color:'rgba(251,191,36,.6)',lineStyle:2,axisLabelVisible:false})}
+ // tape + pressure
+ if(S.fy){const fb=new Map();for(const x of TR[m.id]?.a||[]){if(x.t<x0-dur||x.t>x1)continue;const t=Math.floor(x.t/dur)*dur,o=fb.get(t)||{y:0,n:0};if(x.s==='yes')o.y+=x.c;else o.n+=x.c;fb.set(t,o)}
+  const up=[],dn=[];for(const[t,o]of[...fb].sort((p,q)=>p[0]-q[0])){const u=side==='YES'?o.y:o.n,d=side==='YES'?o.n:o.y;up.push({time:sec(t),value:u});dn.push({time:sec(t),value:-d})}S.fy.setData(up);S.fn.setData(dn);
+  const pm=new Map();for(const p of PRESS[m.id]||[]){if(p.t<x0-dur)continue;pm.set(bt(p.t),side==='YES'?p.pr:-p.pr)}S.pr.setData([...pm].sort((p,q)=>p[0]-q[0]).map(([time,value])=>({time,value})))}
+ // trades: strategy entries (arrow + icon) and exits (circle), open target / stop lines
+ const mk=[],T=trades().filter(r=>r.id===m.id);
+ if(LW.on.trades)for(const r of T){const px=(r.sd===side?r.px:1-r.px)*100,ic=STR[r.strat]?.ic||(r.strat==='tix'?'✋':r.strat==='fav'?'⭐':r.strat==='favD'?'☀️':'📐');
+  mk.push({time:bt(r.t),position:'atPriceMiddle',price:px,shape:'arrowUp',color:r.sd==='YES'?'#a3e635':'#fb7185',text:ic+' '+sideName(m,r.sd)});
+  if(r.xt)mk.push({time:bt(r.xt),position:'atPriceMiddle',price:(r.sd===side?r.xp:1-r.xp)*100,shape:'circle',color:r.pnl>=0?'#a3e635':'#fb7185',text:(r.pnl>=0?'+':'')+usd(r.pnl)});
+  if(r.o==null){if(r.tp!=null)pl(S.ct,{price:(r.sd===side?r.tp:1-r.tp)*100,color:'#a3e635',lineStyle:2,title:ic+' target'});if(r.slx!=null)pl(S.ct,{price:(r.sd===side?r.slx:1-r.slx)*100,color:'#fb7185',lineStyle:2,title:ic+' stop'})}}
+ LW.mk.setMarkers(mk.sort((p,q)=>p.time-q.time));
+ const fk=m.id+'|'+z;let tw=0;try{tw=ch.timeScale().width()}catch(e){}if(LW.fit!==fk&&cb.length&&tw>50){LW.fit=fk;try{ch.timeScale().setVisibleRange({from:sec(Math.max(x0,(CC[0]?.[0])??x0)),to:sec(x1)})}catch(e){try{ch.timeScale().fitContent()}catch(x){}}}
+ lwLegend(null)}
+function lwTog(){$('#lwTog').innerHTML=`<button data-lwpro="1" class="${SC.pro?'on':''}">${SC.pro?'TradingView chart':'Classic chart'}</button>`+(SC.pro?LWT.map(([k,l])=>`<button data-lwt="${k}" class="${LW.on[k]?'on':''}">${l}</button>`).join(''):'')}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-lwt],[data-lwpro]');if(!b)return;
+ if(b.dataset.lwpro){if(!LW.ok){toast('The TradingView chart library did not load; using the classic chart');return}SC.pro=!SC.pro;store.set('fl.pro',SC.pro)}
+ else{const k=b.dataset.lwt;LW.on[k]=!LW.on[k];store.set('fl.lwon',LW.on)}lwTog();scDraw()});
 
 /* ---- Lab ---- */
 function labStats(f){const T=trades().filter(f),S=T.filter(r=>r.pnl!=null),pnl=S.reduce((s,r)=>s+r.pnl,0),cost=S.reduce((s,r)=>s+r.cost*r.C,0),hold=S.map(r=>(r.xt||r.cl)-r.t).filter(x=>x>0);
