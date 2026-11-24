@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07090d"><link rel="icon" href="data:,"><title>Fairline</title>
+<style>
+/* FAIRLINE: "bookmaker's tote board at night". Graphite slate, chalk-white numerals, lime for a priced edge, amber for paper calls, coral for no-trade, cyan for reference data; tabular mono figures */
+:root{--bg:#07090d;--p1:#0f131a;--p2:#141a23;--line:#222b38;--ink:#e9eef6;--ink2:#8a97ab;--lime:#a3e635;--amb:#fbbf24;--cor:#fb7185;--cyn:#22d3ee;--vio:#a78bfa;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html{color-scheme:dark}
+body{margin:0;background:radial-gradient(circle at 0 -20%,rgba(163,230,53,.08),transparent 45%),radial-gradient(circle at 120% 30%,rgba(34,211,238,.07),transparent 45%),var(--bg);background-attachment:fixed;color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:84px}
+header{padding:max(10px,env(safe-area-inset-top)) 14px 10px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#0c1016,#07090d)}
+.hrow{display:flex;justify-content:space-between;align-items:center;gap:8px}
+h1{margin:0;font:800 21px var(--mono);letter-spacing:.06em}h1 b{color:var(--lime)}
+.sub{font:11px var(--mono);color:var(--ink2)}
+.pill{font:700 10.5px var(--mono);padding:4px 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.pill.live{color:var(--lime);border-color:rgba(163,230,53,.5)}.pill.off{color:var(--cor);border-color:rgba(251,113,133,.5)}
+.strip{display:flex;gap:6px;overflow-x:auto;padding:8px 0 0;scrollbar-width:none}.strip::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;background:var(--p1);border:1px solid var(--line);border-radius:10px;padding:6px 9px;font:11px var(--mono);min-width:118px}
+.chip b{display:block;font-size:14px;color:var(--ink)}.chip i{font-style:normal;color:var(--ink2)}
+main{max-width:860px;margin:0 auto;padding:8px 10px}
+.card{background:linear-gradient(170deg,var(--p2),var(--p1));border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
+h2{margin:0 0 6px;font:800 15px system-ui;letter-spacing:.02em}h3{margin:12px 0 6px;font:800 12px var(--mono);color:var(--ink2);text-transform:uppercase;letter-spacing:.1em}
+.muted{color:var(--ink2);font-size:12.5px}.mono{font-family:var(--mono)}
+.btn{min-height:44px;border:0;border-radius:10px;padding:0 14px;background:linear-gradient(135deg,#65a30d,#0e7490);color:#fff;font:800 13.5px system-ui;cursor:pointer}
+.btn.alt{background:transparent;border:1px solid var(--line);color:var(--ink)}.btn.sm{min-height:34px;padding:0 10px;font-size:12px}.btn.red{background:linear-gradient(135deg,#be123c,#7f1d1d)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+label{display:block;font:600 11.5px system-ui;color:var(--ink2);margin:8px 0 3px}
+input,select,textarea{width:100%;min-height:42px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#0a0d12;color:var(--ink);font:14px var(--mono)}
+textarea{min-height:120px;font-size:11px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 8px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:0 8px}
+.chk{display:flex;align-items:center;gap:8px;min-height:40px;font-size:13px;color:var(--ink)}.chk input{width:20px;min-height:20px}
+.filters{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:4px 0}.filters::-webkit-scrollbar{display:none}
+.filters button{flex:0 0 auto;min-height:34px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink2);padding:0 12px;font:700 12px var(--mono);cursor:pointer}
+.filters button.on{color:#0b0f14;background:var(--lime);border-color:var(--lime)}
+.sig{border:1px solid var(--line);border-radius:13px;padding:11px;margin:9px 0;background:var(--p1);cursor:pointer}
+.sig.ENTRY{border-color:rgba(163,230,53,.7);box-shadow:0 0 18px rgba(163,230,53,.15)}.sig.PAPER{border-color:rgba(251,191,36,.6)}.sig.REF{border-color:rgba(34,211,238,.55)}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.ven{font:800 10px var(--mono);padding:2px 7px;border-radius:6px;background:#1c2430;color:var(--ink2);margin-right:4px}
+.ven.K{background:rgba(163,230,53,.14);color:var(--lime)}.ven.P{background:rgba(34,211,238,.14);color:var(--cyn)}.ven.U,.ven.O{background:rgba(167,139,250,.16);color:var(--vio)}
+.tl{font:800 13px var(--mono);color:var(--ink)}
+.nums{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.num{background:#0a0d12;border-radius:9px;padding:6px 7px}.num span{display:block;font:10px var(--mono);color:var(--ink2);text-transform:uppercase;letter-spacing:.06em}.num b{font:800 16px var(--mono)}
+.call{margin-top:8px;font:800 13px var(--mono);padding:7px 9px;border-radius:9px;background:#0a0d12}
+.call.ENTRY{color:#0b0f14;background:var(--lime)}.call.PAPER{color:#0b0f14;background:var(--amb)}.call.REF{color:#0b0f14;background:var(--cyn)}.call.NO{color:var(--cor)}.call.WAIT{color:var(--ink2)}
+.why{font-size:12px;color:var(--ink2);margin-top:5px}
+.det{margin-top:8px;font:11.5px/1.6 var(--mono);color:var(--ink2);border-top:1px dashed var(--line);padding-top:8px}
+.det b{color:var(--ink);font-weight:700}.ok{color:var(--lime)}.bad{color:var(--cor)}.am{color:var(--amb)}.cy{color:var(--cyn)}
+table{width:100%;border-collapse:collapse;font:12px var(--mono)}td,th{padding:6px 4px;border-bottom:1px dashed var(--line);text-align:left;vertical-align:top}th{color:var(--ink2);font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.kpi{background:#0a0d12;border-radius:10px;padding:8px}.kpi span{display:block;font:10px var(--mono);color:var(--ink2);text-transform:uppercase}.kpi b{font:800 17px var(--mono)}
+canvas{width:100%;display:block;background:#0a0d12;border-radius:10px}
+.bar{height:8px;background:#0a0d12;border-radius:99px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--lime),var(--cyn));transition:width .3s}
+.warn{border-left:3px solid var(--amb);background:rgba(251,191,36,.07);border-radius:0 9px 9px 0;padding:8px 10px;font-size:12.5px;margin:8px 0}
+.toast{position:fixed;left:10px;right:10px;top:max(10px,env(safe-area-inset-top));z-index:50;background:var(--lime);color:#0b0f14;font:800 13px system-ui;padding:12px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+nav{position:fixed;left:8px;right:8px;bottom:8px;display:flex;background:rgba(7,9,13,.95);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:16px;overflow:hidden;z-index:20}
+nav button{flex:1;min-height:58px;background:none;border:0;color:#6f7b8f;font:700 10.5px system-ui;cursor:pointer}nav button span{display:block;font-size:18px}
+nav button.on{color:#fff;background:linear-gradient(180deg,rgba(163,230,53,.16),rgba(34,211,238,.1))}
+.banner{background:#3b2f0b;color:#fde68a;padding:7px 12px;font-size:12px}
+a{color:var(--cyn)}
+pre{white-space:pre-wrap;word-break:break-all;background:#0a0d12;border-radius:9px;padding:8px;font:10.5px/1.45 var(--mono);max-height:260px;overflow:auto}
+</style></head><body>
+<div class="banner" id="banner" hidden>Preview mode: live feeds may be blocked here. Everything works once it's on GitHub Pages.</div>
+<header>
+ <div class="hrow"><div><h1>FAIR<b>LINE</b></h1><div class="sub">fair odds vs market price · NO TRADE by default · paper only</div></div><span class="pill live" id="live">● LIVE</span></div>
+ <div class="strip" id="strip"></div>
+</header>
+<main>
+
+<!-- SIGNALS -->
+<section id="t-sig">
+ <div class="kpis" style="margin-top:6px"><div class="kpi"><span>Paper bank</span><b id="kBank">$0</b></div><div class="kpi"><span>Today</span><b id="kDay">$0</b></div><div class="kpi"><span>Open</span><b id="kOpen">0</b></div></div>
+ <div id="evid"></div>
+ <div id="kalshiNote"></div>
+ <div class="filters" id="filt"></div>
+ <div id="sumLine" class="muted" style="margin:6px 2px"></div>
+ <div id="list"></div>
+</section>
+
+<!-- MANUAL -->
+<section id="t-man" hidden>
+ <div class="card"><h2>Check a market by hand</h2>
+  <div class="muted">For Kalshi (without the proxy), Polymarket US, or anything else. Type what you see in the app. It gets the same fair-value math, fees and TRADE/NO TRADE rules, then stays on your Signals list.</div>
+  <div class="g2"><div><label>Venue</label><select id="mV"><option value="K">Kalshi</option><option value="U">Polymarket US</option><option value="P">Polymarket (intl)</option><option value="O">Other (no fee)</option></select></div>
+   <div><label>Coin</label><select id="mA"><option>BTC</option><option>ETH</option><option>SOL</option><option>XRP</option></select></div></div>
+  <div class="g2"><div><label>Contract</label><select id="mT"><option value="updown">Up / Down (price to beat)</option><option value="above">Above strike</option><option value="below">Below strike</option><option value="range">Range (between)</option></select></div>
+   <div><label>Timeframe</label><select id="mTf"><option value="15m">15 min</option><option value="1h">1 hour</option><option value="4h">4 hour</option><option value="5m">5 min</option></select></div></div>
+  <div class="g2" id="mK1"><div><label>Strike / price to beat ($)</label><input id="mK" inputmode="decimal"></div><div><label>Closes at (your time)</label><input id="mC" type="time"></div></div>
+  <div class="g2" id="mK2" hidden><div><label>Range low ($)</label><input id="mL" inputmode="decimal"></div><div><label>Range high ($)</label><input id="mU" inputmode="decimal"></div></div>
+  <div class="g2"><div><label>YES / UP bid (¢)</label><input id="mYb" inputmode="decimal"></div><div><label>YES / UP ask (¢)</label><input id="mYa" inputmode="decimal"></div></div>
+  <div class="g2"><div><label>Settles on</label><select id="mAv"><option value="60">60-second average (Kalshi, Poly)</option><option value="0">single price at close</option></select></div><div><label>Fee rate (Poly US / other)</label><input id="mF" inputmode="decimal" placeholder="0.095"></div></div>
+  <div class="row"><button class="btn" id="mGo">Evaluate &amp; watch</button></div>
+  <div id="mOut"></div></div>
+ <div class="card"><h2>Watching (manual)</h2><div id="mList" class="muted">None yet.</div></div>
+</section>
+
+<!-- LEDGER -->
+<section id="t-led" hidden>
+ <div class="card"><h2>Calibration: does the model beat the market?</h2>
+  <div class="muted">Every market gets logged at fixed checkpoints (NO TRADE calls too) and graded when it settles. "Δ Brier" below 0 means the fair value beat the market price. A venue/timeframe only earns real <b class="ok">ENTRY</b> calls after 500+ graded checkpoints with the whole 90% confidence range below zero.</div>
+  <div id="calTable"></div>
+  <h3>Reliability (do 70% calls happen 70% of the time?)</h3>
+  <canvas id="rel" width="640" height="420"></canvas>
+  <div class="muted" style="margin-top:4px"><span class="ok">●</span> fair value &nbsp; <span style="color:#8a97ab">●</span> market price &nbsp; dashed = perfect calibration · dot size = count</div></div>
+ <div class="card"><h2>Paper trades</h2><div id="trSum"></div><div id="trList"></div>
+  <div class="row"><button class="btn alt" id="lCsv">Export CSV</button><button class="btn alt" id="lMC">Monte Carlo on these</button><button class="btn red" id="lReset">Reset ledger</button></div><div id="lMCout"></div></div>
+</section>
+
+<!-- BACKTEST -->
+<section id="t-bt" hidden>
+ <div class="card"><h2>Backtest on settled markets (walk-forward)</h2>
+  <div class="muted">Replays real settled markets. It rebuilds the fair value at each checkpoint using only data from before that moment, trains the market-weight on earlier days, and grades it on the next day. Only out-of-sample days count.</div>
+  <div class="g2"><div><label>Venue</label><select id="bV"><option value="P">Polymarket (no proxy needed)</option><option value="K">Kalshi 15m (needs proxy)</option></select></div><div><label>Coin</label><select id="bA"><option>BTC</option><option>ETH</option><option>SOL</option><option>XRP</option></select></div></div>
+  <div class="g3"><div><label>Timeframe</label><select id="bTf"><option>15m</option><option>1h</option><option>4h</option></select></div><div><label>Days</label><select id="bD"><option>2</option><option selected>3</option><option>5</option><option>7</option></select></div><div><label>Poly half-spread ¢</label><input id="bHs" value="0.5" inputmode="decimal"></div></div>
+  <div class="row"><button class="btn" id="bGo">Run backtest</button></div>
+  <div class="bar"><i id="bBar"></i></div><div id="bProg" class="muted"></div></div>
+ <div id="bOut"></div>
+</section>
+
+<!-- SETTINGS -->
+<section id="t-set" hidden>
+ <div class="card"><h2>Coins &amp; venues</h2>
+  <div class="row" id="sAssets"></div>
+  <label class="chk"><input type="checkbox" data-k="showPoly"> Show Polymarket (intl) as reference</label>
+  <label class="chk"><input type="checkbox" data-k="showKalshi"> Show Kalshi (needs proxy below)</label>
+  <label>Paper bankroll ($)</label><input data-k="bank" inputmode="decimal"></div>
+ <div class="card"><h2>Kalshi proxy (free Cloudflare Worker)</h2>
+  <div class="muted">Kalshi blocks phone browsers from reading its prices, so a tiny free relay fixes it. It can only <b>read</b> public prices; it can't trade or see any account. It also fetches Polymarket's exact "price to beat".</div>
+  <ol class="muted" style="padding-left:18px">
+   <li>Go to <b>dash.cloudflare.com</b> and sign up free.</li>
+   <li><b>Workers &amp; Pages → Create → Start with Hello World</b>. Name it <b>fairline-proxy</b> → <b>Deploy</b>.</li>
+   <li>Tap <b>Edit code</b>, delete everything, paste the code below, then <b>Deploy</b>.</li>
+   <li>Copy the Worker's address (like <span class="mono">https://fairline-proxy.yourname.workers.dev</span>) into the box below and tap Test.</li></ol>
+  <pre id="wCode"></pre><div class="row"><button class="btn alt sm" id="wCopy">Copy code</button></div>
+  <label>Worker URL</label><input data-k="worker" placeholder="https://fairline-proxy.yourname.workers.dev" autocomplete="off">
+  <div class="row"><button class="btn sm" id="wTest">Save &amp; test</button><span id="wMsg" class="muted"></span></div></div>
+ <div class="card"><h2>Rules &amp; risk</h2>
+  <div class="g3"><div><label>Min edge (¢)</label><input data-k="minEdge" data-pct="1" inputmode="decimal"></div><div><label>Max spread (¢)</label><input data-k="maxSpread" data-pct="1" inputmode="decimal"></div><div><label>Model vs mkt max (pts)</label><input data-k="maxDiv" data-pct="1" inputmode="decimal"></div>
+   <div><label>Kelly fraction</label><input data-k="kelly" inputmode="decimal"></div><div><label>Max / trade (%)</label><input data-k="cap" data-pct="1" inputmode="decimal"></div><div><label>Same-hour cap (%)</label><input data-k="corrCap" data-pct="1" inputmode="decimal"></div>
+   <div><label>Max open</label><input data-k="maxOpen" inputmode="numeric"></div><div><label>Daily stop (%)</label><input data-k="dayStop" data-pct="1" inputmode="decimal"></div><div><label>Order type</label><select data-k="mode"><option value="taker">Taker (buy the ask)</option><option value="maker">Maker (limit order)</option></select></div></div></div>
+ <div class="card"><h2>Model</h2>
+  <div class="g3"><div><label>Model weight vs market</label><input data-k="wm" inputmode="decimal"></div><div><label>Implied-vol weight ≤1h</label><input data-k="wivShort" inputmode="decimal"></div><div><label>Implied-vol weight 4h</label><input data-k="wivLong" inputmode="decimal"></div>
+   <div><label>Basis Kalshi (bp)</label><input data-k="bBrti" inputmode="decimal"></div><div><label>Basis Poly (bp)</label><input data-k="bCl" inputmode="decimal"></div><div><label>Event vol ×</label><input data-k="evMult" inputmode="decimal"></div><div><label>Volatility multiplier</label><input data-k="vk" inputmode="decimal"></div></div>
+  <label>Scheduled events (CPI, jobs, FOMC…): times when volatility spikes</label>
+  <div class="row"><input type="datetime-local" id="evIn" style="flex:1"><button class="btn sm" id="evAdd">Add</button></div><div id="evList" class="muted"></div></div>
+ <div class="card"><h2>Fees (edit if venues change them)</h2>
+  <div class="g3"><div><label>Kalshi taker rate</label><input data-k="kFee" inputmode="decimal"></div><div><label>Kalshi maker rate</label><input data-k="kMaker" inputmode="decimal"></div><div><label>Kalshi rounding</label><select data-k="kRound"><option value="cent">Up to the cent</option><option value="hund">Up to 1/100¢</option></select></div>
+   <div><label>Poly US rate</label><input data-k="pusRate" inputmode="decimal"></div><div><label>Maker pick-off haircut (¢)</label><input data-k="haircut" data-pct="1" inputmode="decimal"></div></div>
+  <div class="row"><button class="btn" id="sSave">Save settings</button></div></div>
+</section>
+
+<!-- GUIDE -->
+<section id="t-guide" hidden>
+ <div class="card"><h2>What this is (and isn't)</h2>
+  <p class="muted">The research verdict: <b>no public signal reliably beats the market price on 5-minute to 4-hour crypto contracts after fees.</b> Directional accuracy at the open is about 50–53% on every timeframe. A 75% win rate is easy by buying favorites, and it still loses money after fees.</p>
+  <p class="muted">So Fairline is a <b>fair-value calculator plus a lie detector</b>. It prices every contract from how much the coin is likely to move before close, including the 60-second settlement averaging, volatility by time of day, fat tails and options-market volatility. It blends that with the market price, subtracts the exact fees, and only flags an entry when what's left clears a safety margin. Expect NO TRADE on almost everything. If it says TRADE often, something is wrong.</p>
+  <h3>How to read a card</h3>
+  <p class="muted"><b>Market</b> = the venue's price. <b>Model</b> = pure math probability. <b>Fair</b> = blended fair value (mostly market, a little model). <b>Edge</b> = fair value minus what you'd pay including fees.<br><b class="ok">ENTRY</b> = passed every rule and this venue/timeframe has proven calibration. <b class="am">PAPER ENTRY</b> = passed every rule but isn't proven yet, so it's logged only. <b class="cy">REF</b> = Polymarket international (not for US users, tracked for learning only).</p>
+  <h3>The rules (all must pass)</h3>
+  <p class="muted">Fresh data (spot &lt;5 s) · inside the entry window (15m: 2–12 min left, 1h: 5–50, 4h: 15–200; 5m display only; never the final minute) · spread ≤3¢ · enough size at the price · edge ≥2¢ (or ≥1.5¢ and ≥30% of cost for contracts under 10¢) · model within 20 points of the market · risk caps: ¼ Kelly, max 2% per trade, 5% same-hour, 3 open, −6% daily stop.</p>
+  <h3>Your 3–10¢ scalps</h3>
+  <p class="muted">If prices are fair, a 5¢ contract reaches 20¢ about 25% of the time, which is break-even before fees and a loser after (Kalshi fees ≈29% of the stake on a 5¢→20¢ round trip). It only works when the model shows the cheap side is underpriced: event minutes or volatility spikes. Fairline flags exactly those cases.</p>
+  <h3>Before real money</h3>
+  <p class="muted">Paper-trade until the Ledger shows the venue/timeframe beating the market over 500+ graded checkpoints, and the backtest's out-of-sample edge has a confidence range above zero. Connecticut access to Kalshi and Polymarket US is being fought in court; check before trading. Polymarket international is not for US users.</p></div>
+</section>
+</main>
+
+<nav>
+ <button data-t="sig" class="on"><span>📡</span>Signals</button>
+ <button data-t="man"><span>✍️</span>Manual</button>
+ <button data-t="led"><span>📒</span>Ledger</button>
+ <button data-t="bt"><span>🧪</span>Backtest</button>
+ <button data-t="set"><span>⚙️</span>Settings</button>
+ <button data-t="guide"><span>📘</span>Guide</button>
+</nav>
+
+<script>
+/* ================= basics ================= */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
+try{if(!/github\.io$/.test(location.hostname))$('#banner').hidden=false}catch(e){}
+async function J(url,ms=8000){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);try{const r=await fetch(url,{signal:c.signal});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(t)}}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+const logit=p=>Math.log(p/(1-p)),sigm=x=>1/(1+Math.exp(-x));
+const c1=p=>(p*100).toFixed(1)+'¢';
+const usd=n=>(n<0?'-$':'$')+Math.abs(n).toFixed(2);
+const pctS=x=>(x*100).toFixed(1)+'%';
+const fmtP=p=>p==null?'?':'$'+(p>=1000?p.toLocaleString(undefined,{maximumFractionDigits:2}):p>=10?p.toFixed(2):p.toFixed(4));
+let toastT=null;function toast(msg){let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t);t.onclick=()=>t.remove()}t.textContent=msg;clearTimeout(toastT);toastT=setTimeout(()=>t.remove(),6000)}
+
+/* ================= config ================= */
+const DEF={bank:500,worker:'',assets:{BTC:true,ETH:true,SOL:false,XRP:false},showPoly:true,showKalshi:true,
+ kFee:0.07,kMaker:0.0175,kRound:'cent',pusRate:0.095,mode:'taker',haircut:0.015,
+ minEdge:0.02,lsEdge:0.015,lsPct:0.30,maxSpread:0.03,maxDiv:0.20,wm:0.25,wivShort:0.2,wivLong:0.4,bBrti:2,bCl:3,evMult:4,
+ kelly:0.25,cap:0.02,corrCap:0.05,maxOpen:3,dayStop:0.06,events:[],vk:1};
+let cfg={...DEF,...store.get('fl.cfg',{})};cfg.assets={...DEF.assets,...(cfg.assets||{})};
+const saveCfg=()=>store.set('fl.cfg',cfg);
+const AS={BTC:{cb:'BTC-USD',gm:'btcusd',cc:'BTC_USD',dc:'BTC',dp:'BTC-',pm:'btc',kq:'KXBTC15M',kd:'KXBTCD',kr:'KXBTC'},
+ ETH:{cb:'ETH-USD',gm:'ethusd',cc:'ETH_USD',dc:'ETH',dp:'ETH-',pm:'eth',kq:'KXETH15M',kd:'KXETHD',kr:'KXETH'},
+ SOL:{cb:'SOL-USD',gm:'solusd',cc:'SOL_USD',dc:'USDC',dp:'SOL_USDC-',pm:'sol',kq:'KXSOL15M',kd:'KXSOLD',kr:null},
+ XRP:{cb:'XRP-USD',gm:'xrpusd',cc:'XRP_USD',dc:'USDC',dp:'XRP_USDC-',pm:'xrp',kq:'KXXRP15M',kd:'KXXRPD',kr:null}};
+const act=()=>Object.keys(AS).filter(a=>cfg.assets[a]);
+
+/* ================= time (US Eastern) ================= */
+const offC={};
+function etOff(t){const h=Math.floor(t/3600000);if(offC[h]!=null)return offC[h];
+ const p=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).formatToParts(new Date(h*3600000)).map(x=>[x.type,x.value]));
+ return offC[h]=Date.UTC(+p.year,+p.month-1,+p.day,(+p.hour)%24,+p.minute)-h*3600000}
+function bucket(t){const d=new Date(t+etOff(t));const wd=d.getUTCDay();return((wd===0||wd===6)?24:0)+d.getUTCHours()}
+const etDay=t=>new Date(t+etOff(t)).toISOString().slice(0,10);
+const etFmt=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'});
+const etT=t=>etFmt.format(new Date(t));
+const left=s=>s<0?'closed':s>=3600?Math.floor(s/3600)+'h '+String(Math.floor(s%3600/60)).padStart(2,'0')+'m':Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+
+/* ================= volatility: seasonality + EWMA + implied ================= */
+const SEA={},VOL={},IV={};const ONES=new Array(48).fill(1);
+const fac=(a,t)=>(SEA[a]||ONES)[bucket(t)];
+async function loadSeason(a){const key='fl.sea.'+a;const c=store.get(key,null);const today=etDay(Date.now());if(c&&c.d===today&&c.f){SEA[a]=c.f;return}
+ const end=Math.floor(Date.now()/3600000)*3600000;const rows=[];
+ for(let i=0;i<5;i++){const e=end-i*300*3600000,s=e-300*3600000;for(let k=0;k<2;k++){try{rows.push(...await J(`https://api.exchange.coinbase.com/products/${AS[a].cb}/candles?granularity=3600&start=${new Date(s).toISOString()}&end=${new Date(e).toISOString()}`,10000));break}catch(x){await sleep(1200)}}await sleep(200)}
+ const m=new Map();for(const r of rows)m.set(r[0],r);const R=[...m.values()].sort((x,y)=>x[0]-y[0]);
+ const sum=new Array(48).fill(0),n=new Array(48).fill(0);let tot=0,N=0;
+ const sq=[];for(let i=1;i<R.length;i++){if(R[i][0]-R[i-1][0]!==3600)continue;const r=Math.log(R[i][4]/R[i-1][4]);sq.push([bucket(R[i][0]*1000),r*r])}
+ if(sq.length<200){SEA[a]=ONES;return}
+ const med=[...sq.map(x=>x[1])].sort((x,y)=>x-y)[sq.length>>1];const capv=med*12;
+ for(const[b,v]of sq){const w=Math.min(v,capv);sum[b]+=w;n[b]++;tot+=w;N++}
+ const avg=tot/N;const f=sum.map((s,i)=>clamp((n[i]*(n[i]?s/n[i]/avg:1)+8)/(n[i]+8),0.3,3));SEA[a]=f;store.set(key,{d:today,f})}
+function ewmaBase(a,c){const lam=Math.pow(.5,1/60);let v=null;const acc=[];
+ for(let i=1;i<c.length;i++){if(c[i][0]-c[i-1][0]!==60000)continue;const r=Math.log(c[i][4]/c[i-1][4]);const x=r*r/fac(a,c[i][0]);
+  if(v==null){acc.push(x);if(acc.length>=30)v=acc.reduce((s,y)=>s+y,0)/acc.length;continue}v=lam*v+(1-lam)*x}
+ if(v==null&&acc.length)v=acc.reduce((s,y)=>s+y,0)/acc.length;return v}
+async function loadVol(a){const d=await J(`https://api.exchange.coinbase.com/products/${AS[a].cb}/candles?granularity=60`,8000);
+ const c=d.map(r=>[r[0]*1000,r[3],r[2],r[1],r[4]]).sort((x,y)=>x[0]-y[0]);VOL[a]={base:ewmaBase(a,c),t:Date.now(),c}}
+const MON={JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
+const dExp=s=>Date.UTC(2000+ +s.slice(-2),MON[s.slice(-5,-2)],+s.slice(0,-5),8);
+async function loadIV(){const g={};for(const a of act())(g[AS[a].dc]=g[AS[a].dc]||[]).push(a);
+ for(const[c,as]of Object.entries(g)){try{const d=await J(`https://www.deribit.com/api/v2/public/get_book_summary_by_currency?currency=${c}&kind=option`,12000);
+  for(const a of as){const rows=d.result.filter(x=>x.instrument_name.startsWith(AS[a].dp)&&x.mark_iv>0).map(x=>{const p=x.instrument_name.split('-');return{exp:dExp(p[1]),K:parseFloat(p[2].replace('d','.')),iv:x.mark_iv,u:x.underlying_price}}).filter(x=>x.exp>Date.now()+2*3600000);
+   if(!rows.length)continue;const e=Math.min(...rows.map(x=>x.exp));const r=rows.filter(x=>x.exp===e);const u=r[0].u;
+   const Ks=[...new Set(r.map(x=>x.K))].sort((x,y)=>Math.abs(x-u)-Math.abs(y-u)).slice(0,2);const sel=r.filter(x=>Ks.includes(x.K));
+   IV[a]={iv:sel.reduce((s,x)=>s+x.iv,0)/sel.length,exp:e,t:Date.now()}}}catch(x){}}}
+const ivRate=a=>IV[a]&&Date.now()-IV[a].t<900000?Math.pow(IV[a].iv/100,2)/31536000:null;
+function rateAt(a,t,w,base){const f=fac(a,t);const rv=base/60*f;const iv=ivRate(a);return iv!=null&&w>0?w*iv*f+(1-w)*rv:rv}
+function fwdVar(a,t0,t1,w,base,ev){if(!(t1>t0))return 0;let v=0,t=t0;
+ while(t<t1){const nh=Math.min(t1,(Math.floor(t/3600000)+1)*3600000);v+=rateAt(a,t,w,base)*(nh-t)/1000;t=nh}
+ for(const e of ev||[]){const s=Math.max(t0,e),en=Math.min(t1,e+300000);if(en>s)v+=(cfg.evMult-1)*rateAt(a,e,w,base)*(en-s)/1000}return v}
+const wIV=tau=>tau>3600?cfg.wivLong:cfg.wivShort;
+
+/* ================= probability core ================= */
+// Student-t (nu=4) CDF, closed form; scaled so the distribution has unit variance via T4(z*sqrt2)
+function T4(t){const u=1+t*t/4;return .5+.375*(t/Math.sqrt(u))*(1-(t*t/u)/12)}
+// P(settlement average >= K). Handles 60-s averaging (Asian digital), partially-fixed average in the last minute, basis + strike noise.
+function pAbove(o){let E,V;const sc=o.scale||1;
+ if(o.tau>=o.A){E=Math.log(o.S);V=sc*(o.v1+o.rateEnd*o.A/3)}
+ else{const k=(o.A-o.tau)/o.A;const m=o.mKnown||o.S;E=Math.log(k*m+(1-k)*o.S);V=sc*o.rateEnd*Math.pow(Math.max(o.tau,0),3)/(3*o.A*o.A)}
+ V+=Math.pow(o.basis*1e-4,2)+(o.extraK||0);
+ const z=(E-Math.log(o.K)-V/2)/Math.sqrt(Math.max(V,1e-14));return T4(z*Math.SQRT2)}
+function modelP(m,x){const tau=(m.close-x.now)/1000;const v1=tau>=m.A?fwdVar(x.a,x.now,m.close-m.A*1000,x.w,x.base,x.ev):0;
+ const base={S:x.S,tau,A:m.A,v1,rateEnd:rateAt(x.a,m.close,x.w,x.base),basis:m.basis,extraK:m.kEst?9e-8:0,mKnown:x.mKnown,scale:x.scale||1};
+ const pa=K=>pAbove({...base,K});let p;
+ if(m.type==='range')p=pa(m.L)-pa(m.U);else if(m.type==='below')p=1-pa(m.K);else p=pa(m.K);return clamp(p,0.001,0.999)}
+
+/* ================= fees ================= */
+const rUp=x=>cfg.kRound==='cent'?Math.ceil(x*100-1e-9)/100:Math.ceil(x*10000-1e-9)/10000;
+function feeFor(m,p,C){C=Math.max(1,C||100);if(m.v==='K')return rUp(cfg.kFee*C*p*(1-p))/C;if(m.v==='P')return(m.feeRate??0.01)*p*(1-p);if(m.v==='U')return(m.feeRate||cfg.pusRate)*p*(1-p);return(m.feeRate||0)*p*(1-p)}
+function makerFee(m,p,C){C=Math.max(1,C||100);return m.v==='K'&&cfg.kMaker>0?rUp(cfg.kMaker*C*p*(1-p))/C:0}
+const makerPrice=(b,a)=>a-b>0.0101?Math.round((b+0.01)*100)/100:b;
+
+/* ================= spot composite (settlement-index proxy) ================= */
+const SP={};
+function setSrc(a,k,b,ask){b=+b;ask=+ask;if(!(b>0&&ask>0&&ask>=b))return;(SP[a]=SP[a]||{src:{},buf:[]}).src[k]={m:(b+ask)/2,t:Date.now()}}
+function comp(a){const s=SP[a];if(!s)return null;const now=Date.now();const v=Object.values(s.src).filter(x=>now-x.t<10000).map(x=>x.m).sort((x,y)=>x-y);if(!v.length)return null;const n=v.length;return n%2?v[(n-1)/2]:(v[n/2-1]+v[n/2])/2}
+const spotAge=a=>SP[a]?Date.now()-Math.max(0,...Object.values(SP[a].src).map(x=>x.t)):1e12;
+const nSrc=a=>SP[a]?Object.values(SP[a].src).filter(x=>Date.now()-x.t<10000).length:0;
+let spotN=0;
+async function pollSpot(){const as=act();const slow=(spotN++%3)===0;const jobs=[
+ ...as.map(a=>J(`https://api.exchange.coinbase.com/products/${AS[a].cb}/ticker`,4000).then(d=>setSrc(a,'cb',d.bid,d.ask)).catch(()=>{})),
+ J('https://api.kraken.com/0/public/Ticker?pair=XBTUSD,ETHUSD,SOLUSD,XRPUSD',4000).then(d=>{for(const[k,v]of Object.entries(d.result||{})){const a=k.includes('XBT')?'BTC':k.includes('ETH')?'ETH':k.includes('SOL')?'SOL':k.includes('XRP')?'XRP':null;if(a&&as.includes(a))setSrc(a,'kr',v.b[0],v.a[0])}}).catch(()=>{})];
+ if(slow)for(const a of as){jobs.push(J(`https://api.gemini.com/v1/pubticker/${AS[a].gm}`,4000).then(d=>setSrc(a,'gm',d.bid,d.ask)).catch(()=>{}));
+  jobs.push(J(`https://api.crypto.com/exchange/v1/public/get-tickers?instrument_name=${AS[a].cc}`,4000).then(d=>{const x=d.result?.data?.[0];if(x)setSrc(a,'cc',x.b,x.k)}).catch(()=>{}))}
+ await Promise.all(jobs);const now=Date.now();
+ for(const a of as){const p=comp(a);if(p){const b=SP[a].buf;b.push([now,p]);while(b.length&&now-b[0][0]>1200000)b.shift()}}}
+
+/* ================= markets ================= */
+const MK=new Map();
+const TFS={'5m':300,'15m':900,'1h':3600,'4h':14400};
+const PVAR={'5m':'fiveminute','15m':'fifteen','1h':'onehour','4h':'fourhour'};
+const wurl=(h,path)=>cfg.worker.replace(/\/+$/,'')+'/?h='+h+'&u='+encodeURIComponent(path);
+async function kget(path){for(let k=0;;k++){try{return await J(wurl('k','/trade-api/v2'+path),9000)}catch(e){if(k>=3||!/HTTP (429|5\d\d)/.test(e.message))throw e;await sleep(1200*(k+1))}}}
+function strikeFromCandles(a,st){const c=VOL[a]?.c;if(!c)return null;const x=c.find(r=>r[0]===st-60000);return x?(x[1]+x[2]+x[3]+x[4])/4:null}
+const KX={};
+async function pmStrike(a,tf,st,en,slug){if(cfg.worker){if(KX[slug])return{v:KX[slug],est:false};
+  try{const d=await J(wurl('w',`/api/crypto/crypto-price?symbol=${a}&eventStartTime=${new Date(st).toISOString().replace('.000','')}&variant=${PVAR[tf]}&endDate=${new Date(en).toISOString().replace('.000','')}`),6000);if(d.openPrice>0){KX[slug]=d.openPrice;return{v:d.openPrice,est:false}}}catch(e){}}
+ const v=strikeFromCandles(a,st);return v?{v,est:true}:null}
+let pmDisc=0;
+async function discoverPoly(){if(!cfg.showPoly){for(const id of[...MK.keys()])if(id.startsWith('P:'))MK.delete(id);return}
+ const now=Date.now(),s=Math.floor(now/1000);const slugs=[];
+ for(const a of act()){const c=AS[a].pm;for(const tf of['5m','15m','1h']){const d=TFS[tf];slugs.push(`${c}-updown-${tf}-${Math.floor(s/d)*d}`)}for(let k=0;k<4;k++)slugs.push(`${c}-updown-4h-${Math.floor(s/3600)*3600-k*3600}`)}
+ const d=await J('https://gamma-api.polymarket.com/markets?'+slugs.map(x=>'slug='+x).join('&'),9000);const seen=new Set();const need=[];
+ for(const m of d){const mt=m.slug.match(/^(btc|eth|sol|xrp)-updown-(5m|15m|1h|4h)-(\d+)$/);if(!mt||m.closed)continue;
+  const a=mt[1].toUpperCase(),tf=mt[2],st=+mt[3]*1000,en=Date.parse(m.endDate)||st+TFS[tf]*1000;if(!(now>=st&&now<en))continue;
+  const id='P:'+m.slug;seen.add(id);const old=MK.get(id)||{};const tok=JSON.parse(m.clobTokenIds||'[]');
+  const x={...old,id,v:'P',asset:a,tf,type:'updown',open:st,close:en,A:m.cryptoMarketConfig?.twapLookbackSeconds??(/binance/i.test(m.description||'')?0:60),basis:cfg.bCl,
+   feeRate:m.feeSchedule?.rate??((a==='BTC'&&(tf==='5m'||tf==='15m'))?0.05:0.01),tokUp:tok[0],tokDn:tok[1],slug:m.slug,minSize:+m.orderMinSize||5,
+   url:'https://polymarket.com/event/'+m.slug,title:m.question};
+  if(old.bt==null){const bb=+m.bestBid,ba=+m.bestAsk;Object.assign(x,{yesBid:bb,yesAsk:ba,noBid:1-ba,noAsk:1-bb,bt:0})}
+  MK.set(id,x);if(x.K==null||x.kEst)need.push(x)}
+ await Promise.all(need.map(async x=>{const k=await pmStrike(x.asset,x.tf,x.open,x.close,x.slug);if(k){x.K=k.v;x.kEst=k.est}}));
+ for(const[id,x]of MK)if(id.startsWith('P:')&&(!seen.has(id)&&x.close<=now||!cfg.assets[x.asset]))MK.delete(id);pmDisc=now}
+async function booksPoly(){const now=Date.now();if(now-pmDisc>20000||[...MK.values()].some(m=>m.v==='P'&&m.close<=now))await discoverPoly();
+ const ms=[...MK.values()].filter(m=>m.v==='P'&&m.close>now&&m.tokUp);
+ await Promise.all(ms.map(async m=>{try{const b=await J('https://clob.polymarket.com/book?token_id='+m.tokUp,5000);
+  const bids=(b.bids||[]).map(x=>[+x.price,+x.size]),asks=(b.asks||[]).map(x=>[+x.price,+x.size]);if(!bids.length||!asks.length)return;
+  const bb=Math.max(...bids.map(x=>x[0])),ba=Math.min(...asks.map(x=>x[0]));
+  Object.assign(m,{yesBid:bb,yesAsk:ba,noBid:1-ba,noAsk:1-bb,bt:Date.now(),depth:{t:Date.now(),YES:asks.filter(x=>x[0]===ba).reduce((s,x)=>s+x[1],0),NO:bids.filter(x=>x[0]===bb).reduce((s,x)=>s+x[1],0)}})}catch(e){}}))}
+function kSet(m,a,tf,kind,now){const id='K:'+m.ticker;let ty=kind==='updown'?'updown':'above',K=m.floor_strike,L=null,U=null;
+ if(m.strike_type==='between'){ty='range';L=m.floor_strike;U=m.cap_strike}else if(/^less/.test(m.strike_type||'')){ty='below';K=m.cap_strike}
+ if(ty!=='range'&&K==null)return;const old=MK.get(id)||{};const yb=+m.yes_bid_dollars,ya=+m.yes_ask_dollars;
+ const fresh=old.yesBid!==yb||old.yesAsk!==ya;
+ MK.set(id,{...old,id,v:'K',asset:a,tf,type:ty,K,L,U,open:Date.parse(m.open_time),close:Date.parse(m.close_time),A:60,basis:cfg.bBrti,yesBid:yb,yesAsk:ya,noBid:+m.no_bid_dollars,noAsk:+m.no_ask_dollars,bt:now,ticker:m.ticker,series:m.ticker.split('-')[0],minSize:1,url:'https://kalshi.com/markets/'+m.ticker.split('-')[0].toLowerCase(),depth:fresh?null:old.depth})}
+async function loadK15(){if(!cfg.worker||!cfg.showKalshi)return;const now=Date.now();
+ await Promise.all(act().map(async a=>{try{const d=await kget(`/markets?series_ticker=${AS[a].kq}&status=open&limit=10`);
+  for(const m of d.markets||[]){const op=Date.parse(m.open_time),cl=Date.parse(m.close_time);if(now>=op&&now<cl)kSet(m,a,'15m','updown',now)}}catch(e){}}));
+ for(const[id,x]of MK)if(x.v==='K'&&!x.man&&(x.close<=now||!cfg.assets[x.asset]))MK.delete(id)}
+const KEV={};
+async function loadKH(){if(!cfg.worker||!cfg.showKalshi)return;const now=Date.now();
+ for(const a of act())for(const[ser,kind]of[[AS[a].kd,'above'],[AS[a].kr,'range']]){if(!ser)continue;try{
+  let ev=KEV[ser];if(!ev||ev.close<=now){const d=await kget(`/events?series_ticker=${ser}&status=open&limit=25`);
+   const evs=(d.events||[]).map(e=>({t:e.event_ticker,close:Date.parse(e.strike_date)})).filter(e=>e.close>now&&e.close-now<=65*60000).sort((x,y)=>x.close-y.close);ev=KEV[ser]=evs[0]||{t:null,close:now+60000}}
+  if(!ev.t)continue;const d=await kget(`/markets?event_ticker=${ev.t}&limit=200`);
+  const ms=(d.markets||[]).map(m=>({m,mid:(+m.yes_bid_dollars+ +m.yes_ask_dollars)/2})).filter(x=>+x.m.yes_ask_dollars>0&&+x.m.yes_ask_dollars<1&&x.mid>=0.04&&x.mid<=0.96).sort((x,y)=>Math.abs(x.mid-.5)-Math.abs(y.mid-.5)).slice(0,6);
+  const keep=new Set(ms.map(x=>'K:'+x.m.ticker));for(const x of ms)kSet(x.m,a,'1h',kind,now);
+  for(const[id,x]of MK)if(x.v==='K'&&x.series===ser&&!keep.has(id))MK.delete(id)}catch(e){}}}
+const KDQ=new Set();
+async function kDepth(id){if(KDQ.has(id))return;KDQ.add(id);try{const m0=MK.get(id);if(!m0)return;const d=await kget(`/markets/${m0.ticker}/orderbook?depth=5`);const m=MK.get(id);if(!m)return;const ob=d.orderbook_fp||{};
+ const yb=ob.yes_dollars||[],nb=ob.no_dollars||[];const ly=yb[yb.length-1],ln=nb[nb.length-1];
+ m.depth={t:Date.now(),YES:ln?+ln[1]:0,NO:ly?+ly[1]:0};if(ln)m.yesAsk=Math.round((1-ln[0])*100)/100;if(ly)m.noAsk=Math.round((1-ly[0])*100)/100}catch(e){}finally{KDQ.delete(id)}}
+
+/* manual markets */
+let MAN=store.get('fl.man',[]);
+function loadMan(){MAN=MAN.filter(x=>x.close>Date.now()-3600000);store.set('fl.man',MAN);for(const x of MAN)MK.set(x.id,x)}
+const saveMan=()=>{MAN=[...MK.values()].filter(m=>m.man);store.set('fl.man',MAN)};
+
+/* ================= ledger ================= */
+let LED=store.get('fl.led',[]);const LOGGED=new Set(LED.filter(r=>r.k==='c').map(r=>r.id+'@'+r.cp));
+let ledDirty=false;const saveLed=()=>{ledDirty=true};
+setInterval(()=>{if(!ledDirty)return;ledDirty=false;if(LED.length>15000){let drop=LED.length-14000;LED=LED.filter(r=>{if(drop>0&&r.k==='c'&&r.o!=null){drop--;return false}return true})}store.set('fl.led',LED)},3000);
+const trades=()=>LED.filter(r=>r.k==='t');
+const bankroll=()=>cfg.bank+trades().filter(r=>r.pnl!=null).reduce((s,r)=>s+r.pnl,0);
+const todayPnl=()=>{const d=etDay(Date.now());return trades().filter(r=>r.pnl!=null&&etDay(r.cl)===d).reduce((s,r)=>s+r.pnl,0)};
+function lossStreak(){const t=trades().filter(r=>r.pnl!=null).sort((x,y)=>y.cl-x.cl);let n=0;for(const r of t){if(r.pnl<0)n++;else break}return n}
+function riskCheck(m,cost){const open=trades().filter(r=>r.o==null);
+ if(open.length>=cfg.maxOpen)return`max ${cfg.maxOpen} open positions`;
+ const hr=Math.floor(m.close/3600000);const corr=open.filter(r=>Math.floor(r.cl/3600000)===hr).reduce((s,r)=>s+r.cost*r.C,0);
+ if(corr+cost>cfg.corrCap*bankroll())return`same-hour exposure cap (${Math.round(cfg.corrCap*100)}%)`;
+ if(todayPnl()<=-cfg.dayStop*cfg.bank)return'daily loss stop hit: done for today';return null}
+function desc(m){const a=m.asset;if(m.type==='updown')return`${a} ${m.tf} Up/Down · beat ${fmtP(m.K)}${m.kEst?' (est)':''}`;
+ if(m.type==='range')return`${a} ${fmtP(m.L)}–${fmtP(m.U)} at ${etT(m.close)}`;return`${a} ${m.type==='below'?'below':'above'} ${fmtP(m.K)} at ${etT(m.close)}`}
+const sideName=(m,s)=>m.type==='updown'?(s==='YES'?'UP':'DOWN'):s;
+const CPS={'5m':[180],'15m':[600,300,180],'1h':[2700,1800,900,360],'4h':[10800,7200,3600,1200]};
+const WIN={'5m':null,'15m':[120,720],'1h':[300,3000],'4h':[900,12000]};
+const winTxt={'15m':'2–12 min left','1h':'5–50 min left','4h':'15–200 min left'};
+function cpLog(R,now){const m=R.m;if(R.q==null||m.man)return;for(const cp of CPS[m.tf]||[]){const key=m.id+'@'+cp;if(LOGGED.has(key))continue;
+ if(R.tau<=cp&&R.tau>cp-90){LOGGED.add(key);LED.push({k:'c',id:m.id,v:m.v,a:m.asset,tf:m.tf,sl:m.slug||m.ticker||'',cl:m.close,cp,t:now,mid:R.mid,P:R.P,q:R.q,sd:R.side,e:R.edge,call:R.call,r:R.reason,o:null,ds:desc(m)});saveLed()}}}
+function autoEnter(R){if(!/ENTRY/.test(R.call))return;const m=R.m;if(trades().some(r=>r.id===m.id&&r.o==null))return;
+ LED.push({k:'t',id:m.id,v:m.v,a:m.asset,tf:m.tf,sl:m.slug||m.ticker||'',cl:m.close,t:Date.now(),sd:R.side,px:R.price,fee:R.fee,cost:R.cost,C:R.C,q:R.q,P:R.P,mid:R.mid,e:R.edge,qs:R.qs,call:R.call,o:null,pnl:null,ds:desc(m),man:!!m.man});saveLed();
+ try{navigator.vibrate&&navigator.vibrate([120,60,120])}catch(e){}toast(`${R.call}: ${sideName(m,R.side)} ${desc(m)} @ ${c1(R.price)} · edge ${c1(R.edge)}`)}
+function setOutcome(id,o){for(const r of LED)if(r.id===id&&r.o==null){r.o=o;if(r.k==='t'){const win=r.sd==='YES'?o:1-o;r.pnl=r.C*(win-r.px)-r.C*r.fee}}saveLed()}
+async function resolveAll(){const now=Date.now();const pend=LED.filter(r=>r.o==null&&r.cl<now-20000);if(!pend.length)return;
+ const ps=[...new Set(pend.filter(r=>r.v==='P'&&r.sl).map(r=>r.sl))];
+ for(let i=0;i<ps.length;i+=20){try{const d=await J('https://gamma-api.polymarket.com/markets?closed=true&'+ps.slice(i,i+20).map(s=>'slug='+s).join('&'),9000);
+  for(const m of d){const op=JSON.parse(m.outcomePrices||'[]');const o=op[0]==='1'&&op[1]==='0'?1:op[0]==='0'&&op[1]==='1'?0:null;if(o!=null)setOutcome('P:'+m.slug,o)}}catch(e){}}
+ if(cfg.worker){const ks=[...new Set(pend.filter(r=>r.v==='K'&&!r.man&&r.sl).map(r=>r.sl))];
+  for(let i=0;i<ks.length;i+=20){try{const d=await kget('/markets?tickers='+ks.slice(i,i+20).join(','));for(const m of d.markets||[])if(m.result==='yes'||m.result==='no')setOutcome('K:'+m.ticker,m.result==='yes'?1:0)}catch(e){}}}}
+
+/* calibration gate */
+function calRows(v,tf){return LED.filter(r=>r.k==='c'&&r.o!=null&&r.mid!=null&&r.q!=null&&(!v||r.v===v)&&(!tf||r.tf===tf))}
+function stats(rows){let bq=0,bm=0,lq=0,lm=0;for(const r of rows){bq+=(r.q-r.o)**2;bm+=(r.mid-r.o)**2;lq-=Math.log(clamp(r.o?r.q:1-r.q,1e-4,1));lm-=Math.log(clamp(r.o?r.mid:1-r.mid,1e-4,1))}const n=rows.length||1;return{n:rows.length,bq:bq/n,bm:bm/n,lq:lq/n,lm:lm/n}}
+function bootCI(groups,B=600){const arr=Object.values(groups).filter(g=>g.length);if(arr.length<2)return null;const res=[];
+ for(let b=0;b<B;b++){let s=0,c=0;for(let i=0;i<arr.length;i++){const d=arr[(Math.random()*arr.length)|0];for(const x of d){s+=x;c++}}res.push(s/c)}res.sort((x,y)=>x-y);return[res[Math.floor(B*.05)],res[Math.floor(B*.95)]]}
+const byDay=(rows,f)=>{const g={};for(const r of rows){const k=r.day||etDay(r.t||r.cl);(g[k]=g[k]||[]).push(f(r))}return g};
+let GATE={};
+function computeGate(){const G={};for(const v of['K','P'])for(const tf of['15m','1h','4h']){const rows=calRows(v,tf);if(!rows.length)continue;const s=stats(rows);const ci=rows.length>=50?bootCI(byDay(rows,r=>(r.q-r.o)**2-(r.mid-r.o)**2)):null;G[v+'|'+tf]={...s,ci,pass:rows.length>=500&&ci&&ci[1]<0}}GATE=G}
+const gateOk=m=>!!(GATE[m.v+'|'+m.tf]?.pass);
+
+/* ================= evaluate one market ================= */
+function evaluate(m,now){const a=m.asset,R={m,reasons:[]};const S=comp(a),vb=VOL[a]?.base;R.tau=(m.close-now)/1000;
+ if(!S||!vb){R.call='WAIT';R.reason='waiting for price / volatility data';return R}
+ if(m.type!=='range'&&m.K==null){R.call='WAIT';R.reason='price to beat not known yet';return R}
+ const w=ivRate(a)!=null?wIV(R.tau):0;const ev=(cfg.events||[]).filter(e=>e>now-300000&&e<m.close);
+ let mk=null;if(R.tau<m.A&&SP[a]){const b=SP[a].buf.filter(x=>x[0]>=m.close-m.A*1000);if(b.length)mk=b.reduce((s,x)=>s+x[1],0)/b.length}
+ const vs=Math.pow(cfg.vk||1,2);const x={a,S,now,w,base:vb,ev,mKnown:mk,scale:vs};
+ const P=modelP(m,x),Plo=modelP(m,{...x,scale:.64*vs}),Phi=modelP(m,{...x,scale:1.5625*vs});R.P=P;R.w=w;R.S=S;
+ const ok=m.yesAsk>0&&m.yesAsk<1&&m.yesBid>0&&m.yesBid<1&&m.yesAsk>=m.yesBid;
+ if(!ok){R.call='NO TRADE';R.reason='no two-sided market';return R}
+ const mid=(m.yesBid+m.yesAsk)/2;R.mid=mid;const wm=cfg.wm;const anc=p=>sigm((1-wm)*logit(clamp(mid,.005,.995))+wm*logit(p));
+ R.q=anc(P);const q1=anc(Plo),q2=anc(Phi);R.qlo=Math.min(q1,q2,R.q);R.qhi=Math.max(q1,q2,R.q);const hw=(R.qhi-R.qlo)/2;
+ const maker=cfg.mode==='maker';const sides=[];
+ for(const[side,b,a2,qs]of[['YES',m.yesBid,m.yesAsk,R.q],['NO',m.noBid,m.noAsk,1-R.q]]){const price=maker?makerPrice(b,a2):a2;if(!(price>0&&price<1))continue;
+  const fee=maker?makerFee(m,price,100):feeFor(m,price,100);const cost=price+fee+(maker?cfg.haircut:0);sides.push({side,price,fee,cost,qs,edge:qs-cost})}
+ if(!sides.length){R.call='NO TRADE';R.reason='no price to buy at';return R}
+ sides.sort((p,q)=>q.edge-p.edge);Object.assign(R,sides[0]);
+ const km=cfg.kelly*(lossStreak()>=10?.5:1);R.f=Math.max(0,(R.qs-R.cost)/(1-R.cost));R.stake=bankroll()*Math.min(km*R.f,cfg.cap);R.C=Math.floor(R.stake/R.cost);
+ if(m.v==='K'&&R.C>0){const fee=maker?makerFee(m,R.price,R.C):feeFor(m,R.price,R.C);R.fee=fee;R.cost=R.price+fee+(maker?cfg.haircut:0);R.edge=R.qs-R.cost;R.C=Math.floor(R.stake/R.cost)}
+ R.edgePct=R.edge/R.cost;const rs=R.reasons;
+ const win=WIN[m.tf];if(!win)rs.push('5-minute markets: display only (bot territory)');
+ if(spotAge(a)>5000)rs.push('coin price feed stale');
+ const maxAge=m.man?120000:m.tf==='15m'||m.tf==='5m'?12000:25000;if(now-(m.bt||0)>maxAge)rs.push(m.man?'your typed prices are over 2 min old; update them':'market prices stale ('+Math.round((now-(m.bt||0))/1000)+'s old)');
+ if(!win){}else if(R.tau<win[0]||R.tau>win[1])rs.push('outside entry window ('+winTxt[m.tf]+')');
+ if(R.tau<60)rs.push('final minute: bots win this race');
+ const spr=m.yesAsk-m.yesBid;if(spr>cfg.maxSpread+1e-9)rs.push(`spread ${c1(spr)} is over ${c1(cfg.maxSpread)}`);
+ if(Math.abs(P-mid)>cfg.maxDiv)rs.push(`model ${pctS(P)} vs market ${pctS(mid)}: too far apart, likely stale data or model error`);
+ const thr=R.price<0.10?cfg.lsEdge:Math.max(cfg.minEdge,0.5*hw);
+ if(R.edge<=0)rs.push(`no edge after fees (best side ${c1(R.edge)})`);else if(R.edge<thr)rs.push(`edge ${c1(R.edge)} is below the ${c1(thr)} bar`);else if(R.price<0.10&&R.edgePct<cfg.lsPct)rs.push(`cheap contract: edge only ${Math.round(R.edgePct*100)}% of cost (needs ${Math.round(cfg.lsPct*100)}%)`);
+ const minC=m.v==='P'?(m.minSize||5):1;if(R.C<minC)rs.push(`bet size below the ${minC}-contract minimum`);
+ if(!rs.length){const rk=riskCheck(m,R.cost*R.C);if(rk)rs.push(rk)}
+ if(!rs.length&&!m.man){const d=m.depth&&now-m.depth.t<15000?m.depth[R.side]:null;if(d==null){rs.push('checking order book depth…');if(m.v==='K')kDepth(m.id)}else if(d<R.C)rs.push(`only ${Math.floor(d)} contracts at that price (need ${R.C})`)}
+ if(!rs.length&&m.v==='K'&&!m.man&&R.C<20)R.note='Small Kalshi order: fee rounding costs extra under ~20 contracts';
+ const held=trades().find(r=>r.id===m.id&&r.o==null);if(held){R.call='HOLDING';R.reason=`paper position: ${sideName(m,held.sd)} ${held.C}× @ ${c1(held.px)} · fair now ${pctS(held.sd==='YES'?R.q:1-R.q)}`;return R}
+ R.call=rs.length?'NO TRADE':m.v==='P'?'REF ENTRY':gateOk(m)?'ENTRY':'PAPER ENTRY';R.reason=rs[0]||(R.call==='ENTRY'?'all rules pass · calibration proven':m.v==='P'?'all rules pass · reference venue (not for US users)':'all rules pass · not yet proven, paper only');
+ return R}
+
+/* ================= render: signals ================= */
+let FILT='all';const OPEN=new Set();
+const FILTERS=[['all','All'],['entry','Entries'],['15m','15m'],['1h','1h'],['4h','4h'],['5m','5m'],['K','Kalshi'],['P','Poly'],['BTC','BTC'],['ETH','ETH'],['SOL','SOL'],['XRP','XRP']];
+function renderFilters(){$('#filt').innerHTML=FILTERS.filter(([k])=>!AS[k]||cfg.assets[k]).map(([k,l])=>`<button data-f="${k}" class="${FILT===k?'on':''}">${l}</button>`).join('');$$('#filt button').forEach(b=>b.onclick=()=>{FILT=b.dataset.f;renderFilters();render()})}
+const callCls=c=>c==='ENTRY'?'ENTRY':c==='PAPER ENTRY'||c==='HOLDING'?'PAPER':c==='REF ENTRY'?'REF':c==='WAIT'?'WAIT':'NO';
+let LAST=[];
+function render(){const now=Date.now();const res=[];
+ for(const m of MK.values()){if(!cfg.assets[m.asset]||m.close<=now-5000)continue;const R=evaluate(m,now);res.push(R);cpLog(R,now);autoEnter(R)}
+ LAST=res;renderHeader();
+ const f=FILT;const shown=res.filter(R=>f==='all'||(f==='entry'?/ENTRY/.test(R.call):TFS[f]?R.m.tf===f:AS[f]?R.m.asset===f:R.m.v===f||(f==='P'&&R.m.v==='U')));
+ const ord={ENTRY:0,'PAPER ENTRY':1,'REF ENTRY':2,HOLDING:3,'NO TRADE':4,WAIT:5};const bad=R=>R.reasons.some(x=>/stale|too far apart|display only/.test(x));shown.sort((a,b)=>(ord[a.call]-ord[b.call])||(bad(a)-bad(b))||(a.reasons.length-b.reasons.length)||((b.edge??-9)-(a.edge??-9)));
+ const nE=res.filter(R=>/ENTRY/.test(R.call)).length;const rc={};res.filter(R=>R.call==='NO TRADE').forEach(R=>{const k=R.reason.split(/[\d(:]/)[0].replace(/[\s·-]+$/,'').trim();rc[k]=(rc[k]||0)+1});
+ const top=Object.entries(rc).sort((a,b)=>b[1]-a[1])[0];
+ $('#sumLine').textContent=`${res.length} markets · ${nE} entr${nE===1?'y':'ies'}${top?` · most common block: ${top[0]}`:''}`;
+ $('#list').innerHTML=shown.length?shown.map(cardHTML).join(''):'<div class="card muted">No markets loaded yet. Prices and markets appear within a few seconds.</div>';
+ $$('#list .sig').forEach(el=>el.onclick=e=>{if(e.target.closest('a,button'))return;const id=el.dataset.id;OPEN.has(id)?OPEN.delete(id):OPEN.add(id);render()})}
+function cardHTML(R){const m=R.m;const cc=callCls(R.call);const vn={K:m.man?'KALSHI·MANUAL':'KALSHI',P:'POLY·REF',U:'POLY US',O:'MANUAL'}[m.v];
+ const callTxt=R.call==='WAIT'?'WAIT':R.call==='HOLDING'?'HOLDING (paper)':/ENTRY/.test(R.call)?`${R.call} · BUY ${sideName(m,R.side)} @ ${c1(R.price)} · edge +${c1(R.edge)} · ${R.C} × = ${usd(R.C*R.cost)}`:`NO TRADE${R.edge!=null&&!R.reasons.some(x=>/stale|too far apart/.test(x))?` · best ${sideName(m,R.side)} edge ${R.edge>=0?'+':''}${c1(R.edge)}`:''}`;
+ let det='';if(OPEN.has(m.id)&&R.q!=null){const sd=Math.sqrt(fwdVar(m.asset,Date.now(),m.close,R.w,VOL[m.asset].base,cfg.events));
+  det=`<div class="det">Coin now <b>${fmtP(R.S)}</b> (${nSrc(m.asset)} exchanges) · expected move to close ±<b>${(sd*100).toFixed(2)}%</b><br>
+  Volatility: realized${R.w>0?` + ${Math.round(R.w*100)}% options-implied (${IV[m.asset].iv.toFixed(0)}%)`:' only (no options data)'} · settles on ${m.A?m.A+'-sec average':'single print'} · basis ${m.basis} bp<br>
+  Strike: <b>${m.type==='range'?fmtP(m.L)+'–'+fmtP(m.U):fmtP(m.K)}</b> ${m.kEst?'<span class="am">(estimated, add the proxy for exact)</span>':'<span class="ok">(exact)</span>'}<br>
+  Book: YES ${c1(m.yesBid)}/${c1(m.yesAsk)} · NO ${c1(m.noBid)}/${c1(m.noAsk)} · ${m.depth?`depth YES ${Math.floor(m.depth.YES)} / NO ${Math.floor(m.depth.NO)}`:'depth n/a'}<br>
+  Fair range (vol ×0.8 to ×1.25): <b>${pctS(R.qlo)}–${pctS(R.qhi)}</b><br>
+  ${R.side?`Fee ${c1(R.fee)}/contract · all-in cost ${c1(R.cost)} · Kelly ${(R.f*100).toFixed(1)}% → stake ${usd(R.stake)}`:''}<br>
+  ${R.reasons.length?'<span class="bad">✗ '+R.reasons.map(esc).join('<br>✗ ')+'</span>':'<span class="ok">✓ every rule passes</span>'}${R.note?'<br><span class="am">'+esc(R.note)+'</span>':''}<br>
+  ${m.url?`<a href="${esc(m.url)}" target="_blank" rel="noopener">Open on ${m.v==='K'?'Kalshi':'Polymarket'} ↗</a>`:''}${m.man?` · <button class="btn sm alt" data-rm="${esc(m.id)}">Remove</button>`:''}</div>`}
+ return `<div class="sig ${cc==='NO'||cc==='WAIT'?'':cc}" data-id="${esc(m.id)}"><div class="top"><div><span class="ven ${m.v}">${vn}</span><b>${esc(desc(m))}</b><div class="muted">closes ${etT(m.close)}</div></div><div class="tl">${left(R.tau)}</div></div>
+ ${R.q!=null?`<div class="nums"><div class="num"><span>Market ${m.type==='updown'?'UP':'YES'}</span><b>${pctS(R.mid)}</b></div><div class="num"><span>Model</span><b style="color:var(--vio)">${pctS(R.P)}</b></div><div class="num"><span>Fair</span><b>${pctS(R.q)}</b></div></div>`:''}
+ <div class="call ${cc}">${esc(callTxt)}</div><div class="why">${esc(R.reason||'')}</div>${det}</div>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(!b)return;MK.delete(b.dataset.rm);saveMan();renderMan();render()});
+function renderEvid(){const EV=store.get('fl.ev',{});const ks=Object.keys(EV);if(!ks.length){$('#evid').innerHTML='<div class="warn">No backtest run yet. Run one in <b>Backtest</b> before trusting any entry. Research baseline: no public model beats these markets after fees.</div>';return}
+ $('#evid').innerHTML='<div class="card" style="padding:10px"><h3 style="margin-top:0">Evidence so far (backtests)</h3>'+ks.sort((a,b)=>EV[b].t-EV[a].t).slice(0,4).map(k=>{const e=EV[k];const[v,a,tf]=k.split('|');const good=e.lo!=null&&e.lo>0;return`<div class="mono" style="font-size:12px">${v==='K'?'Kalshi':'Poly'} ${a} ${tf}: <b class="${good?'ok':'bad'}">${e.n?(e.pc>=0?'+':'')+(e.pc*100).toFixed(2)+'¢/contract':'no trades'}</b>${e.lo!=null?` (CI ${(e.lo*100).toFixed(1)} to ${(e.hi*100).toFixed(1)})`:''} · ${good?'edge holding':'no proven edge: paper only'}</div>`}).join('')+'</div>'}
+function renderHeader(){const now=Date.now();renderEvid();
+ $('#strip').innerHTML=act().map(a=>{const p=comp(a),v=VOL[a];const sd=v&&v.base?Math.sqrt(fwdVar(a,now,now+3600000,ivRate(a)!=null?cfg.wivShort:0,v.base,cfg.events)):null;
+  return `<div class="chip"><i>${a}</i><b>${p?fmtP(p):'…'}</b><i>1h ±${sd?(sd*100).toFixed(2)+'%':'…'} · IV ${IV[a]?IV[a].iv.toFixed(0)+'%':'–'}</i><br><i>${nSrc(a)} feeds · ${spotAge(a)<1e11?Math.round(spotAge(a)/1000)+'s':'–'}</i></div>`}).join('');
+ const b=bankroll();$('#kBank').textContent=usd(b);$('#kBank').style.color=b>=cfg.bank?'var(--lime)':'var(--cor)';
+ const d=todayPnl();$('#kDay').textContent=(d>=0?'+':'')+usd(d);$('#kDay').style.color=d>=0?'var(--lime)':'var(--cor)';
+ $('#kOpen').textContent=trades().filter(r=>r.o==null).length;
+ $('#kalshiNote').innerHTML=!cfg.worker&&cfg.showKalshi?`<div class="warn">Kalshi markets (the ones you can trade) need the free proxy. <a href="#" id="goSet">Set it up in Settings</a> (10 min), or type Kalshi prices in <b>Manual</b>. Polymarket intl is shown as reference.</div>`:'';
+ const g=$('#goSet');if(g)g.onclick=e=>{e.preventDefault();tab('set')}}
+
+/* ================= manual ================= */
+$('#mT').onchange=()=>{const r=$('#mT').value==='range';$('#mK2').hidden=!r;$('#mK').parentElement.hidden=r};
+function nextClose(hhmm){const[h,mi]=hhmm.split(':').map(Number);const d=new Date();d.setHours(h,mi,0,0);if(d.getTime()<Date.now()-30000)d.setDate(d.getDate()+1);return d.getTime()}
+$('#mGo').onclick=()=>{const v=$('#mV').value,type=$('#mT').value,tf=$('#mTf').value;const cl=$('#mC').value;if(!cl){alert('Enter the closing time');return}
+ const yb=parseFloat($('#mYb').value)/100,ya=parseFloat($('#mYa').value)/100;if(!(ya>0&&ya<1&&yb>0&&yb<=ya)){alert('Enter the YES bid and ask in cents, e.g. 54 and 56');return}
+ const close=nextClose(cl);const m={id:'M:'+Date.now(),man:true,v,asset:$('#mA').value,tf,type,K:parseFloat($('#mK').value)||null,L:parseFloat($('#mL').value)||null,U:parseFloat($('#mU').value)||null,
+  open:close-TFS[tf]*1000,close,A:+$('#mAv').value,basis:v==='P'?cfg.bCl:cfg.bBrti,yesBid:yb,yesAsk:ya,noBid:1-ya,noAsk:1-yb,bt:Date.now(),feeRate:v==='U'?(parseFloat($('#mF').value)||cfg.pusRate):v==='O'?(parseFloat($('#mF').value)||0):v==='P'?(($('#mA').value==='BTC'&&(tf==='15m'||tf==='5m'))?0.05:0.01):null,minSize:1,depth:{t:9e15,YES:1e9,NO:1e9}};
+ if(type!=='range'&&!m.K){alert('Enter the strike / price to beat');return}if(type==='range'&&!(m.L&&m.U)){alert('Enter the range low and high');return}
+ MK.set(m.id,m);saveMan();renderMan();render();const R=evaluate(m,Date.now());$('#mOut').innerHTML=cardHTML(R)};
+function renderMan(){const ms=[...MK.values()].filter(m=>m.man);
+ $('#mList').innerHTML=ms.length?ms.map(m=>`<div class="sig" style="cursor:default"><div class="top"><div><span class="ven ${m.v}">${{K:'KALSHI',U:'POLY US',P:'POLY',O:'OTHER'}[m.v]}</span><b>${esc(desc(m))}</b><div class="muted">closes ${etT(m.close)} · prices typed ${Math.round((Date.now()-m.bt)/1000)}s ago</div></div></div>
+  <div class="g3"><div><label>YES bid ¢</label><input id="ub-${m.id}" value="${(m.yesBid*100).toFixed(1)}" inputmode="decimal"></div><div><label>YES ask ¢</label><input id="ua-${m.id}" value="${(m.yesAsk*100).toFixed(1)}" inputmode="decimal"></div><div><label>&nbsp;</label><button class="btn sm" data-up="${m.id}" style="width:100%">Update</button></div></div>
+  <div class="row"><button class="btn sm alt" data-rm="${m.id}">Remove</button></div></div>`).join(''):'None yet.';
+ $$('[data-up]').forEach(b=>b.onclick=()=>{const m=MK.get(b.dataset.up);const yb=parseFloat(document.getElementById('ub-'+m.id).value)/100,ya=parseFloat(document.getElementById('ua-'+m.id).value)/100;
+  if(ya>0&&ya<1&&yb>0&&yb<=ya){Object.assign(m,{yesBid:yb,yesAsk:ya,noBid:1-ya,noAsk:1-yb,bt:Date.now()});saveMan();renderMan();render();toast('Prices updated')}})}
+
+/* ================= ledger UI ================= */
+function relChart(rows){const cv=$('#rel'),x=cv.getContext('2d');const W=cv.width,H=cv.height,P=40;x.clearRect(0,0,W,H);
+ x.strokeStyle='#222b38';x.lineWidth=1;for(let i=0;i<=10;i+=2){const gx=P+(W-2*P)*i/10,gy=H-P-(H-2*P)*i/10;x.beginPath();x.moveTo(gx,P);x.lineTo(gx,H-P);x.stroke();x.beginPath();x.moveTo(P,gy);x.lineTo(W-P,gy);x.stroke();
+  x.fillStyle='#8a97ab';x.font='18px monospace';x.fillText((i*10)+'',gx-10,H-P+22);x.fillText((i*10)+'',6,gy+6)}
+ x.setLineDash([6,6]);x.strokeStyle='#8a97ab';x.beginPath();x.moveTo(P,H-P);x.lineTo(W-P,P);x.stroke();x.setLineDash([]);
+ for(const[key,col]of[['mid','#8a97ab'],['q','#a3e635']]){const b=Array.from({length:10},()=>({n:0,s:0,o:0}));for(const r of rows){const i=Math.min(9,Math.floor(r[key]*10));b[i].n++;b[i].s+=r[key];b[i].o+=r.o}
+  x.fillStyle=col;for(const k of b){if(!k.n)continue;const px=P+(W-2*P)*(k.s/k.n),py=H-P-(H-2*P)*(k.o/k.n);x.beginPath();x.arc(px,py,Math.min(16,3+Math.sqrt(k.n)),0,7);x.globalAlpha=.75;x.fill();x.globalAlpha=1}}}
+function renderLed(){const rows=calRows();const seg=[['K','Kalshi'],['P','Poly']].flatMap(([v,vn])=>['15m','1h','4h'].map(tf=>({v,vn,tf,g:GATE[v+'|'+tf]}))).filter(x=>x.g);
+ $('#calTable').innerHTML=seg.length?`<table><tr><th>Venue</th><th>n</th><th>Brier fair</th><th>Brier mkt</th><th>Δ (90% CI)</th><th>Gate</th></tr>${seg.map(x=>`<tr><td>${x.vn} ${x.tf}</td><td>${x.g.n}</td><td>${x.g.bq.toFixed(4)}</td><td>${x.g.bm.toFixed(4)}</td><td class="${x.g.bq<x.g.bm?'ok':'bad'}">${(x.g.bq-x.g.bm>=0?'+':'')+(x.g.bq-x.g.bm).toFixed(4)}${x.g.ci?`<br><span class="muted">${x.g.ci[0].toFixed(4)} to ${x.g.ci[1].toFixed(4)}</span>`:''}</td><td>${x.g.pass?'<b class="ok">PASS</b>':`<span class="am">${x.g.n<500?(500-x.g.n)+' to go':'not proven'}</span>`}</td></tr>`).join('')}</table>`:'<p class="muted">No graded checkpoints yet. Leave the Signals tab open; markets are logged at checkpoints and graded after they settle.</p>';
+ relChart(rows);
+ const T=trades();const res=T.filter(r=>r.pnl!=null);const w=res.filter(r=>r.pnl>0).length;const pnl=res.reduce((s,r)=>s+r.pnl,0),cost=res.reduce((s,r)=>s+r.cost*r.C,0);
+ const grp=k=>{const g={};for(const r of res){const key=k(r);(g[key]=g[key]||[]).push(r)}return Object.entries(g).map(([key,rs])=>`<tr><td>${key}</td><td>${rs.length}</td><td>${Math.round(rs.filter(r=>r.pnl>0).length/rs.length*100)}%</td><td class="${rs.reduce((s,r)=>s+r.pnl,0)>=0?'ok':'bad'}">${usd(rs.reduce((s,r)=>s+r.pnl,0))}</td><td>${(rs.reduce((s,r)=>s+r.pnl,0)/rs.reduce((s,r)=>s+r.cost*r.C,0)*100).toFixed(1)}%</td></tr>`).join('')};
+ const bucketP=r=>r.px<.1?'<10¢':r.px<.3?'10–30¢':r.px<.7?'30–70¢':r.px<.9?'70–90¢':'>90¢';
+ $('#trSum').innerHTML=`<div class="kpis"><div class="kpi"><span>Graded</span><b>${res.length}</b></div><div class="kpi"><span>Win rate</span><b>${res.length?Math.round(w/res.length*100)+'%':'–'}</b></div><div class="kpi"><span>ROI</span><b class="${pnl>=0?'ok':'bad'}">${cost?(pnl/cost*100).toFixed(1)+'%':'–'}</b></div></div>
+  ${res.length?`<h3>By timeframe</h3><table><tr><th></th><th>n</th><th>win</th><th>P&amp;L</th><th>ROI</th></tr>${grp(r=>({K:'Kalshi',P:'Poly',U:'PolyUS',O:'Other'}[r.v])+' '+r.tf)}</table><h3>By entry price</h3><table><tr><th></th><th>n</th><th>win</th><th>P&amp;L</th><th>ROI</th></tr>${grp(bucketP)}</table>`:''}`;
+ $('#trList').innerHTML=T.length?'<h3>Recent</h3>'+T.slice(-40).reverse().map(r=>`<div class="sig" style="cursor:default"><div class="top"><div><span class="ven ${r.v}">${{K:'KALSHI',P:'POLY·REF',U:'POLY US',O:'OTHER'}[r.v]}</span><b>${esc(r.ds)}</b><div class="muted">${new Date(r.t).toLocaleString()} · ${r.sd==='YES'?'YES/UP':'NO/DOWN'} ${r.C}× @ ${c1(r.px)} · fair ${pctS(r.qs??(r.sd==='YES'?r.q:1-r.q))} · edge ${c1(r.e)}</div></div><div class="tl ${r.pnl==null?'':r.pnl>=0?'ok':'bad'}">${r.pnl==null?'open':(r.pnl>=0?'+':'')+usd(r.pnl)}</div></div>
+  ${r.o==null&&r.man&&r.cl<Date.now()?`<div class="row"><button class="btn sm" data-res="${r.t}" data-o="1">YES/UP won</button><button class="btn sm alt" data-res="${r.t}" data-o="0">NO/DOWN won</button></div>`:''}</div>`).join(''):'<p class="muted">No paper entries yet. That is normal: the rules are strict on purpose.</p>';
+ $$('[data-res]').forEach(b=>b.onclick=()=>{const r=LED.find(x=>x.k==='t'&&String(x.t)===b.dataset.res);if(r){setOutcome(r.id,+b.dataset.o);renderLed()}})}
+$('#lCsv').onclick=()=>{const cols=['k','t','v','a','tf','sl','ds','cl','cp','sd','px','fee','cost','C','mid','P','q','e','call','r','o','pnl'];
+ const head='kind,time,venue,coin,timeframe,market,description,close,checkpoint_sec,side,price,fee,cost,contracts,market_mid,model_p,fair_q,edge,call,reason,outcome,pnl';
+ const body=LED.map(r=>cols.map(c=>{let v=r[c];if((c==='t'||c==='cl')&&v)v=new Date(v).toISOString();if(c==='k')v=v==='t'?'paper_trade':'checkpoint';return'"'+String(v??'').replace(/"/g,'""')+'"'}).join(','));
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([head+'\n'+body.join('\n')],{type:'text/csv'}));a.download='fairline-ledger.csv';a.click()};
+$('#lReset').onclick=()=>{if(!confirm('Delete every logged checkpoint and paper trade?'))return;LED=[];LOGGED.clear();store.set('fl.led',[]);computeGate();renderLed()};
+$('#lMC').onclick=()=>{const T=trades().filter(r=>r.pnl!=null).map(r=>({day:etDay(r.cl),qs:r.qs??(r.sd==='YES'?r.q:1-r.q),cost:r.cost,win:(r.sd==='YES'?r.o:1-r.o)}));$('#lMCout').innerHTML=mcHTML(T)};
+
+/* ================= Monte Carlo ================= */
+function monteCarlo(T,stress){const days={};for(const t of T)(days[t.day]=days[t.day]||[]).push(t);const D=Object.values(days);const P=10000,N=500;const ends=[];let dd30=0,below=0;
+ for(let p=0;p<P;p++){let bank=1,peak=1,mdd=0,i=0;while(i<N){const d=D[(Math.random()*D.length)|0];for(const t of d){if(i>=N)break;i++;const f=Math.max(0,(t.qs-t.cost)/(1-t.cost));const stake=bank*Math.min(cfg.kelly*f,cfg.cap);if(stake<=0)continue;
+  let pnl=stake/t.cost*(t.win-t.cost);if(stress)pnl-=0.5*(t.qs-t.cost)*stake/t.cost;bank+=pnl;if(bank>peak)peak=bank;const dd=1-bank/peak;if(dd>mdd)mdd=dd;if(bank<=0.0001){bank=0.0001;break}}}
+  ends.push(bank);if(mdd>0.3)dd30++;if(bank<1)below++}
+ ends.sort((x,y)=>x-y);return{med:ends[P/2|0],p5:ends[P*0.05|0],p95:ends[P*0.95|0],dd30:dd30/P,below:below/P}}
+function mcHTML(T){if(T.length<20)return`<div class="warn">Need at least 20 graded trades to simulate (have ${T.length}).</div>`;const nd=new Set(T.map(t=>t.day)).size;const few=nd<3?`<div class="warn">Trades come from only ${nd} day${nd>1?'s':''}, so the paths can't show a real range of outcomes. Run more days.</div>`:'';
+ const a=monteCarlo(T,false),b=monteCarlo(T,true);const row=(n,r)=>`<tr><td>${n}</td><td>${(r.med*100-100).toFixed(1)}%</td><td>${(r.p5*100-100).toFixed(1)}%</td><td>${(r.p95*100-100).toFixed(1)}%</td><td>${Math.round(r.dd30*100)}%</td><td>${Math.round(r.below*100)}%</td></tr>`;
+ return`<h3>Monte Carlo: 10,000 paths × 500 trades, resampled by day</h3><table><tr><th></th><th>median</th><th>worst 5%</th><th>best 5%</th><th>DD&gt;30%</th><th>lose money</th></tr>${row('As measured',a)}${row('Edge cut 50%',b)}</table><p class="muted">${few}Sizing: ${cfg.kelly}× Kelly, max ${Math.round(cfg.cap*100)}% per trade. "Edge cut 50%" assumes the model is half as good as it looked, which is the usual reality check.</p>`}
+
+/* ================= backtest ================= */
+const bprog=(t,f)=>{$('#bProg').textContent=t;if(f!=null)$('#bBar').style.width=Math.round(f*100)+'%'};
+async function fetchCandles(a,t0,t1,onp){const out=new Map();for(let s=t0;s<t1;s+=300*60000){const e=Math.min(t1,s+300*60000);try{const d=await J(`https://api.exchange.coinbase.com/products/${AS[a].cb}/candles?granularity=60&start=${new Date(s).toISOString()}&end=${new Date(e).toISOString()}`,12000);for(const r of d)out.set(r[0]*1000,[r[0]*1000,r[3],r[2],r[1],r[4]])}catch(x){}onp&&onp((s-t0)/(t1-t0));await sleep(150)}return[...out.values()].sort((x,y)=>x[0]-y[0])}
+async function runBT(){const v=$('#bV').value,a=$('#bA').value,days=+$('#bD').value,hs=(parseFloat($('#bHs').value)||0.5)/100;let tf=$('#bTf').value;
+ if(v==='K'){if(!cfg.worker){$('#bOut').innerHTML='<div class="card warn">Kalshi backtests need the proxy (Settings). Polymarket works without it.</div>';return}tf='15m'}
+ $('#bGo').disabled=true;$('#bOut').innerHTML='';try{
+ bprog('Loading time-of-day volatility profile…',0.02);await loadSeason(a);
+ const dur=TFS[tf]*1000,now=Date.now();let end=Math.floor((now-dur-180000)/dur)*dur;const W=[];
+ if(v==='P'){
+  if(tf==='4h'){let base=null;for(let k=0;k<4&&!base;k++){const s=Math.floor((now-dur-180000)/3600000)*3600-k*3600;try{const d=await J(`https://gamma-api.polymarket.com/markets?closed=true&slug=${AS[a].pm}-updown-4h-${s}`);if(d.length)base=s*1000}catch(e){}}if(!base)throw new Error('could not find 4h windows');end=base}
+  const starts=[];for(let s=end;s>end-days*86400000;s-=dur)starts.push(s);
+  for(let i=0;i<starts.length;i+=20){bprog(`Finding settled markets ${Math.min(i+20,starts.length)}/${starts.length}…`,0.05+0.15*i/starts.length);
+   try{const d=await J('https://gamma-api.polymarket.com/markets?closed=true&'+starts.slice(i,i+20).map(s=>`slug=${AS[a].pm}-updown-${tf}-${s/1000}`).join('&'),12000);
+    for(const m of d){const op=JSON.parse(m.outcomePrices||'[]');const o=op[0]==='1'?1:op[1]==='1'?0:null;if(o==null)continue;const st=+m.slug.split('-').pop()*1000;
+     W.push({st,cl:Date.parse(m.endDate)||st+dur,o,tok:JSON.parse(m.clobTokenIds)[0],feeRate:m.feeSchedule?.rate??((a==='BTC'&&tf==='15m')?0.05:0.01),A:m.cryptoMarketConfig?.twapLookbackSeconds??60,slug:m.slug})}}catch(e){}await sleep(120)}
+  for(let i=0;i<W.length;i++){const w=W[i];if(i%5===0)bprog(`Price history ${i+1}/${W.length}…`,0.2+0.5*i/W.length);
+   try{const h=await J(`https://clob.polymarket.com/prices-history?market=${w.tok}&startTs=${w.st/1000-60}&endTs=${w.cl/1000}&fidelity=1`,10000);w.h=(h.history||[]).map(x=>[x.t*1000,+x.p])}catch(e){w.h=[]}
+   if(cfg.worker){for(let k=0;k<3&&w.K==null;k++){try{const d=await J(wurl('w',`/api/crypto/crypto-price?symbol=${a}&eventStartTime=${new Date(w.st).toISOString().replace('.000','')}&variant=${PVAR[tf]}&endDate=${new Date(w.cl).toISOString().replace('.000','')}`),6000);if(d.openPrice>0)w.K=d.openPrice}catch(e){await sleep(1500*(k+1))}}}
+   await sleep(cfg.worker?220:120)}
+ }else{
+  let cur='';const t0=end-days*86400000;let guard=0;do{const d=await kget(`/markets?series_ticker=${AS[a].kq}&status=settled&limit=200&min_close_ts=${Math.floor(t0/1000)}&max_close_ts=${Math.floor(end/1000)+dur/1000}${cur?'&cursor='+cur:''}`);
+   for(const m of d.markets||[])if(m.result==='yes'||m.result==='no')W.push({st:Date.parse(m.open_time),cl:Date.parse(m.close_time),o:m.result==='yes'?1:0,K:m.floor_strike,ticker:m.ticker,A:60});cur=d.cursor||'';await sleep(300)}while(cur&&++guard<10);
+  W.sort((x,y)=>x.st-y.st);
+  for(let i=0;i<W.length;i++){const w=W[i];if(i%5===0)bprog(`Kalshi minute prices ${i+1}/${W.length}…`,0.2+0.5*i/W.length);
+   try{const d=await kget(`/series/${AS[a].kq}/markets/${w.ticker}/candlesticks?start_ts=${w.st/1000}&end_ts=${w.cl/1000}&period_interval=1`);
+    w.kc=(d.candlesticks||[]).map(c=>[c.end_period_ts*1000,+c.yes_bid?.close_dollars,+c.yes_ask?.close_dollars])}catch(e){w.kc=[]}await sleep(400)}}
+ if(W.length<20)throw new Error(`only ${W.length} settled markets found; try more days`);
+ W.sort((x,y)=>x.st-y.st);
+ const c=await fetchCandles(a,W[0].st-7*3600000,W[W.length-1].cl,f=>bprog('Coin price history…',0.7+0.15*f));
+ if(c.length<500)throw new Error('could not load coin price history');
+ bprog('Rebuilding fair values at each checkpoint…',0.87);
+ const lam=Math.pow(.5,1/60);const base=new Array(c.length).fill(null);let ev=null,acc=[];
+ for(let i=1;i<c.length;i++){if(c[i][0]-c[i-1][0]===60000){const r=Math.log(c[i][4]/c[i-1][4]),x=r*r/fac(a,c[i][0]);if(ev==null){acc.push(x);if(acc.length>=30)ev=acc.reduce((s,y)=>s+y,0)/acc.length}else ev=lam*ev+(1-lam)*x}base[i]=ev}
+ const idxAt=t=>{let lo=0,hi=c.length-1,ans=-1;while(lo<=hi){const md=(lo+hi)>>1;if(c[md][0]+60000<=t){ans=md;lo=md+1}else hi=md-1}return ans};
+ const rows=[];
+ for(const w of W){const mm={v,asset:a,type:'updown',close:w.cl,A:w.A,basis:v==='P'?cfg.bCl:cfg.bBrti,K:w.K,kEst:false,feeRate:w.feeRate};
+  if(mm.K==null){const ks=c.find(r=>r[0]===w.st-60000);if(!ks)continue;mm.K=(ks[1]+ks[2]+ks[3]+ks[4])/4;mm.kEst=true}
+  for(const cp of CPS[tf]){const t=w.cl-cp*1000;const i=idxAt(t);if(i<0||base[i]==null||t-c[i][0]>180000)continue;const S=c[i][4];
+   let yb,ya;if(v==='P'){const hh=w.h.filter(x=>x[0]>=t&&x[0]<=t+90000);if(!hh.length)continue;const p=hh[0][1];if(!(p>0.01&&p<0.99))continue;yb=Math.max(0.01,p-hs);ya=Math.min(0.99,p+hs)}
+   else{const k=w.kc.filter(x=>x[0]>=t&&x[0]<=t+90000);if(!k.length)continue;[,yb,ya]=k[0];if(!(yb>0&&ya<1&&ya>=yb))continue}
+   const ctx={a,S,now:t,w:0,base:base[i],ev:[],mKnown:null};const Pk={};for(const k of VKS)Pk[k]=modelP(mm,{...ctx,scale:k*k});
+   rows.push({day:etDay(t),t,cp,win:w.st,mm,Pk,P:Pk[1],mid:(yb+ya)/2,yb,ya,o:w.o})}}
+ if(!rows.length)throw new Error('no usable checkpoints');
+ const dayList=[...new Set(rows.map(r=>r.day))].sort();if(dayList.length<2)throw new Error('need at least 2 days for out-of-sample testing');
+ const anc=(r,wm,k)=>sigm((1-wm)*logit(clamp(r.mid,.005,.995))+wm*logit(r.Pk[k]));
+ const ll=(rs,wm,k)=>rs.reduce((s,r)=>{const q=anc(r,wm,k);return s-Math.log(clamp(r.o?q:1-q,1e-4,1))},0);
+ const oos=[],tr=[],fits=[];
+ for(let d=1;d<dayList.length;d++){const train=rows.filter(r=>r.day<dayList[d]),test=rows.filter(r=>r.day===dayList[d]);let best=0,bk=1,bv=Infinity;for(const k of VKS)for(let wm=0;wm<=0.6001;wm+=0.05){const L=ll(train,wm,k);if(L<bv-1e-9){bv=L;best=Math.round(wm*100)/100;bk=k}}fits.push([dayList[d],best,bk]);
+  const taken=new Set();for(const r of test){const q=anc(r,best,bk);const P=r.Pk[bk];oos.push({...r,q,P});if(taken.has(r.win))continue;
+   const Pu=r.Pk[bk];const sides=[['YES',r.ya,q],['NO',1-r.yb,1-q]].map(([s,p,qs])=>{const fee=feeFor(r.mm,p,100);return{s,p,qs,fee,cost:p+fee,edge:qs-p-fee}}).sort((x,y)=>y.edge-x.edge);const s=sides[0];
+   const thr=s.p<0.1?cfg.lsEdge:cfg.minEdge;if(s.edge<thr||(s.p<0.1&&s.edge/s.cost<cfg.lsPct)||r.ya-r.yb>cfg.maxSpread+1e-9||Math.abs(Pu-r.mid)>cfg.maxDiv)continue;
+   taken.add(r.win);const win=s.s==='YES'?r.o:1-r.o;tr.push({day:r.day,qs:s.qs,cost:s.cost,win,pnl:win-s.cost,edge:s.edge,px:s.p,side:s.s,cp:r.cp,mside:s.s==='YES'?r.mid:1-r.mid})}}
+ const S1=stats(oos);const ci=bootCI(byDay(oos,r=>(r.q-r.o)**2-(r.mid-r.o)**2),1000);
+ const pc=tr.length?tr.reduce((s,x)=>s+x.pnl,0)/tr.length:0;const pci=tr.length>=10?bootCI(byDay(tr,x=>x.pnl),1000):null;
+ const sh=tr.length?tr.reduce((s,x)=>s+x.mside-x.cost,0)/tr.length:0;const pred=tr.length?tr.reduce((s,x)=>s+x.edge,0)/tr.length:0;
+ const wr=tr.length?tr.filter(x=>x.win).length/tr.length:0;BT_TR=tr;
+ const EV=store.get('fl.ev',{});EV[`${v}|${a}|${tf}`]={t:Date.now(),n:tr.length,pc,lo:pci?pci[0]:null,hi:pci?pci[1]:null,dB:S1.bq-S1.bm,ciB:ci};store.set('fl.ev',EV);
+ $('#bOut').innerHTML=`<div class="card"><h2>Out-of-sample results · ${v==='P'?'Polymarket':'Kalshi'} ${a} ${tf}</h2>
+  <div class="muted">${W.length} settled markets · ${rows.length} checkpoints · ${oos.length} graded out-of-sample (days ${dayList.slice(1).join(', ')}) · strike ${(()=>{const n=rows.filter(r=>r.mm.kEst).length;return n?`<span class="am">estimated on ${Math.round(n/rows.length*100)}% of checkpoints</span>`:'<span class="ok">exact</span>'})()} · market price taken at or after each checkpoint (no timing head start) · ${v==='P'?`Polymarket spread assumed ${c1(2*hs)}`:'real Kalshi bid/ask'} · implied vol not used (no history)</div>
+  <h3>Does fair value beat the market price?</h3>
+  <table><tr><th></th><th>Brier</th><th>Log loss</th></tr><tr><td>Fair value</td><td>${S1.bq.toFixed(4)}</td><td>${S1.lq.toFixed(4)}</td></tr><tr><td>Market price</td><td>${S1.bm.toFixed(4)}</td><td>${S1.lm.toFixed(4)}</td></tr>
+  <tr><td>Δ (fair − market)</td><td class="${S1.bq<S1.bm?'ok':'bad'}">${(S1.bq-S1.bm>=0?'+':'')+(S1.bq-S1.bm).toFixed(5)}</td><td class="${S1.lq<S1.lm?'ok':'bad'}">${(S1.lq-S1.lm>=0?'+':'')+(S1.lq-S1.lm).toFixed(5)}</td></tr></table>
+  <p class="muted">90% CI for Δ Brier (by day): ${ci?ci[0].toFixed(5)+' to '+ci[1].toFixed(5):'n/a'}. ${ci&&ci[1]<0?'<b class="ok">Fair value beat the market.</b>':'<b class="am">Not proven better than the market.</b>'} Fitted on earlier days only (model weight / volatility multiplier): ${fits.map(f=>f[1].toFixed(2)+' / '+f[2]+'×').join(', ')}.</p>
+  <h3>Entries the rules would have taken</h3>
+  <div class="kpis"><div class="kpi"><span>Trades</span><b>${tr.length}</b></div><div class="kpi"><span>Win rate</span><b>${tr.length?Math.round(wr*100)+'%':'–'}</b></div><div class="kpi"><span>¢ per contract</span><b class="${pc>=0?'ok':'bad'}">${tr.length?(pc>=0?'+':'')+(pc*100).toFixed(2):'–'}</b></div></div>
+  <p class="muted">${pci?`90% CI per contract: ${(pci[0]*100).toFixed(2)}¢ to ${(pci[1]*100).toFixed(2)}¢. `:''}The model promised ${tr.length?'+'+(pred*100).toFixed(2)+'¢':'n/a'} per contract. If the market price had been exactly right, these trades would average ${tr.length?(sh*100).toFixed(2)+'¢':'n/a'} (the cost of crossing the spread plus fees). Real edge = the actual result beating that line. Market-price-only control: 0 trades, because the market price can never beat itself after fees.</p>
+  ${tr.length?`<table><tr><th>Entry price</th><th>n</th><th>win</th><th>¢/contract</th></tr>${[['<10¢',x=>x.px<.1],['10–30¢',x=>x.px>=.1&&x.px<.3],['30–70¢',x=>x.px>=.3&&x.px<.7],['70–90¢',x=>x.px>=.7&&x.px<.9],['>90¢',x=>x.px>=.9]].map(([n,f])=>{const g=tr.filter(f);return g.length?`<tr><td>${n}</td><td>${g.length}</td><td>${Math.round(g.filter(x=>x.win).length/g.length*100)}%</td><td class="${g.reduce((s,x)=>s+x.pnl,0)>=0?'ok':'bad'}">${(g.reduce((s,x)=>s+x.pnl,0)/g.length*100).toFixed(2)}</td></tr>`:''}).join('')}</table>`:''}
+  <div class="row"><button class="btn alt" id="bMC">Monte Carlo on these trades</button></div><div id="bMCout"></div>
+  <p class="muted">Honest read: a few days is a small sample. Trust it only when the confidence ranges sit fully above zero across several runs and coins.</p></div>`;
+ $('#bMC').onclick=()=>{$('#bMCout').innerHTML=mcHTML(BT_TR.map(x=>({day:x.day,qs:x.qs,cost:x.cost,win:x.win})))};
+ bprog('Done.',1)}catch(e){console.error('BT',e&&e.stack);bprog('Stopped: '+e.message,0);$('#bOut').innerHTML=`<div class="card warn">Backtest stopped: ${esc(e.message)}</div>`}finally{$('#bGo').disabled=false}}
+const VKS=[0.8,1,1.25,1.5,2];let BT_TR=[];$('#bGo').onclick=runBT;
+$('#bV').onchange=()=>{if($('#bV').value==='K')$('#bTf').value='15m'};
+
+/* ================= settings ================= */
+const WORKER=`export default {
+  async fetch(req) {
+    const ALLOW = "https://7itb7.github.io";
+    const cors = {"Access-Control-Allow-Origin": ALLOW, "Access-Control-Allow-Methods": "GET,OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type", "Vary": "Origin", "Cache-Control": "no-store"};
+    if (req.method === "OPTIONS") return new Response(null, {headers: cors});
+    if (req.method !== "GET") return new Response("read only", {status: 405, headers: cors});
+    const u = new URL(req.url);
+    const path = u.searchParams.get("u") || "";
+    const RULES = {k: ["https://api.elections.kalshi.com", "/trade-api/v2/"],
+                   w: ["https://polymarket.com", "/api/crypto/crypto-price?"]};
+    const rule = RULES[u.searchParams.get("h") || "k"];
+    if (!rule || !path.startsWith(rule[1])) return new Response("blocked", {status: 400, headers: cors});
+    const r = await fetch(rule[0] + path, {headers: {"Accept": "application/json", "User-Agent": "fairline-proxy"}});
+    return new Response(r.body, {status: r.status,
+      headers: {...cors, "Content-Type": r.headers.get("Content-Type") || "application/json"}});
+  }
+};`;
+$('#wCode').textContent=WORKER;
+$('#wCopy').onclick=async()=>{try{await navigator.clipboard.writeText(WORKER);toast('Worker code copied')}catch(e){const r=document.createRange();r.selectNodeContents($('#wCode'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Selected: tap Copy')}};
+function loadSettings(){$$('[data-k]').forEach(el=>{const k=el.dataset.k;let v=cfg[k];if(el.type==='checkbox')el.checked=!!v;else if(el.dataset.pct&&typeof v==='number')el.value=+(v*100).toFixed(2);else el.value=v??''});
+ $('#sAssets').innerHTML=Object.keys(AS).map(a=>`<label class="chk"><input type="checkbox" data-asset="${a}" ${cfg.assets[a]?'checked':''}> ${a}</label>`).join('');renderEv()}
+function readSettings(){$$('[data-k]').forEach(el=>{const k=el.dataset.k;if(el.type==='checkbox')cfg[k]=el.checked;else if(el.tagName==='SELECT'||k==='worker')cfg[k]=el.value.trim();else{const n=parseFloat(el.value);if(!isNaN(n))cfg[k]=el.dataset.pct?n/100:n}});
+ $$('[data-asset]').forEach(el=>cfg.assets[el.dataset.asset]=el.checked);if(!act().length)cfg.assets.BTC=true;cfg.cap=Math.min(cfg.cap,0.1);saveCfg()}
+function renderEv(){const ev=(cfg.events||[]).filter(e=>e>Date.now()-86400000).sort((a,b)=>a-b);cfg.events=ev;
+ $('#evList').innerHTML=ev.length?ev.map((e,i)=>`<div class="row" style="margin-top:4px"><span class="mono">${new Date(e).toLocaleString([], {weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span><button class="btn sm alt" data-evx="${i}">×</button></div>`).join(''):'None. Add US data releases (8:30am ET) and Fed decisions (2pm ET) on days you trade.';
+ $$('[data-evx]').forEach(b=>b.onclick=()=>{cfg.events.splice(+b.dataset.evx,1);saveCfg();renderEv()})}
+$('#evAdd').onclick=()=>{const v=$('#evIn').value;if(!v)return;const t=new Date(v).getTime();if(!t)return;cfg.events=[...(cfg.events||[]),t];saveCfg();renderEv();$('#evIn').value=''};
+$('#sSave').onclick=()=>{readSettings();toast('Saved');boot(true)};
+$('#wTest').onclick=async()=>{readSettings();$('#wMsg').textContent='Testing…';if(!cfg.worker){$('#wMsg').textContent='Paste the Worker URL first.';return}
+ try{const d=await kget('/exchange/status');$('#wMsg').innerHTML='<span class="ok">✓ Kalshi reachable'+(d.trading_active===false?' (trading paused right now)':'')+'</span>';boot(true)}catch(e){$('#wMsg').innerHTML='<span class="bad">✗ '+esc(e.message)+'. Check the URL and that the code is deployed.</span>'}};
+
+/* ================= tabs, loops, boot ================= */
+function tab(t){$$('main>section').forEach(s=>s.hidden=s.id!=='t-'+t);$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+ if(t==='led'){computeGate();renderLed()}if(t==='man')renderMan();if(t==='set')loadSettings();try{history.replaceState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
+$$('nav button').forEach(b=>b.onclick=()=>tab(b.dataset.t));
+let running=true;
+async function loop(fn,ms){for(;;){if(running&&!document.hidden){try{await fn()}catch(e){}}await sleep(ms)}}
+document.addEventListener('visibilitychange',()=>{$('#live').className='pill '+(document.hidden?'off':'live');$('#live').textContent=document.hidden?'○ PAUSED':'● LIVE'});
+async function boot(re){for(const a of act()){await loadSeason(a).catch(()=>{});await sleep(250)}for(const a of act()){for(let k=0;k<3&&!VOL[a];k++){await loadVol(a).catch(()=>{});if(!VOL[a])await sleep(1500)}await sleep(200)}loadIV();
+ if(re){for(const[id,x]of MK)if(!x.man&&!cfg.assets[x.asset])MK.delete(id);pmDisc=0}renderFilters()}
+loadMan();renderFilters();
+(async()=>{await boot(false);
+ loop(pollSpot,2000);loop(booksPoly,4000);loop(loadK15,5000);loop(loadKH,8000);
+ loop(async()=>{for(const a of act()){await loadVol(a).catch(()=>{});await sleep(300)}},60000);
+ loop(async()=>{for(const a of act())if(!VOL[a]){await loadVol(a).catch(()=>{});await sleep(800)}},5000);loop(loadIV,300000);
+ loop(async()=>{await resolveAll();computeGate()},60000);loop(async()=>render(),2000)})();
+try{const h=location.hash.slice(1);if(['sig','man','led','bt','set','guide'].includes(h))tab(h)}catch(e){}
+</script>
+</body></html>
