@@ -56,6 +56,11 @@ nav button.on{color:#fff;background:linear-gradient(180deg,rgba(163,230,53,.16),
 .banner{background:#3b2f0b;color:#fde68a;padding:7px 12px;font-size:12px}
 a{color:var(--cyn)}
 pre{white-space:pre-wrap;word-break:break-all;background:#0a0d12;border-radius:9px;padding:8px;font:10.5px/1.45 var(--mono);max-height:260px;overflow:auto}
+#chCv{height:460px;touch-action:pan-y;margin-top:8px}
+#chNums .num b{font-size:13.5px}#chNums{grid-template-columns:repeat(3,1fr)}
+.cbtn{background:none;border:1px solid var(--line);border-radius:8px;color:var(--ink);min-height:30px;padding:0 7px;margin-left:6px;cursor:pointer;font-size:14px;vertical-align:middle}
+.lg{font:11px/1.65 var(--mono);color:var(--ink2)}
+nav button{font-size:9.5px;min-width:0;white-space:nowrap}
 </style></head><body>
 <div class="banner" id="banner" hidden>Preview mode: live feeds may be blocked here. Everything works once it's on GitHub Pages.</div>
 <header>
@@ -72,6 +77,19 @@ pre{white-space:pre-wrap;word-break:break-all;background:#0a0d12;border-radius:9
  <div class="filters" id="filt"></div>
  <div id="sumLine" class="muted" style="margin:6px 2px"></div>
  <div id="list"></div>
+</section>
+
+<!-- CHART -->
+<section id="t-ch" hidden>
+ <div class="filters" id="chCoins" style="margin-top:6px"></div>
+ <select id="chSel" aria-label="Market"></select>
+ <div class="nums" id="chNums"></div>
+ <canvas id="chCv" aria-label="Live chart"></canvas>
+ <div class="call" id="chCall"></div><div class="why" id="chWhy"></div>
+ <div class="card lg"><b>Top:</b> live candles (median of 4 exchanges, updates every 2 s) · <span class="am">━ strike</span> · <span class="cy">┅ coin now</span> · <span class="ok">green cone</span> = Fairline's ±1σ / ±2σ range for where the coin settles · <span class="am">amber line</span> = close (shaded = settlement average) · ▲▼ = your paper entries<br>
+ <b>Middle:</b> odds over time · <span class="cy">blue</span> = market (band = bid/ask) · <span style="color:var(--vio)">purple</span> = model · white = fair · green shading = entry window · circles = graded checkpoints<br>
+ <b>Bottom:</b> best edge after fees vs the dashed entry bar. An entry needs the line above the bar <i>and</i> every other rule to pass.<br>
+ Tap the chart for exact values. Odds history builds while the app is open.</div>
 </section>
 
 <!-- MANUAL -->
@@ -153,6 +171,8 @@ pre{white-space:pre-wrap;word-break:break-all;background:#0a0d12;border-radius:9
   <p class="muted">So Fairline is a <b>fair-value calculator plus a lie detector</b>. It prices every contract from how much the coin is likely to move before close, including the 60-second settlement averaging, volatility by time of day, fat tails and options-market volatility. It blends that with the market price, subtracts the exact fees, and only flags an entry when what's left clears a safety margin. Expect NO TRADE on almost everything. If it says TRADE often, something is wrong.</p>
   <h3>How to read a card</h3>
   <p class="muted"><b>Market</b> = the venue's price. <b>Model</b> = pure math probability. <b>Fair</b> = blended fair value (mostly market, a little model). <b>Edge</b> = fair value minus what you'd pay including fees.<br><b class="ok">ENTRY</b> = passed every rule and this venue/timeframe has proven calibration. <b class="am">PAPER ENTRY</b> = passed every rule but isn't proven yet, so it's logged only. <b class="cy">REF</b> = Polymarket international (not for US users, tracked for learning only).</p>
+  <h3>The Chart tab</h3>
+  <p class="muted">Live candles with Fairline's numbers drawn on them: the strike, the coin price now, the green cone (where our volatility model expects the coin to settle), the close and its averaging window, and your paper entries. Below that are the odds over time (market vs model vs fair) and the edge after fees vs the entry bar. Tap 📈 on any signal card to chart that market. The candles and cone are not a buy/sell signal on their own. Only the edge line clearing the bar, with every other rule passing, is.</p>
   <h3>The rules (all must pass)</h3>
   <p class="muted">Fresh data (spot &lt;5 s) · inside the entry window (15m: 2–12 min left, 1h: 5–50, 4h: 15–200; 5m display only; never the final minute) · spread ≤3¢ · enough size at the price · edge ≥2¢ (or ≥1.5¢ and ≥30% of cost for contracts under 10¢) · model within 20 points of the market · risk caps: ¼ Kelly, max 2% per trade, 5% same-hour, 3 open, −6% daily stop.</p>
   <h3>Your 3–10¢ scalps</h3>
@@ -164,6 +184,7 @@ pre{white-space:pre-wrap;word-break:break-all;background:#0a0d12;border-radius:9
 
 <nav>
  <button data-t="sig" class="on"><span>📡</span>Signals</button>
+ <button data-t="ch"><span>📈</span>Chart</button>
  <button data-t="man"><span>✍️</span>Manual</button>
  <button data-t="led"><span>📒</span>Ledger</button>
  <button data-t="bt"><span>🧪</span>Backtest</button>
@@ -327,7 +348,7 @@ async function loadKH(){if(!cfg.worker||!cfg.showKalshi)return;const now=Date.no
   let ev=KEV[ser];if(!ev||ev.close<=now){const d=await kget(`/events?series_ticker=${ser}&status=open&limit=25`);
    const evs=(d.events||[]).map(e=>({t:e.event_ticker,close:Date.parse(e.strike_date)})).filter(e=>e.close>now&&e.close-now<=65*60000).sort((x,y)=>x.close-y.close);ev=KEV[ser]=evs[0]||{t:null,close:now+60000}}
   if(!ev.t)continue;const d=await kget(`/markets?event_ticker=${ev.t}&limit=200`);
-  const ms=(d.markets||[]).map(m=>({m,mid:(+m.yes_bid_dollars+ +m.yes_ask_dollars)/2})).filter(x=>+x.m.yes_ask_dollars>0&&+x.m.yes_ask_dollars<1&&x.mid>=0.04&&x.mid<=0.96).sort((x,y)=>Math.abs(x.mid-.5)-Math.abs(y.mid-.5)).slice(0,6);
+  const ms=(d.markets||[]).map(m=>({m,mid:(+m.yes_bid_dollars+ +m.yes_ask_dollars)/2})).filter(x=>+x.m.yes_bid_dollars>0&&+x.m.yes_ask_dollars<1&&+x.m.yes_ask_dollars-(+x.m.yes_bid_dollars)<=0.10&&x.mid>=0.04&&x.mid<=0.96).sort((x,y)=>Math.abs(x.mid-.5)-Math.abs(y.mid-.5)).slice(0,6);
   const keep=new Set(ms.map(x=>'K:'+x.m.ticker));for(const x of ms)kSet(x.m,a,'1h',kind,now);
   for(const[id,x]of MK)if(x.v==='K'&&x.series===ser&&!keep.has(id))MK.delete(id)}catch(e){}}}
 const KDQ=new Set();
@@ -426,7 +447,7 @@ function renderFilters(){$('#filt').innerHTML=FILTERS.filter(([k])=>!AS[k]||cfg.
 const callCls=c=>c==='ENTRY'?'ENTRY':c==='PAPER ENTRY'||c==='HOLDING'?'PAPER':c==='REF ENTRY'?'REF':c==='WAIT'?'WAIT':'NO';
 let LAST=[];
 function render(){const now=Date.now();const res=[];
- for(const m of MK.values()){if(!cfg.assets[m.asset]||m.close<=now-5000)continue;const R=evaluate(m,now);res.push(R);cpLog(R,now);autoEnter(R)}
+ for(const m of MK.values()){if(!cfg.assets[m.asset]||m.close<=now-5000)continue;const R=evaluate(m,now);res.push(R);cpLog(R,now);autoEnter(R);histPush(R,now)}
  LAST=res;renderHeader();
  const f=FILT;const shown=res.filter(R=>f==='all'||(f==='entry'?/ENTRY/.test(R.call):TFS[f]?R.m.tf===f:AS[f]?R.m.asset===f:R.m.v===f||(f==='P'&&R.m.v==='U')));
  const ord={ENTRY:0,'PAPER ENTRY':1,'REF ENTRY':2,HOLDING:3,'NO TRADE':4,WAIT:5};const bad=R=>R.reasons.some(x=>/stale|too far apart|display only/.test(x));shown.sort((a,b)=>(ord[a.call]-ord[b.call])||(bad(a)-bad(b))||(a.reasons.length-b.reasons.length)||((b.edge??-9)-(a.edge??-9)));
@@ -434,7 +455,7 @@ function render(){const now=Date.now();const res=[];
  const top=Object.entries(rc).sort((a,b)=>b[1]-a[1])[0];
  $('#sumLine').textContent=`${res.length} markets · ${nE} entr${nE===1?'y':'ies'}${top?` · most common block: ${top[0]}`:''}`;
  $('#list').innerHTML=shown.length?shown.map(cardHTML).join(''):'<div class="card muted">No markets loaded yet. Prices and markets appear within a few seconds.</div>';
- $$('#list .sig').forEach(el=>el.onclick=e=>{if(e.target.closest('a,button'))return;const id=el.dataset.id;OPEN.has(id)?OPEN.delete(id):OPEN.add(id);render()})}
+ $$('#list .sig').forEach(el=>el.onclick=e=>{if(e.target.closest('a,button'))return;const id=el.dataset.id;OPEN.has(id)?OPEN.delete(id):OPEN.add(id);render()});histGC(now);drawChart()}
 function cardHTML(R){const m=R.m;const cc=callCls(R.call);const vn={K:m.man?'KALSHI·MANUAL':'KALSHI',P:'POLY·REF',U:'POLY US',O:'MANUAL'}[m.v];
  const callTxt=R.call==='WAIT'?'WAIT':R.call==='HOLDING'?'HOLDING (paper)':/ENTRY/.test(R.call)?`${R.call} · BUY ${sideName(m,R.side)} @ ${c1(R.price)} · edge +${c1(R.edge)} · ${R.C} × = ${usd(R.C*R.cost)}`:`NO TRADE${R.edge!=null&&!R.reasons.some(x=>/stale|too far apart/.test(x))?` · best ${sideName(m,R.side)} edge ${R.edge>=0?'+':''}${c1(R.edge)}`:''}`;
  let det='';if(OPEN.has(m.id)&&R.q!=null){const sd=Math.sqrt(fwdVar(m.asset,Date.now(),m.close,R.w,VOL[m.asset].base,cfg.events));
@@ -446,7 +467,7 @@ function cardHTML(R){const m=R.m;const cc=callCls(R.call);const vn={K:m.man?'KAL
   ${R.side?`Fee ${c1(R.fee)}/contract · all-in cost ${c1(R.cost)} · Kelly ${(R.f*100).toFixed(1)}% → stake ${usd(R.stake)}`:''}<br>
   ${R.reasons.length?'<span class="bad">✗ '+R.reasons.map(esc).join('<br>✗ ')+'</span>':'<span class="ok">✓ every rule passes</span>'}${R.note?'<br><span class="am">'+esc(R.note)+'</span>':''}<br>
   ${m.url?`<a href="${esc(m.url)}" target="_blank" rel="noopener">Open on ${m.v==='K'?'Kalshi':'Polymarket'} ↗</a>`:''}${m.man?` · <button class="btn sm alt" data-rm="${esc(m.id)}">Remove</button>`:''}</div>`}
- return `<div class="sig ${cc==='NO'||cc==='WAIT'?'':cc}" data-id="${esc(m.id)}"><div class="top"><div><span class="ven ${m.v}">${vn}</span><b>${esc(desc(m))}</b><div class="muted">closes ${etT(m.close)}</div></div><div class="tl">${left(R.tau)}</div></div>
+ return `<div class="sig ${cc==='NO'||cc==='WAIT'?'':cc}" data-id="${esc(m.id)}"><div class="top"><div><span class="ven ${m.v}">${vn}</span><b>${esc(desc(m))}</b><div class="muted">closes ${etT(m.close)}</div></div><div class="tl">${left(R.tau)}<button class="cbtn" data-chart="${esc(m.id)}" aria-label="Chart">📈</button></div></div>
  ${R.q!=null?`<div class="nums"><div class="num"><span>Market ${m.type==='updown'?'UP':'YES'}</span><b>${pctS(R.mid)}</b></div><div class="num"><span>Model</span><b style="color:var(--vio)">${pctS(R.P)}</b></div><div class="num"><span>Fair</span><b>${pctS(R.q)}</b></div></div>`:''}
  <div class="call ${cc}">${esc(callTxt)}</div><div class="why">${esc(R.reason||'')}</div>${det}</div>`}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(!b)return;MK.delete(b.dataset.rm);saveMan();renderMan();render()});
@@ -619,9 +640,121 @@ $('#sSave').onclick=()=>{readSettings();toast('Saved');boot(true)};
 $('#wTest').onclick=async()=>{readSettings();$('#wMsg').textContent='Testing…';if(!cfg.worker){$('#wMsg').textContent='Paste the Worker URL first.';return}
  try{const d=await kget('/exchange/status');$('#wMsg').innerHTML='<span class="ok">✓ Kalshi reachable'+(d.trading_active===false?' (trading paused right now)':'')+'</span>';boot(true)}catch(e){$('#wMsg').innerHTML='<span class="bad">✗ '+esc(e.message)+'. Check the URL and that the code is deployed.</span>'}};
 
+/* ================= live chart ================= */
+const HIST=new Map();const CH={a:null,id:null,tf:'1m',hx:null,ht:0,prev:null,opts:'',ck:''};
+function histPush(R,now){if(R.P==null)return;const m=R.m;let h=HIST.get(m.id);if(!h)HIST.set(m.id,h=[]);const l=h[h.length-1];if(l&&now-l.t<4000)return;
+ h.push({t:now,S:R.S,P:R.P,q:R.q??null,mid:R.mid??null,b:m.yesBid,a:m.yesAsk,e:R.edge??null,sd:R.side||null});if(h.length>1000)h.splice(0,h.length-1000)}
+let histT=0;function histGC(now){if(now-histT<60000)return;histT=now;for(const[id,h]of HIST)if(!MK.has(id)&&(!h.length||now-h[h.length-1].t>1800000))HIST.delete(id)}
+const ORD={ENTRY:0,'PAPER ENTRY':1,'REF ENTRY':2,HOLDING:3,'NO TRADE':4,WAIT:5};const nearHalf=R=>Math.abs((R.mid??.5)-.5);
+const vName=m=>({K:'Kalshi',P:'Poly',U:'Poly US',O:'Manual'}[m.v]||'');
+function chList(a,now){return LAST.filter(R=>R.m.asset===a&&R.m.close>now).sort((x,y)=>(ORD[x.call]-ORD[y.call])||(nearHalf(x)-nearHalf(y))||(x.m.close-y.m.close))}
+function chPick(L){let R=L.find(R=>R.m.id===CH.id);
+ if(!R&&CH.prev)R=L.filter(x=>x.m.v===CH.prev.v&&x.m.tf===CH.prev.tf&&x.m.type===CH.prev.type).sort((x,y)=>nearHalf(x)-nearHalf(y))[0];
+ R=R||L[0]||null;if(R){CH.id=R.m.id;CH.prev={v:R.m.v,tf:R.m.tf,type:R.m.type}}return R}
+function chCandles(a,g){const out=(VOL[a]?.c||[]).map(r=>r.slice());const by=new Map(out.map(r=>[r[0],r]));const last=out.length?out[out.length-1][0]:0;
+ for(const[t,p]of SP[a]?.buf||[]){const mt=Math.floor(t/60000)*60000;if(mt<last)continue;const r=by.get(mt);if(!r){const n=[mt,p,p,p,p];by.set(mt,n);out.push(n)}else{r[2]=Math.max(r[2],p);r[3]=Math.min(r[3],p);r[4]=p}}
+ out.sort((x,y)=>x[0]-y[0]);if(g===1)return out;const agg=[];let c=null;
+ for(const r of out){const b=Math.floor(r[0]/(g*60000))*g*60000;if(!c||c[0]!==b){c=[b,r[1],r[2],r[3],r[4]];agg.push(c)}else{c[2]=Math.max(c[2],r[2]);c[3]=Math.min(c[3],r[3]);c[4]=r[4]}}return agg}
+const axP=p=>!isFinite(p)?'–':p>=1000?'$'+Math.round(p).toLocaleString('en-US'):p>=10?'$'+p.toFixed(2):'$'+p.toFixed(4);
+const niceStep=x=>{const p=Math.pow(10,Math.floor(Math.log10(x)));for(const k of[1,2,2.5,5,10])if(k*p>=x)return k*p;return 10*p};
+function tag(g,x,y,txt,bg,fg){const w=g.measureText(txt).width+8;g.fillStyle=bg;g.fillRect(x+1,y-7,w,14);g.fillStyle=fg;g.fillText(txt,x+5,y)}
+const chCallTxt=R=>{const m=R.m;return R.call==='WAIT'?'WAIT':R.call==='HOLDING'?'HOLDING (paper)':/ENTRY/.test(R.call)?`${R.call} · BUY ${sideName(m,R.side)} @ ${c1(R.price)} · edge +${c1(R.edge)}`:`NO TRADE${R.edge!=null?` · best ${sideName(m,R.side)} edge ${R.edge>=0?'+':''}${c1(R.edge)}`:''}`};
+function chCtl(L,R,now){const coins=act();const k=coins.join()+'|'+CH.a+'|'+CH.tf;
+ if(CH.ck!==k){CH.ck=k;$('#chCoins').innerHTML=coins.map(a=>`<button data-cc="${a}" class="${CH.a===a?'on':''}">${a}</button>`).join('')+'<span style="flex:0 0 8px"></span>'+['1m','5m'].map(t=>`<button data-ctf="${t}" class="${CH.tf===t?'on':''}">${t} candles</button>`).join('')}
+ const ids=CH.a+'|'+L.map(R=>R.m.id).join('|');if(CH.opts!==ids){CH.opts=ids;$('#chSel').innerHTML=L.length?L.map(R=>`<option value="${esc(R.m.id)}">${esc(vName(R.m)+' '+R.m.tf+' · '+desc(R.m))}</option>`).join(''):`<option value="">No open ${esc(CH.a)} markets yet</option>`}
+ if(R&&$('#chSel').value!==R.m.id)$('#chSel').value=R.m.id;
+ const a=CH.a,S=comp(a);
+ if(!R){$('#chNums').innerHTML=`<div class="num"><span>${a} now</span><b>${S?axP(S):'…'}</b></div>`;$('#chCall').className='call WAIT';$('#chCall').textContent=VOL[a]?'Waiting for open markets':'Loading prices…';$('#chWhy').textContent='Markets show up a few seconds after they open (Kalshi needs the proxy in Settings).';return}
+ const m=R.m,tau=Math.max(0,(m.close-now)/1000);const sd=S&&VOL[a]?.base?Math.sqrt(fwdVar(a,now,m.close,R.w||0,VOL[a].base,cfg.events)):null;
+ const K=m.type==='range'?null:m.K;const gap=S&&K?((S/K-1)*100):null;
+ $('#chNums').innerHTML=`<div class="num"><span>${a} now</span><b>${S?axP(S):'…'}</b></div>`+
+  (m.type==='range'?`<div class="num"><span>Range</span><b>${axP(m.L)}–${axP(m.U)}</b></div>`:`<div class="num"><span>${m.type==='updown'?'Beat':'Strike'}${gap!=null?` (${gap>=0?'+':''}${gap.toFixed(2)}%)`:''}</span><b>${K!=null?axP(K):'?'}</b></div>`)+
+  `<div class="num"><span>Left · exp. move</span><b>${left(tau)} · ${sd!=null?'±'+(sd*100).toFixed(2)+'%':'–'}</b></div>`+
+  `<div class="num"><span>Market ${m.type==='updown'?'UP':'YES'}</span><b class="cy">${R.mid!=null?pctS(R.mid):'–'}</b></div><div class="num"><span>Model</span><b style="color:var(--vio)">${R.P!=null?pctS(R.P):'–'}</b></div><div class="num"><span>Fair</span><b>${R.q!=null?pctS(R.q):'–'}</b></div>`;
+ const cc=callCls(R.call);$('#chCall').className='call '+cc;$('#chCall').textContent=chCallTxt(R);$('#chWhy').textContent=R.reason||''}
+function drawChart(){if($('#t-ch').hidden)return;try{drawChart0()}catch(e){try{console.log('chart error',e)}catch(x){}}}
+function drawChart0(){const now=Date.now();const coins=act();if(!coins.includes(CH.a)){CH.a=coins[0];CH.id=null;CH.prev=null}const a=CH.a;
+ const L=chList(a,now);const R=chPick(L);chCtl(L,R,now);const m=R?R.m:null;
+ const cv=$('#chCv'),dpr=window.devicePixelRatio||1,W=cv.clientWidth||360,H=460;
+ if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
+ const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);g.font='10px ui-monospace,Menlo,Consolas,monospace';g.textBaseline='middle';g.textAlign='left';
+ const gran=CH.tf==='5m'?5:1,C=chCandles(a,gran);
+ if(C.length<2){g.fillStyle='#8a97ab';g.fillText('Loading candles…',12,40);return}
+ const fut=m?Math.max(0,m.close-now):0;const histMs=gran===5?290*60000:clamp(fut*1.3,60*60000,150*60000);
+ const x0=now-histMs,xe=Math.max(now,m?m.close:now),x1=xe+(xe-x0)*.03;
+ const PL=2,PR=62,pw=W-PL-PR;const X=t=>PL+(t-x0)/(x1-x0)*pw;
+ const vis=C.filter(r=>r[0]+gran*60000>x0);if(!vis.length)return;
+ const S=comp(a)||vis[vis.length-1][4];
+ let lo=Math.min(...vis.map(r=>r[3])),hi=Math.max(...vis.map(r=>r[2]));
+ const base=VOL[a]?.base;let cone=null;
+ if(m&&fut>0&&base){cone=[];const n=48;for(let i=0;i<=n;i++){const t=now+fut*i/n;cone.push([t,Math.sqrt(fwdVar(a,now,t,R.w||0,base,cfg.events))])}const e=cone[n][1];lo=Math.min(lo,S*Math.exp(-2*e));hi=Math.max(hi,S*Math.exp(2*e))}
+ const ks=m?(m.type==='range'?[m.L,m.U]:[m.K]).filter(k=>k!=null&&isFinite(k)):[];
+ const sp0=hi-lo||S*.002;for(const k of ks)if(k>lo-1.2*sp0&&k<hi+1.2*sp0){lo=Math.min(lo,k);hi=Math.max(hi,k)}
+ const pad=(hi-lo)*.06||S*.001;lo-=pad;hi+=pad;
+ const T1=6,B1=262,T2=278,B2=372,T3=386,B3=436;const Y=p=>B1-(p-lo)/(hi-lo)*(B1-T1);const Yp=p=>B2-p*(B2-T2);
+ // panes + price grid
+ g.fillStyle='rgba(255,255,255,.015)';g.fillRect(PL,T2,pw,B2-T2);g.fillRect(PL,T3,pw,B3-T3);
+ g.strokeStyle='#1a2130';g.lineWidth=1;const st=niceStep((hi-lo)/5);
+ for(let p=Math.ceil(lo/st)*st;p<=hi;p+=st){const y=Y(p);g.beginPath();g.moveTo(PL,y);g.lineTo(PL+pw,y);g.stroke();g.fillStyle='#6f7b8f';g.fillText(axP(p),PL+pw+4,y)}
+ const tS=[5,10,15,30,60,120,240].map(x=>x*60000).find(s=>s/(x1-x0)*pw>=64)||480*60000;
+ for(let t=Math.ceil(x0/tS)*tS;t<x1;t+=tS){const x=X(t);g.strokeStyle='#151b26';g.beginPath();g.moveTo(x,T1);g.lineTo(x,B3);g.stroke();g.fillStyle='#6f7b8f';g.textAlign='center';g.fillText(etT(t).replace(/\s?(AM|PM)/,''),x,449);g.textAlign='left'}
+ if(fut>0){g.fillStyle='rgba(255,255,255,.03)';g.fillRect(X(now),T1,X(m.close)-X(now),B1-T1)}
+ // cone: Fairline's expected settlement range
+ if(cone){for(const[k,al]of[[2,.08],[1,.15]]){g.beginPath();cone.forEach(([t,sd],i)=>{const y=Y(S*Math.exp(k*sd));i?g.lineTo(X(t),y):g.moveTo(X(t),y)});for(let i=cone.length-1;i>=0;i--)g.lineTo(X(cone[i][0]),Y(S*Math.exp(-k*cone[i][1])));g.closePath();g.fillStyle=`rgba(163,230,53,${al})`;g.fill()}
+  const e=cone[cone.length-1][1];g.fillStyle='#a3e635';g.textAlign='right';g.fillText('±1σ',X(m.close)-4,Y(S*Math.exp(e))-7);g.fillText('±2σ',X(m.close)-4,Y(S*Math.exp(2*e))-7);g.textAlign='left'}
+ // strike / range
+ let kY=[];if(m){if(m.type==='range'&&m.L!=null&&m.U!=null){const ya=clamp(Y(m.U),T1,B1),yb=clamp(Y(m.L),T1,B1);g.fillStyle='rgba(251,191,36,.10)';g.fillRect(PL,ya,pw,Math.max(1,yb-ya))}
+  g.strokeStyle='#fbbf24';g.lineWidth=1.4;const off={up:[],dn:[]};for(const k of ks){const y=Y(k);if(y<T1||y>B1){off[y<T1?'up':'dn'].push(k);continue}
+   g.setLineDash([6,4]);g.beginPath();g.moveTo(PL,y);g.lineTo(PL+pw,y);g.stroke();g.setLineDash([]);kY.push(y);tag(g,PL+pw,y,axP(k),'#fbbf24','#0b0f14')}g.lineWidth=1;
+  for(const[sd,v]of Object.entries(off))if(v.length){const nm=m.type==='updown'?'beat':m.type==='range'?'range':'strike';g.fillStyle='#fbbf24';g.fillText((sd==='up'?'▲ ':'▼ ')+nm+' '+(v.length>1?axP(Math.min(...v))+'–'+axP(Math.max(...v)):axP(v[0]))+' (off chart)',PL+6,sd==='up'?T1+8:B1-8)}}
+ // candles
+ const cw=Math.max(1,gran*60000/(x1-x0)*pw*.68);
+ for(const r of vis){const x=X(r[0]+gran*30000),up=r[4]>=r[1];g.strokeStyle=g.fillStyle=up?'#84cc16':'#f43f5e';g.beginPath();g.moveTo(x,Y(r[2]));g.lineTo(x,Y(r[3]));g.stroke();const y1=Y(Math.max(r[1],r[4])),y2=Y(Math.min(r[1],r[4]));g.fillRect(x-cw/2,y1,cw,Math.max(1,y2-y1))}
+ // coin now
+ const yS=Y(S);g.setLineDash([2,3]);g.strokeStyle='#22d3ee';g.beginPath();g.moveTo(PL,yS);g.lineTo(PL+pw,yS);g.stroke();g.setLineDash([]);
+ let ty=yS;for(const y of kY)if(Math.abs(ty-y)<14)ty=y+(yS>=y?14:-14);tag(g,PL+pw,clamp(ty,T1+7,B1-7),axP(S),'#22d3ee','#0b0f14');
+ // now + close + settlement window
+ g.strokeStyle='rgba(233,238,246,.35)';g.setLineDash([1,3]);g.beginPath();g.moveTo(X(now),T1);g.lineTo(X(now),B3);g.stroke();g.setLineDash([]);
+ if(m){const xc=X(m.close),xa=X(m.close-(m.A||0)*1000);g.fillStyle='rgba(251,191,36,.22)';g.fillRect(xa,T1,Math.max(1.5,xc-xa),B3-T1);g.strokeStyle='#fbbf24';g.beginPath();g.moveTo(xc,T1);g.lineTo(xc,B3);g.stroke();g.fillStyle='#fbbf24';g.textAlign='right';g.fillText('close '+etT(m.close),xc-4,T1+8);g.textAlign='left'}
+ // paper entries
+ const tr=m?trades().filter(r=>r.id===m.id):[];const pxAt=t=>{const r=C.find(r=>t>=r[0]&&t<r[0]+gran*60000);return r?r[4]:null};
+ for(const r of tr){const x=X(r.t),y=Y(pxAt(r.t)??S),yes=r.sd==='YES';g.fillStyle=yes?'#a3e635':'#fb7185';g.beginPath();if(yes){g.moveTo(x,y+4);g.lineTo(x-6,y+15);g.lineTo(x+6,y+15)}else{g.moveTo(x,y-4);g.lineTo(x-6,y-15);g.lineTo(x+6,y-15)}g.fill()}
+ // odds pane
+ g.strokeStyle='#1a2130';for(const p of[0,.25,.5,.75,1]){const y=Yp(p);g.beginPath();g.moveTo(PL,y);g.lineTo(PL+pw,y);g.stroke();g.fillStyle='#6f7b8f';g.fillText(Math.round(p*100)+'%',PL+pw+4,y)}
+ const h=m?(HIST.get(m.id)||[]).filter(p=>p.t>=x0):[];
+ if(m){const w=WIN[m.tf];if(w){const xa=X(m.close-w[1]*1000),xb=X(m.close-w[0]*1000);g.fillStyle='rgba(163,230,53,.08)';g.fillRect(xa,T2,xb-xa,B2-T2);g.fillRect(xa,T3,xb-xa,B3-T3)}
+  const hb=h.filter(p=>p.b>0&&p.a>0&&p.a<1&&p.a>=p.b);if(hb.length>1){g.beginPath();hb.forEach((p,i)=>i?g.lineTo(X(p.t),Yp(p.a)):g.moveTo(X(p.t),Yp(p.a)));for(let i=hb.length-1;i>=0;i--)g.lineTo(X(hb[i].t),Yp(hb[i].b));g.closePath();g.fillStyle='rgba(34,211,238,.18)';g.fill()}
+  const line=(k,col,wd)=>{const pts=h.filter(p=>p[k]!=null);if(!pts.length)return;g.strokeStyle=col;g.lineWidth=wd;g.beginPath();pts.forEach((p,i)=>i?g.lineTo(X(p.t),Yp(p[k])):g.moveTo(X(p.t),Yp(p[k])));if(pts.length===1)g.lineTo(X(pts[0].t)+2,Yp(pts[0][k]));g.stroke();g.lineWidth=1};
+  line('mid','#22d3ee',1.6);line('P','#a78bfa',1.6);line('q','#e9eef6',1.2);
+  for(const r of LED){if(r.k!=='c'||r.id!==m.id||r.mid==null||r.t<x0)continue;g.strokeStyle='#e9eef6';g.beginPath();g.arc(X(r.t),Yp(r.mid),3,0,7);g.stroke()}
+  for(const r of tr){const x=X(r.t);g.strokeStyle=r.sd==='YES'?'#a3e635':'#fb7185';g.beginPath();g.moveTo(x,T2);g.lineTo(x,B3);g.stroke()}}
+ g.fillStyle='#22d3ee';g.fillText('market',PL+5,T2+7);g.fillStyle='#a78bfa';g.fillText('model',PL+52,T2+7);g.fillStyle='#e9eef6';g.fillText('fair',PL+94,T2+7);
+ if(m&&!h.length){g.fillStyle='#8a97ab';g.fillText('odds history starts now (builds while the app is open)',PL+5,(T2+B2)/2)}
+ // edge pane
+ const he=h.filter(p=>p.e!=null);const em=Math.min(.15,Math.max(.05,...he.map(p=>Math.abs(p.e))));const Ye=e=>(T3+B3)/2-clamp(e,-em,em)/em*(B3-T3)/2;
+ g.strokeStyle='#2a3444';g.beginPath();g.moveTo(PL,Ye(0));g.lineTo(PL+pw,Ye(0));g.stroke();g.fillStyle='#6f7b8f';g.fillText('0¢',PL+pw+4,Ye(0));
+ const bar=cfg.minEdge;g.setLineDash([4,3]);g.strokeStyle='rgba(163,230,53,.7)';g.beginPath();g.moveTo(PL,Ye(bar));g.lineTo(PL+pw,Ye(bar));g.stroke();g.setLineDash([]);g.fillStyle='#a3e635';g.fillText('+'+(bar*100).toFixed(1).replace('.0','')+'¢ bar',PL+pw+4,Ye(bar));
+ g.lineWidth=1.6;for(let i=1;i<he.length;i++){const p0=he[i-1],p1=he[i];g.strokeStyle=p1.e>=bar?'#a3e635':p1.e>=0?'#fbbf24':'#fb7185';g.beginPath();g.moveTo(X(p0.t),Ye(p0.e));g.lineTo(X(p1.t),Ye(p1.e));g.stroke()}g.lineWidth=1;
+ g.fillStyle='#8a97ab';g.fillText('best edge after fees',PL+5,T3+7);
+ // tap / hover readout
+ if(CH.hx!=null&&now-CH.ht<8000){const x=clamp(CH.hx,PL,PL+pw),t=x0+(x-PL)/pw*(x1-x0);g.strokeStyle='rgba(233,238,246,.55)';g.beginPath();g.moveTo(x,T1);g.lineTo(x,B3);g.stroke();
+  const ln=[etT(t)];
+  if(t<=now){const c=C.find(r=>t>=r[0]&&t<r[0]+gran*60000);if(c)ln.push(`O ${axP(c[1])}  H ${axP(c[2])}`,`L ${axP(c[3])}  C ${axP(c[4])}`);
+   const hp=h.reduce((b,p)=>!b||Math.abs(p.t-t)<Math.abs(b.t-t)?p:b,null);if(hp&&Math.abs(hp.t-t)<90000)ln.push(`market ${hp.mid!=null?pctS(hp.mid):'–'}  model ${pctS(hp.P)}`,`fair ${hp.q!=null?pctS(hp.q):'–'}  edge ${hp.e!=null?(hp.e>=0?'+':'')+c1(hp.e):'–'}`)}
+  else if(cone){if(t>m.close)ln[0]=etT(m.close)+' (close)';const sd=cone[clamp(Math.round((Math.min(t,m.close)-now)/fut*(cone.length-1)),0,cone.length-1)][1];ln.push(`±1σ ${axP(S*Math.exp(-sd))}–${axP(S*Math.exp(sd))}`,`±2σ ${axP(S*Math.exp(-2*sd))}–${axP(S*Math.exp(2*sd))}`)}
+  const bw=Math.max(...ln.map(s=>g.measureText(s).width))+12,bh=ln.length*13+8;let bx=x+8;if(bx+bw>W-2)bx=x-8-bw;
+  g.fillStyle='rgba(10,13,18,.94)';g.fillRect(bx,T1+4,bw,bh);g.strokeStyle='#2a3444';g.strokeRect(bx,T1+4,bw,bh);g.fillStyle='#e9eef6';ln.forEach((s,i)=>g.fillText(s,bx+6,T1+12+i*13))}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-chart],[data-cc],[data-ctf]');if(!b)return;
+ if(b.dataset.chart){const m=MK.get(b.dataset.chart);if(m){CH.a=m.asset;CH.id=m.id;CH.prev={v:m.v,tf:m.tf,type:m.type};tab('ch')}}
+ else if(b.dataset.cc){CH.a=b.dataset.cc;CH.id=null;CH.prev=null;drawChart()}else if(b.dataset.ctf){CH.tf=b.dataset.ctf;drawChart()}});
+$('#chSel').onchange=e=>{CH.id=e.target.value;const m=MK.get(CH.id);if(m)CH.prev={v:m.v,tf:m.tf,type:m.type};drawChart()};
+(()=>{const cv=$('#chCv');const hv=e=>{const r=cv.getBoundingClientRect();CH.hx=e.clientX-r.left;CH.ht=Date.now();drawChart()};
+ cv.addEventListener('pointerdown',hv);cv.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||e.buttons)hv(e)});cv.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){CH.hx=null;drawChart()}})})();
+window.addEventListener('resize',()=>drawChart());
+
 /* ================= tabs, loops, boot ================= */
 function tab(t){$$('main>section').forEach(s=>s.hidden=s.id!=='t-'+t);$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
- if(t==='led'){computeGate();renderLed()}if(t==='man')renderMan();if(t==='set')loadSettings();try{history.replaceState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
+ if(t==='led'){computeGate();renderLed()}if(t==='man')renderMan();if(t==='set')loadSettings();if(t==='ch'){CH.ck='';CH.opts='';drawChart()}try{history.replaceState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
 $$('nav button').forEach(b=>b.onclick=()=>tab(b.dataset.t));
 let running=true;
 async function loop(fn,ms){for(;;){if(running&&!document.hidden){try{await fn()}catch(e){}}await sleep(ms)}}
@@ -634,7 +767,7 @@ loadMan();renderFilters();
  loop(async()=>{for(const a of act()){await loadVol(a).catch(()=>{});await sleep(300)}},60000);
  loop(async()=>{for(const a of act())if(!VOL[a]){await loadVol(a).catch(()=>{});await sleep(800)}},5000);loop(loadIV,300000);
  loop(async()=>{await resolveAll();computeGate()},60000);loop(async()=>render(),2000)})();
-try{const h=location.hash.slice(1);if(['sig','man','led','bt','set','guide'].includes(h))tab(h)}catch(e){}
+try{const h=location.hash.slice(1);if(['sig','ch','man','led','bt','set','guide'].includes(h))tab(h)}catch(e){}
 try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
 </script>
 </body></html>
