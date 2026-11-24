@@ -61,6 +61,7 @@ pre{white-space:pre-wrap;word-break:break-all;background:#0a0d12;border-radius:9
 .cbtn{background:none;border:1px solid var(--line);border-radius:8px;color:var(--ink);min-height:30px;padding:0 7px;margin-left:6px;cursor:pointer;font-size:14px;vertical-align:middle}
 .lg{font:11px/1.65 var(--mono);color:var(--ink2)}
 nav button{font-size:9.5px;min-width:0;white-space:nowrap}
+.fav{border-color:rgba(251,191,36,.45)}.fav h2{color:var(--amb,#fbbf24)}.frow{display:flex;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}.frow:first-of-type{border-top:0}.fbad{font:700 10.5px var(--mono);padding:3px 6px;border-radius:6px;white-space:nowrap}.fbad.go{background:#a3e635;color:#0b0f14}.fbad.wt{background:#1a2130;color:#8a97ab}.fbad.in{background:#22d3ee;color:#0b0f14}
 </style></head><body>
 <div class="banner" id="banner" hidden>Preview mode: live feeds may be blocked here. Everything works once it's on GitHub Pages.</div>
 <header>
@@ -74,6 +75,7 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
  <div class="kpis" style="margin-top:6px"><div class="kpi"><span>Paper bank</span><b id="kBank">$0</b></div><div class="kpi"><span>Today</span><b id="kDay">$0</b></div><div class="kpi"><span>Open</span><b id="kOpen">0</b></div></div>
  <div id="evid"></div>
  <div id="kalshiNote"></div>
+ <div id="favBox"></div>
  <div class="filters" id="filt"></div>
  <div id="sumLine" class="muted" style="margin:6px 2px"></div>
  <div id="list"></div>
@@ -111,6 +113,7 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
 
 <!-- LEDGER -->
 <section id="t-led" hidden>
+ <div class="card fav" id="favSum"></div>
  <div class="card"><h2>Calibration: does the model beat the market?</h2>
   <div class="muted">Every market gets logged at fixed checkpoints (NO TRADE calls too) and graded when it settles. "Δ Brier" below 0 means the fair value beat the market price. A venue/timeframe only earns real <b class="ok">ENTRY</b> calls after 500+ graded checkpoints with the whole 90% confidence range below zero.</div>
   <div id="calTable"></div>
@@ -158,6 +161,10 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
    <div><label>Basis Kalshi (bp)</label><input data-k="bBrti" inputmode="decimal"></div><div><label>Basis Poly (bp)</label><input data-k="bCl" inputmode="decimal"></div><div><label>Event vol ×</label><input data-k="evMult" inputmode="decimal"></div><div><label>Volatility multiplier</label><input data-k="vk" inputmode="decimal"></div></div>
   <label>Scheduled events (CPI, jobs, FOMC…): times when volatility spikes</label>
   <div class="row"><input type="datetime-local" id="evIn" style="flex:1"><button class="btn sm" id="evAdd">Add</button></div><div id="evList" class="muted"></div></div>
+ <div class="card fav"><h2>⭐ Favorites strategy (paper test)</h2>
+  <div class="muted">Paper-buys the 90–97¢ side of Kalshi hourly BTC/ETH "above" markets under the tested rule (see Guide). It never places real orders.</div>
+  <label class="chk"><input type="checkbox" data-k="favOn"> Run the favorites paper test</label>
+  <div class="g3"><div><label>Paper $ per bet</label><input data-k="favStake" inputmode="decimal"></div><div><label>Sides</label><select data-k="favSide"><option value="auto">Tested default</option><option value="NO">NO side only</option><option value="both">Both sides</option></select></div></div></div>
  <div class="card"><h2>Fees (edit if venues change them)</h2>
   <div class="g3"><div><label>Kalshi taker rate</label><input data-k="kFee" inputmode="decimal"></div><div><label>Kalshi maker rate</label><input data-k="kMaker" inputmode="decimal"></div><div><label>Kalshi rounding</label><select data-k="kRound"><option value="cent">Up to the cent</option><option value="hund">Up to 1/100¢</option></select></div>
    <div><label>Poly US rate</label><input data-k="pusRate" inputmode="decimal"></div><div><label>Maker pick-off haircut (¢)</label><input data-k="haircut" data-pct="1" inputmode="decimal"></div></div>
@@ -171,6 +178,9 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
   <p class="muted">So Fairline is a <b>fair-value calculator plus a lie detector</b>. It prices every contract from how much the coin is likely to move before close, including the 60-second settlement averaging, volatility by time of day, fat tails and options-market volatility. It blends that with the market price, subtracts the exact fees, and only flags an entry when what's left clears a safety margin. Expect NO TRADE on almost everything. If it says TRADE often, something is wrong.</p>
   <h3>How to read a card</h3>
   <p class="muted"><b>Market</b> = the venue's price. <b>Model</b> = pure math probability. <b>Fair</b> = blended fair value (mostly market, a little model). <b>Edge</b> = fair value minus what you'd pay including fees.<br><b class="ok">ENTRY</b> = passed every rule and this venue/timeframe has proven calibration. <b class="am">PAPER ENTRY</b> = passed every rule but isn't proven yet, so it's logged only. <b class="cy">REF</b> = Polymarket international (not for US users, tracked for learning only).</p>
+  <h3>⭐ Favorites (paper test)</h3>
+  <p class="muted">Why it exists: in a month of Kalshi hourly data, contracts bought at 15¢ or less lost 23–95% of the money paid, while 80¢+ contracts were about break-even. Cheap contracts are overpriced because people buy them as lottery tickets. Expensive ones win slightly more often than their price says, but Kalshi's fee eats most of that. Filtering to the conditions where favorites did best (1¢ spread, 90–97¢, 6–30 min left, price not moving toward the strike; BTC NO side only) gave about +1% per bet (about $1 on a $100 bet) in the two months used to design it (Sep 24–Nov 23), on both coins. It loses roughly 1 bet in 30, and one loss wipes out about 20 wins.</p>
+  <p class="muted">This is a forward test, not a proven edge. Extra fees kill it: trading through an app that adds $0.01 per contract (about 1% at 95¢) erases the whole margin, so it only makes sense on Kalshi directly at its standard fee.</p>
   <h3>The Chart tab</h3>
   <p class="muted">Live candles with Fairline's numbers drawn on them: the strike, the coin price now, the green cone (where our volatility model expects the coin to settle), the close and its averaging window, and your paper entries. Below that are the odds over time (market vs model vs fair) and the edge after fees vs the entry bar. Tap 📈 on any signal card to chart that market. The candles and cone are not a buy/sell signal on their own. Only the edge line clearing the bar, with every other rule passing, is.</p>
   <h3>The rules (all must pass)</h3>
@@ -212,7 +222,7 @@ let toastT=null;function toast(msg){let t=$('.toast');if(!t){t=document.createEl
 const DEF={bank:500,worker:'',assets:{BTC:true,ETH:true,SOL:false,XRP:false},showPoly:true,showKalshi:true,
  kFee:0.07,kMaker:0.0175,kRound:'cent',pusRate:0.095,mode:'taker',haircut:0.015,
  minEdge:0.02,lsEdge:0.015,lsPct:0.30,maxSpread:0.03,maxDiv:0.20,wm:0.25,wivShort:0.2,wivLong:0.4,bBrti:2,bCl:3,evMult:4,
- kelly:0.25,cap:0.02,corrCap:0.05,maxOpen:3,dayStop:0.06,events:[],vk:1};
+ kelly:0.25,cap:0.02,corrCap:0.05,maxOpen:3,dayStop:0.06,events:[],vk:1,favOn:true,favStake:100,favSide:'auto'};
 let cfg={...DEF,...store.get('fl.cfg',{})};cfg.assets={...DEF.assets,...(cfg.assets||{})};
 const saveCfg=()=>store.set('fl.cfg',cfg);
 const AS={BTC:{cb:'BTC-USD',gm:'btcusd',cc:'BTC_USD',dc:'BTC',dp:'BTC-',pm:'btc',kq:'KXBTC15M',kd:'KXBTCD',kr:'KXBTC'},
@@ -349,7 +359,9 @@ async function loadKH(){if(!cfg.worker||!cfg.showKalshi)return;const now=Date.no
    const evs=(d.events||[]).map(e=>({t:e.event_ticker,close:Date.parse(e.strike_date)})).filter(e=>e.close>now&&e.close-now<=65*60000).sort((x,y)=>x.close-y.close);ev=KEV[ser]=evs[0]||{t:null,close:now+60000}}
   if(!ev.t)continue;const d=await kget(`/markets?event_ticker=${ev.t}&limit=200`);
   const ms=(d.markets||[]).map(m=>({m,mid:(+m.yes_bid_dollars+ +m.yes_ask_dollars)/2})).filter(x=>+x.m.yes_bid_dollars>0&&+x.m.yes_ask_dollars<1&&+x.m.yes_ask_dollars-(+x.m.yes_bid_dollars)<=0.10&&x.mid>=0.04&&x.mid<=0.96).sort((x,y)=>Math.abs(x.mid-.5)-Math.abs(y.mid-.5)).slice(0,6);
-  const keep=new Set(ms.map(x=>'K:'+x.m.ticker));for(const x of ms)kSet(x.m,a,'1h',kind,now);
+  const fz=kind==='above'&&FAVA[a]&&cfg.favOn?(d.markets||[]).filter(m=>{const b=+m.yes_bid_dollars,y=+m.yes_ask_dollars;return b>0&&y<1&&y-b<=0.0301&&((y>=0.88&&y<=0.98)||(b>=0.02&&b<=0.12))}).filter(m=>!ms.some(x=>x.m.ticker===m.ticker)).slice(0,12):[];
+  const keep=new Set([...ms.map(x=>'K:'+x.m.ticker),...fz.map(m=>'K:'+m.ticker)]);for(const x of ms){kSet(x.m,a,'1h',kind,now);const z=MK.get('K:'+x.m.ticker);if(z)z.favOnly=false}
+  for(const m of fz){kSet(m,a,'1h',kind,now);const z=MK.get('K:'+m.ticker);if(z)z.favOnly=true}
   for(const[id,x]of MK)if(x.v==='K'&&x.series===ser&&!keep.has(id))MK.delete(id)}catch(e){}}}
 const KDQ=new Set();
 async function kDepth(id){if(KDQ.has(id))return;KDQ.add(id);try{const m0=MK.get(id);if(!m0)return;const d=await kget(`/markets/${m0.ticker}/orderbook?depth=5`);const m=MK.get(id);if(!m)return;const ob=d.orderbook_fp||{};
@@ -365,11 +377,11 @@ const saveMan=()=>{MAN=[...MK.values()].filter(m=>m.man);store.set('fl.man',MAN)
 let LED=store.get('fl.led',[]);const LOGGED=new Set(LED.filter(r=>r.k==='c').map(r=>r.id+'@'+r.cp));
 let ledDirty=false;const saveLed=()=>{ledDirty=true};
 setInterval(()=>{if(!ledDirty)return;ledDirty=false;if(LED.length>15000){let drop=LED.length-14000;LED=LED.filter(r=>{if(drop>0&&r.k==='c'&&r.o!=null){drop--;return false}return true})}store.set('fl.led',LED)},3000);
-const trades=()=>LED.filter(r=>r.k==='t');
-const bankroll=()=>cfg.bank+trades().filter(r=>r.pnl!=null).reduce((s,r)=>s+r.pnl,0);
-const todayPnl=()=>{const d=etDay(Date.now());return trades().filter(r=>r.pnl!=null&&etDay(r.cl)===d).reduce((s,r)=>s+r.pnl,0)};
-function lossStreak(){const t=trades().filter(r=>r.pnl!=null).sort((x,y)=>y.cl-x.cl);let n=0;for(const r of t){if(r.pnl<0)n++;else break}return n}
-function riskCheck(m,cost){const open=trades().filter(r=>r.o==null);
+const trades=()=>LED.filter(r=>r.k==='t');const mtr=()=>trades().filter(r=>r.strat!=='fav');const favT=()=>trades().filter(r=>r.strat==='fav');
+const bankroll=()=>cfg.bank+mtr().filter(r=>r.pnl!=null).reduce((s,r)=>s+r.pnl,0);
+const todayPnl=()=>{const d=etDay(Date.now());return mtr().filter(r=>r.pnl!=null&&etDay(r.cl)===d).reduce((s,r)=>s+r.pnl,0)};
+function lossStreak(){const t=mtr().filter(r=>r.pnl!=null).sort((x,y)=>y.cl-x.cl);let n=0;for(const r of t){if(r.pnl<0)n++;else break}return n}
+function riskCheck(m,cost){const open=mtr().filter(r=>r.o==null);
  if(open.length>=cfg.maxOpen)return`max ${cfg.maxOpen} open positions`;
  const hr=Math.floor(m.close/3600000);const corr=open.filter(r=>Math.floor(r.cl/3600000)===hr).reduce((s,r)=>s+r.cost*r.C,0);
  if(corr+cost>cfg.corrCap*bankroll())return`same-hour exposure cap (${Math.round(cfg.corrCap*100)}%)`;
@@ -446,9 +458,9 @@ const FILTERS=[['all','All'],['entry','Entries'],['15m','15m'],['1h','1h'],['4h'
 function renderFilters(){$('#filt').innerHTML=FILTERS.filter(([k])=>!AS[k]||cfg.assets[k]).map(([k,l])=>`<button data-f="${k}" class="${FILT===k?'on':''}">${l}</button>`).join('');$$('#filt button').forEach(b=>b.onclick=()=>{FILT=b.dataset.f;renderFilters();render()})}
 const callCls=c=>c==='ENTRY'?'ENTRY':c==='PAPER ENTRY'||c==='HOLDING'?'PAPER':c==='REF ENTRY'?'REF':c==='WAIT'?'WAIT':'NO';
 let LAST=[];
-function render(){const now=Date.now();const res=[];
- for(const m of MK.values()){if(!cfg.assets[m.asset]||m.close<=now-5000)continue;const R=evaluate(m,now);res.push(R);cpLog(R,now);autoEnter(R);histPush(R,now)}
- LAST=res;renderHeader();
+function render(){const now=Date.now();let res=[];
+ for(const m of MK.values()){if(!cfg.assets[m.asset]||m.close<=now-5000)continue;const R=evaluate(m,now);res.push(R);if(!m.favOnly){cpLog(R,now);autoEnter(R)}histPush(R,now)}
+ LAST=res;renderHeader();try{favRun(now)}catch(e){}const resAll=res;res=res.filter(R=>!R.m.favOnly);
  const f=FILT;const shown=res.filter(R=>f==='all'||(f==='entry'?/ENTRY/.test(R.call):TFS[f]?R.m.tf===f:AS[f]?R.m.asset===f:R.m.v===f||(f==='P'&&R.m.v==='U')));
  const ord={ENTRY:0,'PAPER ENTRY':1,'REF ENTRY':2,HOLDING:3,'NO TRADE':4,WAIT:5};const bad=R=>R.reasons.some(x=>/stale|too far apart|display only/.test(x));shown.sort((a,b)=>(ord[a.call]-ord[b.call])||(bad(a)-bad(b))||(a.reasons.length-b.reasons.length)||((b.edge??-9)-(a.edge??-9)));
  const nE=res.filter(R=>/ENTRY/.test(R.call)).length;const rc={};res.filter(R=>R.call==='NO TRADE').forEach(R=>{const k=R.reason.split(/[\d(:]/)[0].replace(/[\s·-]+$/,'').trim();rc[k]=(rc[k]||0)+1});
@@ -478,7 +490,7 @@ function renderHeader(){const now=Date.now();renderEvid();
   return `<div class="chip"><i>${a}</i><b>${p?fmtP(p):'…'}</b><i>1h ±${sd?(sd*100).toFixed(2)+'%':'…'} · IV ${IV[a]?IV[a].iv.toFixed(0)+'%':'–'}</i><br><i>${nSrc(a)} feeds · ${spotAge(a)<1e11?Math.round(spotAge(a)/1000)+'s':'–'}</i></div>`}).join('');
  const b=bankroll();$('#kBank').textContent=usd(b);$('#kBank').style.color=b>=cfg.bank?'var(--lime)':'var(--cor)';
  const d=todayPnl();$('#kDay').textContent=(d>=0?'+':'')+usd(d);$('#kDay').style.color=d>=0?'var(--lime)':'var(--cor)';
- $('#kOpen').textContent=trades().filter(r=>r.o==null).length;
+ $('#kOpen').textContent=mtr().filter(r=>r.o==null).length;
  $('#kalshiNote').innerHTML=!cfg.worker&&cfg.showKalshi?`<div class="warn">Kalshi markets (the ones you can trade) need the free proxy. <a href="#" id="goSet">Set it up in Settings</a> (10 min), or type Kalshi prices in <b>Manual</b>. Polymarket intl is shown as reference.</div>`:'';
  const g=$('#goSet');if(g)g.onclick=e=>{e.preventDefault();tab('set')}}
 
@@ -508,7 +520,7 @@ function relChart(rows){const cv=$('#rel'),x=cv.getContext('2d');const W=cv.widt
 function renderLed(){const rows=calRows();const seg=[['K','Kalshi'],['P','Poly']].flatMap(([v,vn])=>['15m','1h','4h'].map(tf=>({v,vn,tf,g:GATE[v+'|'+tf]}))).filter(x=>x.g);
  $('#calTable').innerHTML=seg.length?`<table><tr><th>Venue</th><th>n</th><th>Brier fair</th><th>Brier mkt</th><th>Δ (90% CI)</th><th>Gate</th></tr>${seg.map(x=>`<tr><td>${x.vn} ${x.tf}</td><td>${x.g.n}</td><td>${x.g.bq.toFixed(4)}</td><td>${x.g.bm.toFixed(4)}</td><td class="${x.g.bq<x.g.bm?'ok':'bad'}">${(x.g.bq-x.g.bm>=0?'+':'')+(x.g.bq-x.g.bm).toFixed(4)}${x.g.ci?`<br><span class="muted">${x.g.ci[0].toFixed(4)} to ${x.g.ci[1].toFixed(4)}</span>`:''}</td><td>${x.g.pass?'<b class="ok">PASS</b>':`<span class="am">${x.g.n<500?(500-x.g.n)+' to go':'not proven'}</span>`}</td></tr>`).join('')}</table>`:'<p class="muted">No graded checkpoints yet. Leave the Signals tab open; markets are logged at checkpoints and graded after they settle.</p>';
  relChart(rows);
- const T=trades();const res=T.filter(r=>r.pnl!=null);const w=res.filter(r=>r.pnl>0).length;const pnl=res.reduce((s,r)=>s+r.pnl,0),cost=res.reduce((s,r)=>s+r.cost*r.C,0);
+ const T=mtr();const res=T.filter(r=>r.pnl!=null);const w=res.filter(r=>r.pnl>0).length;favLedger();const pnl=res.reduce((s,r)=>s+r.pnl,0),cost=res.reduce((s,r)=>s+r.cost*r.C,0);
  const grp=k=>{const g={};for(const r of res){const key=k(r);(g[key]=g[key]||[]).push(r)}return Object.entries(g).map(([key,rs])=>`<tr><td>${key}</td><td>${rs.length}</td><td>${Math.round(rs.filter(r=>r.pnl>0).length/rs.length*100)}%</td><td class="${rs.reduce((s,r)=>s+r.pnl,0)>=0?'ok':'bad'}">${usd(rs.reduce((s,r)=>s+r.pnl,0))}</td><td>${(rs.reduce((s,r)=>s+r.pnl,0)/rs.reduce((s,r)=>s+r.cost*r.C,0)*100).toFixed(1)}%</td></tr>`).join('')};
  const bucketP=r=>r.px<.1?'<10¢':r.px<.3?'10–30¢':r.px<.7?'30–70¢':r.px<.9?'70–90¢':'>90¢';
  $('#trSum').innerHTML=`<div class="kpis"><div class="kpi"><span>Graded</span><b>${res.length}</b></div><div class="kpi"><span>Win rate</span><b>${res.length?Math.round(w/res.length*100)+'%':'–'}</b></div><div class="kpi"><span>ROI</span><b class="${pnl>=0?'ok':'bad'}">${cost?(pnl/cost*100).toFixed(1)+'%':'–'}</b></div></div>
@@ -521,7 +533,7 @@ $('#lCsv').onclick=()=>{const cols=['k','t','v','a','tf','sl','ds','cl','cp','sd
  const body=LED.map(r=>cols.map(c=>{let v=r[c];if((c==='t'||c==='cl')&&v)v=new Date(v).toISOString();if(c==='k')v=v==='t'?'paper_trade':'checkpoint';return'"'+String(v??'').replace(/"/g,'""')+'"'}).join(','));
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([head+'\n'+body.join('\n')],{type:'text/csv'}));a.download='fairline-ledger.csv';a.click()};
 $('#lReset').onclick=()=>{if(!confirm('Delete every logged checkpoint and paper trade?'))return;LED=[];LOGGED.clear();store.set('fl.led',[]);computeGate();renderLed()};
-$('#lMC').onclick=()=>{const T=trades().filter(r=>r.pnl!=null).map(r=>({day:etDay(r.cl),qs:r.qs??(r.sd==='YES'?r.q:1-r.q),cost:r.cost,win:(r.sd==='YES'?r.o:1-r.o)}));$('#lMCout').innerHTML=mcHTML(T)};
+$('#lMC').onclick=()=>{const T=mtr().filter(r=>r.pnl!=null).map(r=>({day:etDay(r.cl),qs:r.qs??(r.sd==='YES'?r.q:1-r.q),cost:r.cost,win:(r.sd==='YES'?r.o:1-r.o)}));$('#lMCout').innerHTML=mcHTML(T)};
 
 /* ================= Monte Carlo ================= */
 function monteCarlo(T,stress){const days={};for(const t of T)(days[t.day]=days[t.day]||[]).push(t);const D=Object.values(days);const P=10000,N=500;const ends=[];let dd30=0,below=0;
@@ -639,6 +651,45 @@ $('#evAdd').onclick=()=>{const v=$('#evIn').value;if(!v)return;const t=new Date(
 $('#sSave').onclick=()=>{readSettings();toast('Saved');boot(true)};
 $('#wTest').onclick=async()=>{readSettings();$('#wMsg').textContent='Testing…';if(!cfg.worker){$('#wMsg').textContent='Paste the Worker URL first.';return}
  try{const d=await kget('/exchange/status');$('#wMsg').innerHTML='<span class="ok">✓ Kalshi reachable'+(d.trading_active===false?' (trading paused right now)':'')+'</span>';boot(true)}catch(e){$('#wMsg').innerHTML='<span class="bad">✗ '+esc(e.message)+'. Check the URL and that the code is deployed.</span>'}};
+
+/* ================= favorites (paper test) ================= */
+const FAVA={BTC:1,ETH:1};const FAVSIDE={BTC:'NO',ETH:'both'};   // tested defaults
+const favSides=a=>cfg.favSide==='NO'?['NO']:cfg.favSide==='both'?['YES','NO']:FAVSIDE[a]==='NO'?['NO']:['YES','NO'];
+function favMom(a,side,now){const s=SP[a],c=VOL[a]?.c;if(!s||!c||c.length<61)return null;const S=comp(a);let old=null;for(const x of s.buf){if(x[0]<=now-300000)old=x;else break}
+ if(!S||!old||now-old[0]>420000)return null;const r=[];for(let i=1;i<c.length;i++)if(c[i][4]>0&&c[i-1][4]>0)r.push(Math.log(c[i][4]/c[i-1][4]));if(r.length<60)return null;
+ const rms=v=>Math.sqrt(v.reduce((t,x)=>t+x*x,0)/v.length);const s60=rms(r.slice(-60)),sL=rms(r),s1=Math.sqrt(.5*s60*s60+.5*sL*sL);if(!(s1>0))return null;
+ return (side==='YES'?1:-1)*Math.log(S/old[1])/(s1*Math.sqrt(5))}
+function favEval(m,now){if(!cfg.favOn||m.v!=='K'||m.man||m.tf!=='1h'||m.type!=='above'||!FAVA[m.asset])return null;const b=m.yesBid,y=m.yesAsk;if(!(b>0&&y>0&&y<1))return null;
+ const sd=y>=0.88?'YES':(1-b)>=0.88?'NO':null;if(!sd)return null;const cost=Math.round((sd==='YES'?y:1-b)*100)/100;if(cost>0.98)return null;
+ const tl=(m.close-now)/60000,spr=Math.round((y-b)*100),why=[];
+ if(!favSides(m.asset).includes(sd))why.push(`${m.asset}: ${sd} side not in the tested rule`);
+ if(cost<0.90||cost>0.97)why.push(`price ${c1(cost)} (needs 90–97¢)`);if(spr!==1)why.push(`spread ${spr}¢ (needs 1¢)`);
+ if(tl>30)why.push(`window opens at 30 min left`);else if(tl<6)why.push('under 6 min left');
+ const mo=favMom(m.asset,sd,now);if(mo==null)why.push('warming up (needs 5 min of prices)');else if(mo<-0.5)why.push('price moving toward the strike');
+ const held=favT().find(r=>r.id===m.id);return{m,sd,cost,spr,tl,mo,why,ok:!why.length,held}}
+function favEnter(x,now){const m=x.m,C=Math.max(1,Math.floor(cfg.favStake/x.cost)),fee=Math.ceil(cfg.kFee*C*x.cost*(1-x.cost)*100-1e-9)/100/C;
+ LED.push({k:'t',strat:'fav',id:m.id,v:'K',a:m.asset,tf:'1h',sl:m.ticker,cl:m.close,t:now,sd:x.sd,px:x.cost,fee,cost:x.cost+fee,C,q:null,P:null,mid:(m.yesBid+m.yesAsk)/2,e:null,call:'FAV ENTRY',o:null,pnl:null,ds:desc(m)});saveLed();
+ try{navigator.vibrate&&navigator.vibrate([120,60,120])}catch(e){}toast(`⭐ FAV ENTRY (paper): BUY ${x.sd} ${desc(m)} @ ${c1(x.cost)}`)}
+let FAVLAST=[];
+function favRun(now){if(!cfg.favOn){$('#favBox').innerHTML='';return}const C=[];
+ for(const m of MK.values()){if(!cfg.assets[m.asset]||m.close<=now)continue;const x=favEval(m,now);if(x)C.push(x)}
+ for(const a of Object.keys(FAVA)){if(!cfg.assets[a])continue;const ok=C.filter(x=>x.ok&&x.m.asset===a).sort((p,q)=>q.cost-p.cost);if(!ok.length)continue;
+  if(favT().some(r=>r.a===a&&r.cl===ok[0].m.close))continue;favEnter(ok[0],now);ok[0].held=favT().find(r=>r.id===ok[0].m.id)}
+ FAVLAST=C;favBox(C,now)}
+function favStats(){const T=favT().filter(r=>r.pnl!=null);const pnl=T.reduce((t,r)=>t+r.pnl,0),cost=T.reduce((t,r)=>t+r.cost*r.C,0);return{n:T.length,lost:T.filter(r=>r.pnl<0).length,pnl,roi:cost?pnl/cost:null,open:favT().filter(r=>r.o==null).length}}
+function favBox(C,now){const st=favStats();const rows=C.filter(x=>x.held||x.ok||x.why.length<=2).sort((p,q)=>(!!q.held-!!p.held)||(q.ok-p.ok)||(p.why.length-q.why.length)||(p.tl-q.tl)).slice(0,6);
+ const kNote=!cfg.worker||!cfg.showKalshi?'<div class="muted">Needs the Kalshi proxy (Settings) to see Kalshi markets.</div>':'';
+ $('#favBox').innerHTML=`<div class="card fav"><h2>⭐ Favorites (paper test)</h2>
+ <div class="muted">Buy the 90–97¢ side of a Kalshi hourly BTC/ETH "above" market: 1¢ spread, 6–30 min left, price not moving toward the strike. One bet per coin per hour, held to settlement.${FAVSIDE.BTC==='NO'&&cfg.favSide==='auto'?' BTC: NO side only.':''}</div>${kNote}
+ ${rows.length?rows.map(x=>{const m=x.m,b=x.held?'<span class="fbad in">IN</span>':x.ok?'<span class="fbad go">ENTRY</span>':'<span class="fbad wt">WATCH</span>';
+  return `<div class="frow">${b}<div style="flex:1;min-width:0"><b>BUY ${x.sd} · ${esc(desc(m))} @ ${c1(x.cost)}</b><div class="muted">${left(Math.max(0,x.tl*60))} left${x.mo!=null?` · momentum ${Math.abs(x.mo)<0.05?'0.0':(x.mo>0?'+':'')+x.mo.toFixed(1)}σ`:''}${x.held?` · paper ${x.held.C}× @ ${c1(x.held.px)}`:x.why.length?' · '+esc(x.why.join(' · ')):''}</div></div><button class="cbtn" data-chart="${esc(m.id)}" aria-label="Chart">📈</button></div>`}).join(''):`<div class="muted" style="margin-top:6px">No 88–98¢ favorites with tight spreads right now.</div>`}
+ <div class="muted" style="margin-top:6px">Paper results: ${st.n?`${st.n} settled · ${st.lost} lost · <b class="${st.pnl>=0?'ok':'bad'}">${(st.pnl>=0?'+':'')+usd(st.pnl)}</b> · ROI ${(st.roi*100).toFixed(2)}%`:'none settled yet'}${st.open?` · ${st.open} open`:''}</div></div>`}
+function favLedger(){const T=favT(),st=favStats();const cut=T.filter(r=>r.pnl!=null);
+ const byDay={};for(const r of cut){const d=etDay(r.cl);byDay[d]=(byDay[d]||0)+r.pnl}let eq=0,pk=0,dd=0;for(const d of Object.keys(byDay).sort()){eq+=byDay[d];pk=Math.max(pk,eq);dd=Math.max(dd,pk-eq)}
+ $('#favSum').innerHTML=`<h2>⭐ Favorites paper test</h2><div class="muted">Separate from the model strategy above: its own bets, its own P&amp;L. Backtest on the months used to design the rule (Sep 24–Nov 23, one $100 bet per hour): BTC +1.0%/bet, ETH +1.3%/bet, about 3% of bets lost. This live paper record is the real test.</div>
+ <div class="kpis"><div class="kpi"><span>Settled</span><b>${st.n}</b></div><div class="kpi"><span>Lost</span><b>${st.n?st.lost+' ('+Math.round(st.lost/st.n*100)+'%)':'–'}</b></div><div class="kpi"><span>P&amp;L · ROI</span><b class="${st.pnl>=0?'ok':'bad'}">${st.n?(st.pnl>=0?'+':'')+usd(st.pnl)+' · '+(st.roi*100).toFixed(1)+'%':'–'}</b></div></div>
+ ${cut.length?`<div class="muted">Max drawdown ${usd(dd)} · worst day ${usd(Math.min(...Object.values(byDay)))}</div>`:''}
+ ${T.length?T.slice(-25).reverse().map(r=>`<div class="frow"><span class="fbad ${r.pnl==null?'in':r.pnl>=0?'go':'wt'}">${r.pnl==null?'OPEN':r.pnl>=0?'WON':'LOST'}</span><div style="flex:1;min-width:0"><b>${r.sd} · ${esc(r.ds)}</b><div class="muted">${new Date(r.t).toLocaleString()} · ${r.C}× @ ${c1(r.px)}</div></div><div class="tl ${r.pnl==null?'':r.pnl>=0?'ok':'bad'}">${r.pnl==null?'':(r.pnl>=0?'+':'')+usd(r.pnl)}</div></div>`).join(''):'<p class="muted">No favorites bets yet. They show up within the hour once the Kalshi proxy is set.</p>'}`}
 
 /* ================= live chart ================= */
 const HIST=new Map();const CH={a:null,id:null,tf:'1m',hx:null,ht:0,prev:null,opts:'',ck:''};
