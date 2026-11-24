@@ -56,22 +56,36 @@ nav button.on{color:#fff;background:linear-gradient(180deg,rgba(163,230,53,.16),
 .banner{background:#3b2f0b;color:#fde68a;padding:7px 12px;font-size:12px}
 a{color:var(--cyn)}
 pre{white-space:pre-wrap;word-break:break-all;background:#0a0d12;border-radius:9px;padding:8px;font:10.5px/1.45 var(--mono);max-height:260px;overflow:auto}
-#chCv{height:460px;touch-action:pan-y;margin-top:8px}
-#chNums .num b{font-size:13.5px}#chNums{grid-template-columns:repeat(3,1fr)}
 .cbtn{background:none;border:1px solid var(--line);border-radius:8px;color:var(--ink);min-height:30px;padding:0 7px;margin-left:6px;cursor:pointer;font-size:14px;vertical-align:middle}
 .lg{font:11px/1.65 var(--mono);color:var(--ink2)}
 nav button{font-size:9.5px;min-width:0;white-space:nowrap}
 .fav{border-color:rgba(251,191,36,.45)}.fav h2{color:var(--amb,#fbbf24)}.frow{display:flex;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}.frow:first-of-type{border-top:0}.fbad{font:700 10.5px var(--mono);padding:3px 6px;border-radius:6px;white-space:nowrap}.fbad.go{background:#a3e635;color:#0b0f14}.fbad.wt{background:#1a2130;color:#8a97ab}.fbad.in{background:#22d3ee;color:#0b0f14}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.tile{background:#0a0d12;border:1px solid #121821;border-radius:10px;padding:7px 8px;min-width:0}
+.tile span{display:block;font:9.5px var(--mono);color:var(--ink2);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile b{display:block;font:800 14.5px var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.tile i{display:block;font:10.5px/1.3 system-ui;font-style:normal;color:var(--ink2);margin-top:2px}
+.tile.g b{color:var(--lime)}.tile.a b{color:var(--amb)}.tile.r b{color:var(--cor)}.tile.c b{color:var(--cyn)}
+#scCv{height:470px;touch-action:pan-y;margin-top:8px}
+.qrow{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.qbtn{min-height:54px;border-radius:11px;border:1px solid var(--line);background:#0a0d12;color:var(--ink);font:800 14px var(--mono);cursor:pointer;padding:4px}
+.qbtn small{display:block;font:600 10.5px var(--mono);color:var(--ink2);margin-top:2px}
+.qbtn.y{border-color:rgba(163,230,53,.55)}.qbtn.n{border-color:rgba(251,113,133,.55)}.qbtn.on{background:rgba(163,230,53,.10)}
+.ev{font:800 9px var(--mono);padding:2px 6px;border-radius:6px;margin-left:6px;vertical-align:middle;white-space:nowrap}
+.ev.ok{background:rgba(163,230,53,.16);color:var(--lime)}.ev.neg{background:rgba(251,113,133,.16);color:var(--cor)}.ev.new{background:rgba(34,211,238,.14);color:var(--cyn)}.ev.data{background:rgba(251,191,36,.16);color:var(--amb)}.ev.model,.ev.you{background:#1c2430;color:var(--ink2)}
+.lad td{padding:8px 4px}.lad tr[data-lad]{cursor:pointer}.lad tr.on td{background:rgba(34,211,238,.09)}
+.pos{border:1px solid var(--line);border-radius:12px;padding:9px;margin:8px 0;background:#0a0d12}
+@media (max-width:370px){.tiles{grid-template-columns:repeat(2,1fr)}}
 </style></head><body>
 <div class="banner" id="banner" hidden>Preview mode: live feeds may be blocked here. Everything works once it's on GitHub Pages.</div>
 <header>
- <div class="hrow"><div><h1>FAIR<b>LINE</b></h1><div class="sub">fair odds vs market price · NO TRADE by default · paper only</div></div><span class="pill live" id="live">● LIVE</span></div>
+ <div class="hrow"><div><h1>FAIR<b>LINE</b></h1><div class="sub">Kalshi scalping desk · 15m · hourly · daily · paper only</div></div><span class="pill live" id="live">● LIVE</span></div>
  <div class="strip" id="strip"></div>
 </header>
 <main>
 
 <!-- SIGNALS -->
-<section id="t-sig">
+<section id="t-sig" hidden>
  <div class="kpis" style="margin-top:6px"><div class="kpi"><span>Paper bank</span><b id="kBank">$0</b></div><div class="kpi"><span>Today</span><b id="kDay">$0</b></div><div class="kpi"><span>Open</span><b id="kOpen">0</b></div></div>
  <div id="evid"></div>
  <div id="kalshiNote"></div>
@@ -82,17 +96,22 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
  <div id="list"></div>
 </section>
 
-<!-- CHART -->
-<section id="t-ch" hidden>
- <div class="filters" id="chCoins" style="margin-top:6px"></div>
- <select id="chSel" aria-label="Market"></select>
- <div class="nums" id="chNums"></div>
- <canvas id="chCv" aria-label="Live chart"></canvas>
- <div class="call" id="chCall"></div><div class="why" id="chWhy"></div>
- <div class="card lg"><b>Top:</b> live candles (median of 4 exchanges, updates every 2 s) · <span class="am">━ strike</span> · <span class="cy">┅ coin now</span> · <span class="ok">green cone</span> = Fairline's ±1σ / ±2σ range for where the coin settles · <span class="am">amber line</span> = close (shaded = settlement average) · ▲▼ = your paper entries<br>
- <b>Middle:</b> odds over time · <span class="cy">blue</span> = market (band = bid/ask) · <span style="color:var(--vio)">purple</span> = model · white = fair · green shading = entry window · circles = graded checkpoints<br>
- <b>Bottom:</b> best edge after fees vs the dashed entry bar. An entry needs the line above the bar <i>and</i> every other rule to pass.<br>
- Tap the chart for exact values. Odds history builds while the app is open.</div>
+<!-- SCALP -->
+<section id="t-sc">
+ <div class="filters" id="scTf" style="margin-top:6px"></div>
+ <select id="scSel" aria-label="Market"></select>
+ <div id="scHead"></div>
+ <div class="filters" id="scView"></div>
+ <canvas id="scCv" aria-label="Scalp chart"></canvas>
+ <div class="tiles" id="scInd"></div>
+ <div id="scStrat"></div>
+ <div class="card" id="scTix" hidden></div>
+ <div id="scPos"></div>
+ <div id="scLad"></div>
+ <div class="card lg"><b>Coin:</b> candles · <span class="am">┅ strike</span> · <span class="ok">green cone</span> = Fairline's ±1σ / ±2σ range to the close · <span class="am">amber band</span> = 60-second settlement average<br>
+ <b>Contract:</b> mid-price candles · <span class="cy">blue band</span> = bid/ask · white line = Fair · <span class="am">amber dots</span> = Truth · ▲ entries ○ exits · dashed green / red = open target / stop<br>
+ <b>Snap:</b> contract move minus the coin-justified move each minute (dashed = strategy trigger) · <b>Tape:</b> <span class="ok">takers buying this side ↑</span> / <span class="bad">the other side ↓</span> · <span class="cy">line</span> = order-book pressure<br>
+ Tap the chart for exact values. Contract history comes from Kalshi; tape and pressure build while the app is open.</div>
 </section>
 
 <!-- MANUAL -->
@@ -124,6 +143,12 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
   <div class="muted" style="margin-top:4px"><span class="ok">●</span> fair value &nbsp; <span style="color:#8a97ab">●</span> market price &nbsp; dashed = perfect calibration · dot size = count</div></div>
  <div class="card"><h2>Paper trades</h2><div id="trSum"></div><div id="trList"></div>
   <div class="row"><button class="btn alt" id="lCsv">Export CSV</button><button class="btn alt" id="lMC">Monte Carlo on these</button><button class="btn red" id="lReset">Reset ledger</button></div><div id="lMCout"></div></div>
+</section>
+
+<!-- LAB -->
+<section id="t-lab" hidden>
+ <div class="card"><h2>🧪 Strategy Lab</h2><div class="muted" id="labIntro"></div><div class="kpis" id="labK" style="margin-top:8px"></div></div>
+ <div id="labList"></div>
 </section>
 
 <!-- BACKTEST -->
@@ -168,6 +193,12 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
   <label class="chk"><input type="checkbox" data-k="dfOn"> Run the ☀️ Daily Fade paper test (BTC 5pm ladder)</label>
   <label class="chk"><input type="checkbox" data-k="favOn"> Run the ⭐ hourly favorites paper test</label>
   <div class="g3"><div><label>Paper $ per bet</label><input data-k="favStake" inputmode="decimal"></div><div><label>Sides</label><select data-k="favSide"><option value="auto">Tested default</option><option value="NO">NO side only</option><option value="both">Both sides</option></select></div></div></div>
+ <div class="card"><h2>🎯 Scalping desk</h2>
+  <div class="muted">Paper strategies run on every Kalshi BTC/ETH 15m, hourly and daily market the app has loaded while it's open, on screen or not. Nothing is ever sent to Kalshi.</div>
+  <div class="g2"><div><label>Paper $ per strategy bet</label><input data-k="scStake" inputmode="decimal"></div><div></div></div>
+  <label class="chk"><input type="checkbox" data-k="scAlert"> Pop-up + buzz on every strategy entry (otherwise only for the market on screen)</label>
+  <div id="stToggles"></div>
+  <div class="row"><button class="btn alt sm" data-go="man">✍️ Manual price checker</button><button class="btn alt sm" data-go="bt">🧪 Backtester</button></div></div>
  <div class="card"><h2>Fees (edit if venues change them)</h2>
   <div class="g3"><div><label>Kalshi taker rate</label><input data-k="kFee" inputmode="decimal"></div><div><label>Kalshi maker rate</label><input data-k="kMaker" inputmode="decimal"></div><div><label>Kalshi rounding</label><select data-k="kRound"><option value="cent">Up to the cent</option><option value="hund">Up to 1/100¢</option></select></div>
    <div><label>Poly US rate</label><input data-k="pusRate" inputmode="decimal"></div><div><label>Maker pick-off haircut (¢)</label><input data-k="haircut" data-pct="1" inputmode="decimal"></div></div>
@@ -176,6 +207,18 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
 
 <!-- GUIDE -->
 <section id="t-guide" hidden>
+ <div class="card"><h2>🎯 The scalping desk</h2>
+  <p class="muted">The <b>Scalp</b> tab covers Kalshi's BTC and ETH 15-minute, hourly and 5pm daily markets. Pick a timeframe and coin. On hourly and daily, tap a strike in the ladder below the chart. <b>BUY YES / BUY NO</b> loads the scalp ticket.</p>
+  <h3>The chart, top to bottom</h3>
+  <p class="muted"><b>Coin:</b> candles, the strike (amber dashed), Fairline's ±1σ/±2σ cone for where it settles, and the 60-second settlement window. <b>Contract:</b> mid-price candles with the bid/ask band, the white Fair line (model) and amber Truth dots, plus ▲ entries, ○ exits and dashed target/stop lines. <b>Snap:</b> each minute, how far the contract moved beyond what the coin's move justified. <b>Tape:</b> contracts bought by takers on each side, with the cyan order-book pressure line. Tap the chart for exact values; flip YES/NO to see either side's price.</p>
+  <h3>Custom indicators</h3>
+  <p class="muted"><b>Fair:</b> Fairline's model probability. <b>Truth:</b> what a contract at this price with this much time left actually won from Sep 24 to Nov 23 (11,593 fifteen-minute markets, 2,700 hourly ladders and 103 daily ladders, BTC+ETH). It's trend-neutral: BTC fell 28% and ETH 37% in that stretch, which made every NO look great, so Truth averages the YES-side and NO-side results to cancel the trend. The tile shows the cheaper side's edge after the fee. <b>Snap:</b> contract move minus model move over the last minute. <b>Θ:</b> what YES gains or loses per minute if the coin sits still. <b>Δ:</b> how far YES moves for one step in the coin: BTC $25 / $100 / $250 and ETH $1 / $5 / $10 on 15m / hourly / daily. <b>Z:</b> distance to the strike in standard deviations of the move expected before close. <b>Pressure:</b> resting YES bids vs NO bids within 3¢ of the top (−1 to +1). <b>Flow:</b> takers buying YES vs NO over 2 minutes. <b>Heat:</b> the volatility the market's prices imply divided by Fairline's forecast; above 1 means cheap contracts are extra expensive. <b>Touch:</b> how often the sell price reached +5¢ (or 2× for contracts under 15¢) from this price and time left in that history, plus the model's estimate. <b>Momentum:</b> the coin's 5-minute move in σ. <b>Lock:</b> final minute only, how much of the 60-second average is already in and what the rest needs to average.</p>
+  <h3>Strategies (all paper)</h3>
+  <p class="muted">⚖️ <b>Truth Fade</b> buys the side history says is underpriced after the fee, mostly 80–97¢ favorites, held to settlement. 🪃 <b>Snapback</b> fades contracts that outran the coin. 🏃 <b>Catch-up</b> buys contracts that haven't caught up to a coin move. ⚡ <b>Spike Seller</b> is your sell-into-the-spike idea, pure price. 🚀 <b>Breakout</b> rides 5-minute momentum when takers agree. 🔒 <b>Last-Minute Lock</b> buys near-certain outcomes in the final 75 seconds. 🎟️ <b>Lottery</b> is the 1–5¢ play, kept as a control. ⭐ Favorites and ☀️ Daily Fade keep running as before. The exact rules are on each Lab card.</p>
+  <h3>How paper exits are counted</h3>
+  <p class="muted">Entries pay the ask plus Kalshi's taker fee. A target is a resting sell: it counts as filled once the bid reaches it and pays the maker fee from Settings. Stops and time stops sell at the bid and pay the taker fee. Quotes refresh every 3 seconds for both 15-minute markets, the hourly strike nearest 50¢, the market on screen and anything open, so spikes shorter than that are missed. Real fills can be worse: other sellers may be ahead of you at the target.</p>
+  <h3>Honest status</h3>
+  <p class="muted">Only ⭐ Favorites and ☀️ Daily Fade passed a backtest. Truth Fade uses the same price bias with a broader rule. Snapback, Catch-up, Spike Seller, Breakout and Lock are new and untested, and the Lottery control is a known loser. Strategies only run while the app is open on screen. The Lab is the test: give each one 100+ settled bets before trusting it. The free Cloudflare plan allows 100,000 proxy requests a day; the desk uses about 2–3 a second, so roughly 9–14 hours of screen time a day.</p></div>
  <div class="card"><h2>What this is (and isn't)</h2>
   <p class="muted">The research verdict: <b>no public signal reliably beats the market price on 5-minute to 4-hour crypto contracts after fees.</b> Directional accuracy at the open is about 50–53% on every timeframe. A 75% win rate is easy by buying favorites, and it still loses money after fees.</p>
   <p class="muted">So Fairline is a <b>fair-value calculator plus a lie detector</b>. It prices every contract from how much the coin is likely to move before close, including the 60-second settlement averaging, volatility by time of day, fat tails and options-market volatility. It blends that with the market price, subtracts the exact fees, and only flags an entry when what's left clears a safety margin. Expect NO TRADE on almost everything. If it says TRADE often, something is wrong.</p>
@@ -186,8 +229,6 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
   <h3>⭐ Favorites (paper test)</h3>
   <p class="muted">Why it exists: in a month of Kalshi hourly data, contracts bought at 15¢ or less lost 23–95% of the money paid, while 80¢+ contracts were about break-even. Cheap contracts are overpriced because people buy them as lottery tickets. Expensive ones win slightly more often than their price says, but Kalshi's fee eats most of that. Filtering to the conditions where favorites did best (1¢ spread, 90–97¢, 6–30 min left, price not moving toward the strike; BTC NO side only) gave about +1% per bet (about $1 on a $100 bet) in the two months used to design it (Sep 24–Nov 23), on both coins. On a month it never saw (Aug 24–Sep 24, every 4th hour) it made +2.1% per bet on BTC (175 bets, 4 lost) and +1.1% on ETH (163 bets, 6 lost). Hold to settlement: selling early lost money to the spread and a second fee. It loses roughly 1 bet in 30, and one loss wipes out about 20 wins.</p>
   <p class="muted">This is a forward test, not a proven edge. Extra fees kill it: trading through an app that adds $0.01 per contract (about 1% at 95¢) erases the whole margin, so it only makes sense on Kalshi directly at its standard fee.</p>
-  <h3>The Chart tab</h3>
-  <p class="muted">Live candles with Fairline's numbers drawn on them: the strike, the coin price now, the green cone (where our volatility model expects the coin to settle), the close and its averaging window, and your paper entries. Below that are the odds over time (market vs model vs fair) and the edge after fees vs the entry bar. Tap 📈 on any signal card to chart that market. The candles and cone are not a buy/sell signal on their own. Only the edge line clearing the bar, with every other rule passing, is.</p>
   <h3>The rules (all must pass)</h3>
   <p class="muted">Fresh data (spot &lt;5 s) · inside the entry window (15m: 2–12 min left, 1h: 5–50, 4h: 15–200; 5m display only; never the final minute) · spread ≤3¢ · enough size at the price · edge ≥2¢ (or ≥1.5¢ and ≥30% of cost for contracts under 10¢) · model within 20 points of the market · risk caps: ¼ Kelly, max 2% per trade, 5% same-hour, 3 open, −6% daily stop.</p>
   <h3>Your 3–10¢ scalps</h3>
@@ -198,11 +239,10 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
 </main>
 
 <nav>
- <button data-t="sig" class="on"><span>📡</span>Signals</button>
- <button data-t="ch"><span>📈</span>Chart</button>
- <button data-t="man"><span>✍️</span>Manual</button>
+ <button data-t="sc" class="on"><span>🎯</span>Scalp</button>
+ <button data-t="sig"><span>📡</span>Board</button>
+ <button data-t="lab"><span>🧪</span>Lab</button>
  <button data-t="led"><span>📒</span>Ledger</button>
- <button data-t="bt"><span>🧪</span>Backtest</button>
  <button data-t="set"><span>⚙️</span>Settings</button>
  <button data-t="guide"><span>📘</span>Guide</button>
 </nav>
@@ -227,8 +267,9 @@ let toastT=null;function toast(msg){let t=$('.toast');if(!t){t=document.createEl
 const DEF={bank:500,worker:'',assets:{BTC:true,ETH:true,SOL:false,XRP:false},showPoly:true,showKalshi:true,
  kFee:0.07,kMaker:0.0175,kRound:'cent',pusRate:0.095,mode:'taker',haircut:0.015,
  minEdge:0.02,lsEdge:0.015,lsPct:0.30,maxSpread:0.03,maxDiv:0.20,wm:0.25,wivShort:0.2,wivLong:0.4,bBrti:2,bCl:3,evMult:4,
- kelly:0.25,cap:0.02,corrCap:0.05,maxOpen:3,dayStop:0.06,events:[],vk:1,favOn:true,favStake:100,favSide:'auto',dfOn:true};
-let cfg={...DEF,...store.get('fl.cfg',{})};cfg.assets={...DEF.assets,...(cfg.assets||{})};
+ kelly:0.25,cap:0.02,corrCap:0.05,maxOpen:3,dayStop:0.06,events:[],vk:1,favOn:true,favStake:100,favSide:'auto',dfOn:true,
+ scStake:100,scAlert:false,st:{tru:true,snap:true,lag:true,spk:true,brk:true,lock:true,lot:true}};
+let cfg={...DEF,...store.get('fl.cfg',{})};cfg.assets={...DEF.assets,...(cfg.assets||{})};cfg.st={...DEF.st,...(cfg.st||{})};
 const saveCfg=()=>store.set('fl.cfg',cfg);
 const AS={BTC:{cb:'BTC-USD',gm:'btcusd',cc:'BTC_USD',dc:'BTC',dp:'BTC-',pm:'btc',kq:'KXBTC15M',kd:'KXBTCD',kr:'KXBTC'},
  ETH:{cb:'ETH-USD',gm:'ethusd',cc:'ETH_USD',dc:'ETH',dp:'ETH-',pm:'eth',kq:'KXETH15M',kd:'KXETHD',kr:'KXETH'},
@@ -318,10 +359,11 @@ async function pollSpot(){const as=act();const slow=(spotN++%3)===0;const jobs=[
 
 /* ================= markets ================= */
 const MK=new Map();
-const TFS={'5m':300,'15m':900,'1h':3600,'4h':14400};
+const TFS={'5m':300,'15m':900,'1h':3600,'4h':14400,'1d':86400};
 const PVAR={'5m':'fiveminute','15m':'fifteen','1h':'onehour','4h':'fourhour'};
 const wurl=(h,path)=>cfg.worker.replace(/\/+$/,'')+'/?h='+h+'&u='+encodeURIComponent(path);
-async function kget(path){for(let k=0;;k++){try{return await J(wurl('k','/trade-api/v2'+path),9000)}catch(e){if(k>=3||!/HTTP (429|5\d\d)/.test(e.message))throw e;await sleep(1200*(k+1))}}}
+const KQ={n:0,last:0};async function kslot(){while(KQ.n>=3||Date.now()-KQ.last<120)await sleep(30);KQ.n++;KQ.last=Date.now()}
+async function kget(path){for(let k=0;;k++){await kslot();let r;try{r=await J(wurl('k','/trade-api/v2'+path),9000)}catch(e){KQ.n--;if(k>=3||!/HTTP (429|5\d\d)/.test(e.message))throw e;await sleep(1200*(k+1));continue}KQ.n--;return r}}
 function strikeFromCandles(a,st){const c=VOL[a]?.c;if(!c)return null;const x=c.find(r=>r[0]===st-60000);return x?(x[1]+x[2]+x[3]+x[4])/4:null}
 const KX={};
 async function pmStrike(a,tf,st,en,slug){if(cfg.worker){if(KX[slug])return{v:KX[slug],est:false};
@@ -358,16 +400,17 @@ async function loadK15(){if(!cfg.worker||!cfg.showKalshi)return;const now=Date.n
   for(const m of d.markets||[]){const op=Date.parse(m.open_time),cl=Date.parse(m.close_time);if(now>=op&&now<cl)kSet(m,a,'15m','updown',now)}}catch(e){}}));
  for(const[id,x]of MK)if(x.v==='K'&&!x.man&&(x.close<=now||!cfg.assets[x.asset]))MK.delete(id)}
 const KEV={};
-async function loadKH(){if(!cfg.worker||!cfg.showKalshi)return;const now=Date.now();
+async function loadKH(){if(!cfg.worker||!cfg.showKalshi)return;const now=Date.now();const pins=scPins();
  for(const a of act())for(const[ser,kind]of[[AS[a].kd,'above'],[AS[a].kr,'range']]){if(!ser)continue;try{
   let ev=KEV[ser];if(!ev||ev.close<=now){const d=await kget(`/events?series_ticker=${ser}&status=open&limit=25`);
    const evs=(d.events||[]).map(e=>({t:e.event_ticker,close:Date.parse(e.strike_date)})).filter(e=>e.close>now&&e.close-now<=65*60000).sort((x,y)=>x.close-y.close);ev=KEV[ser]=evs[0]||{t:null,close:now+60000}}
-  if(!ev.t)continue;const d=await kget(`/markets?event_ticker=${ev.t}&limit=200`);
-  const ms=(d.markets||[]).map(m=>({m,mid:(+m.yes_bid_dollars+ +m.yes_ask_dollars)/2})).filter(x=>+x.m.yes_bid_dollars>0&&+x.m.yes_ask_dollars<1&&+x.m.yes_ask_dollars-(+x.m.yes_bid_dollars)<=0.10&&x.mid>=0.04&&x.mid<=0.96).sort((x,y)=>Math.abs(x.mid-.5)-Math.abs(y.mid-.5)).slice(0,6);
-  const fz=kind==='above'&&FAVA[a]&&cfg.favOn?(d.markets||[]).filter(m=>{const b=+m.yes_bid_dollars,y=+m.yes_ask_dollars;return b>0&&y<1&&y-b<=0.0301&&((y>=0.88&&y<=0.98)||(b>=0.02&&b<=0.12))}).filter(m=>!ms.some(x=>x.m.ticker===m.ticker)).slice(0,12):[];
-  const keep=new Set([...ms.map(x=>'K:'+x.m.ticker),...fz.map(m=>'K:'+m.ticker)]);for(const x of ms){kSet(x.m,a,'1h',kind,now);const z=MK.get('K:'+x.m.ticker);if(z)z.favOnly=false}
-  for(const m of fz){kSet(m,a,'1h',kind,now);const z=MK.get('K:'+m.ticker);if(z)z.favOnly=true}
-  for(const[id,x]of MK)if(x.v==='K'&&x.series===ser&&!keep.has(id))MK.delete(id)}catch(e){}}}
+  if(!ev.t)continue;const d=await kget(`/markets?event_ticker=${ev.t}&limit=200`);const all=d.markets||[];HL[a+'|'+kind]={ev:ev.t,close:ev.close,t:now,ms:all};
+  const ms=all.map(m=>({m,mid:(+m.yes_bid_dollars+ +m.yes_ask_dollars)/2})).filter(x=>+x.m.yes_bid_dollars>0&&+x.m.yes_ask_dollars<1&&+x.m.yes_ask_dollars-(+x.m.yes_bid_dollars)<=0.10&&x.mid>=0.04&&x.mid<=0.96).sort((x,y)=>Math.abs(x.mid-.5)-Math.abs(y.mid-.5)).slice(0,8);
+  const fz=kind==='above'?all.filter(m=>{const b=+m.yes_bid_dollars,y=+m.yes_ask_dollars;return b>0&&y<1&&y-b<=0.0301&&((y>=0.88&&y<=0.98)||(b>=0.02&&b<=0.12))}).filter(m=>!ms.some(x=>x.m.ticker===m.ticker)).slice(0,12):[];
+  const pm=all.filter(m=>pins.has('K:'+m.ticker)&&!ms.some(x=>x.m.ticker===m.ticker)&&!fz.includes(m));
+  const keep=new Set([...ms.map(x=>'K:'+x.m.ticker),...fz.map(m=>'K:'+m.ticker),...pm.map(m=>'K:'+m.ticker)]);for(const x of ms){kSet(x.m,a,'1h',kind,now);const z=MK.get('K:'+x.m.ticker);if(z)z.favOnly=false}
+  for(const m of[...fz,...pm]){kSet(m,a,'1h',kind,now);const z=MK.get('K:'+m.ticker);if(z)z.favOnly=true}
+  for(const[id,x]of MK)if(x.v==='K'&&!x.man&&x.series===ser&&x.tf==='1h'&&!keep.has(id)&&!pins.has(id))MK.delete(id)}catch(e){}}}
 const KDQ=new Set();
 async function kDepth(id){if(KDQ.has(id))return;KDQ.add(id);try{const m0=MK.get(id);if(!m0)return;const d=await kget(`/markets/${m0.ticker}/orderbook?depth=5`);const m=MK.get(id);if(!m)return;const ob=d.orderbook_fp||{};
  const yb=ob.yes_dollars||[],nb=ob.no_dollars||[];const ly=yb[yb.length-1],ln=nb[nb.length-1];
@@ -381,7 +424,9 @@ const saveMan=()=>{MAN=[...MK.values()].filter(m=>m.man);store.set('fl.man',MAN)
 /* ================= ledger ================= */
 let LED=store.get('fl.led',[]);const LOGGED=new Set(LED.filter(r=>r.k==='c').map(r=>r.id+'@'+r.cp));
 let ledDirty=false;const saveLed=()=>{ledDirty=true};
-setInterval(()=>{if(!ledDirty)return;ledDirty=false;if(LED.length>15000){let drop=LED.length-14000;LED=LED.filter(r=>{if(drop>0&&r.k==='c'&&r.o!=null){drop--;return false}return true})}store.set('fl.led',LED)},3000);
+setInterval(()=>{if(!ledDirty)return;ledDirty=false;if(LED.length>15000){let drop=LED.length-14000;LED=LED.filter(r=>{if(drop>0&&r.k==='c'&&r.o!=null){drop--;return false}return true})}saveLedNow()},3000);
+// if the phone's storage fills up, drop the oldest settled rows (a quarter at a time) instead of silently losing new ones
+function saveLedNow(){for(let k=0;k<4;k++){if(store.set('fl.led',LED))return true;const st=[];LED.forEach((r,i)=>{if(r.o!=null)st.push(i)});const cut=new Set(st.slice(0,Math.ceil(st.length/4)));LED=LED.filter((r,i)=>!cut.has(i))}return false}
 const trades=()=>LED.filter(r=>r.k==='t');const mtr=()=>trades().filter(r=>!r.strat);const favT=()=>trades().filter(r=>r.strat==='fav');
 const bankroll=()=>cfg.bank+mtr().filter(r=>r.pnl!=null).reduce((s,r)=>s+r.pnl,0);
 const todayPnl=()=>{const d=etDay(Date.now());return mtr().filter(r=>r.pnl!=null&&etDay(r.cl)===d).reduce((s,r)=>s+r.pnl,0)};
@@ -394,9 +439,9 @@ function riskCheck(m,cost){const open=mtr().filter(r=>r.o==null);
 function desc(m){const a=m.asset;if(m.type==='updown')return`${a} ${m.tf} Up/Down · beat ${fmtP(m.K)}${m.kEst?' (est)':''}`;
  if(m.type==='range')return`${a} ${fmtP(m.L)}–${fmtP(m.U)} at ${etT(m.close)}`;return`${a} ${m.type==='below'?'below':'above'} ${fmtP(m.K)} at ${etT(m.close)}`}
 const sideName=(m,s)=>m.type==='updown'?(s==='YES'?'UP':'DOWN'):s;
-const CPS={'5m':[180],'15m':[600,300,180],'1h':[2700,1800,900,360],'4h':[10800,7200,3600,1200]};
-const WIN={'5m':null,'15m':[120,720],'1h':[300,3000],'4h':[900,12000]};
-const winTxt={'15m':'2–12 min left','1h':'5–50 min left','4h':'15–200 min left'};
+const CPS={'5m':[180],'15m':[600,300,180],'1h':[2700,1800,900,360],'4h':[10800,7200,3600,1200],'1d':[43200,21600,10800,3600]};
+const WIN={'5m':null,'15m':[120,720],'1h':[300,3000],'4h':[900,12000],'1d':[3600,86400]};
+const winTxt={'15m':'2–12 min left','1h':'5–50 min left','4h':'15–200 min left','1d':'1–24 h left'};
 function cpLog(R,now){const m=R.m;if(R.q==null||m.man)return;for(const cp of CPS[m.tf]||[]){const key=m.id+'@'+cp;if(LOGGED.has(key))continue;
  if(R.tau<=cp&&R.tau>cp-90){LOGGED.add(key);LED.push({k:'c',id:m.id,v:m.v,a:m.asset,tf:m.tf,sl:m.slug||m.ticker||'',cl:m.close,cp,t:now,mid:R.mid,P:R.P,q:R.q,sd:R.side,e:R.edge,call:R.call,r:R.reason,o:null,ds:desc(m)});saveLed()}}}
 function autoEnter(R){if(!/ENTRY/.test(R.call))return;const m=R.m;if(trades().some(r=>r.id===m.id&&r.o==null))return;
@@ -426,7 +471,7 @@ function evaluate(m,now){const a=m.asset,R={m,reasons:[]};const S=comp(a),vb=VOL
  if(m.type!=='range'&&m.K==null){R.call='WAIT';R.reason='price to beat not known yet';return R}
  const w=ivRate(a)!=null?wIV(R.tau):0;const ev=(cfg.events||[]).filter(e=>e>now-300000&&e<m.close);
  let mk=null;if(R.tau<m.A&&SP[a]){const b=SP[a].buf.filter(x=>x[0]>=m.close-m.A*1000);if(b.length)mk=b.reduce((s,x)=>s+x[1],0)/b.length}
- const vs=Math.pow(cfg.vk||1,2);const x={a,S,now,w,base:vb,ev,mKnown:mk,scale:vs};
+ const vs=Math.pow(cfg.vk||1,2);const x={a,S,now,w,base:vb,ev,mKnown:mk,scale:vs};R.x=x;
  const P=modelP(m,x),Plo=modelP(m,{...x,scale:.64*vs}),Phi=modelP(m,{...x,scale:1.5625*vs});R.P=P;R.w=w;R.S=S;
  const ok=m.yesAsk>0&&m.yesAsk<1&&m.yesBid>0&&m.yesBid<1&&m.yesAsk>=m.yesBid;
  if(!ok){R.call='NO TRADE';R.reason='no two-sided market';return R}
@@ -442,7 +487,7 @@ function evaluate(m,now){const a=m.asset,R={m,reasons:[]};const S=comp(a),vb=VOL
  R.edgePct=R.edge/R.cost;const rs=R.reasons;
  const win=WIN[m.tf];if(!win)rs.push('5-minute markets: display only (bot territory)');
  if(spotAge(a)>5000)rs.push('coin price feed stale');
- const maxAge=m.man?120000:m.tf==='15m'||m.tf==='5m'?12000:25000;if(now-(m.bt||0)>maxAge)rs.push(m.man?'your typed prices are over 2 min old; update them':'market prices stale ('+Math.round((now-(m.bt||0))/1000)+'s old)');
+ const maxAge=m.man?120000:m.tf==='15m'||m.tf==='5m'?12000:m.tf==='1d'?70000:25000;if(now-(m.bt||0)>maxAge)rs.push(m.man?'your typed prices are over 2 min old; update them':'market prices stale ('+Math.round((now-(m.bt||0))/1000)+'s old)');
  if(!win){}else if(R.tau<win[0]||R.tau>win[1])rs.push('outside entry window ('+winTxt[m.tf]+')');
  if(R.tau<60)rs.push('final minute: bots win this race');
  const spr=m.yesAsk-m.yesBid;if(spr>cfg.maxSpread+1e-9)rs.push(`spread ${c1(spr)} is over ${c1(cfg.maxSpread)}`);
@@ -459,20 +504,20 @@ function evaluate(m,now){const a=m.asset,R={m,reasons:[]};const S=comp(a),vb=VOL
 
 /* ================= render: signals ================= */
 let FILT='all';const OPEN=new Set();
-const FILTERS=[['all','All'],['entry','Entries'],['15m','15m'],['1h','1h'],['4h','4h'],['5m','5m'],['K','Kalshi'],['P','Poly'],['BTC','BTC'],['ETH','ETH'],['SOL','SOL'],['XRP','XRP']];
+const FILTERS=[['all','All'],['entry','Entries'],['15m','15m'],['1h','1h'],['4h','4h'],['1d','Daily'],['5m','5m'],['K','Kalshi'],['P','Poly'],['BTC','BTC'],['ETH','ETH'],['SOL','SOL'],['XRP','XRP']];
 function renderFilters(){$('#filt').innerHTML=FILTERS.filter(([k])=>!AS[k]||cfg.assets[k]).map(([k,l])=>`<button data-f="${k}" class="${FILT===k?'on':''}">${l}</button>`).join('');$$('#filt button').forEach(b=>b.onclick=()=>{FILT=b.dataset.f;renderFilters();render()})}
 const callCls=c=>c==='ENTRY'?'ENTRY':c==='PAPER ENTRY'||c==='HOLDING'?'PAPER':c==='REF ENTRY'?'REF':c==='WAIT'?'WAIT':'NO';
 let LAST=[];
 function render(){const now=Date.now();let res=[];
  for(const m of MK.values()){if(!cfg.assets[m.asset]||m.close<=now-5000)continue;const R=evaluate(m,now);res.push(R);if(!m.favOnly){cpLog(R,now);autoEnter(R)}histPush(R,now)}
- LAST=res;renderHeader();try{favRun(now)}catch(e){}try{dfRun(now)}catch(e){}const resAll=res;res=res.filter(R=>!R.m.favOnly);
+ LAST=res;renderHeader();try{favRun(now)}catch(e){}try{dfRun(now)}catch(e){}try{scExits(now);scRun(now,res)}catch(e){try{console.log('strategies',e)}catch(x){}}const resAll=res;res=res.filter(R=>!R.m.favOnly);
  const f=FILT;const shown=res.filter(R=>f==='all'||(f==='entry'?/ENTRY/.test(R.call):TFS[f]?R.m.tf===f:AS[f]?R.m.asset===f:R.m.v===f||(f==='P'&&R.m.v==='U')));
  const ord={ENTRY:0,'PAPER ENTRY':1,'REF ENTRY':2,HOLDING:3,'NO TRADE':4,WAIT:5};const bad=R=>R.reasons.some(x=>/stale|too far apart|display only/.test(x));shown.sort((a,b)=>(ord[a.call]-ord[b.call])||(bad(a)-bad(b))||(a.reasons.length-b.reasons.length)||((b.edge??-9)-(a.edge??-9)));
  const nE=res.filter(R=>/ENTRY/.test(R.call)).length;const rc={};res.filter(R=>R.call==='NO TRADE').forEach(R=>{const k=R.reason.split(/[\d(:]/)[0].replace(/[\s·-]+$/,'').trim();rc[k]=(rc[k]||0)+1});
  const top=Object.entries(rc).sort((a,b)=>b[1]-a[1])[0];
  $('#sumLine').textContent=`${res.length} markets · ${nE} entr${nE===1?'y':'ies'}${top?` · most common block: ${top[0]}`:''}`;
  $('#list').innerHTML=shown.length?shown.map(cardHTML).join(''):'<div class="card muted">No markets loaded yet. Prices and markets appear within a few seconds.</div>';
- $$('#list .sig').forEach(el=>el.onclick=e=>{if(e.target.closest('a,button'))return;const id=el.dataset.id;OPEN.has(id)?OPEN.delete(id):OPEN.add(id);render()});histGC(now);drawChart()}
+ $$('#list .sig').forEach(el=>el.onclick=e=>{if(e.target.closest('a,button'))return;const id=el.dataset.id;OPEN.has(id)?OPEN.delete(id):OPEN.add(id);render()});histGC(now);drawChart();try{labRender()}catch(e){}}
 function cardHTML(R){const m=R.m;const cc=callCls(R.call);const vn={K:m.man?'KALSHI·MANUAL':'KALSHI',P:'POLY·REF',U:'POLY US',O:'MANUAL'}[m.v];
  const callTxt=R.call==='WAIT'?'WAIT':R.call==='HOLDING'?'HOLDING (paper)':/ENTRY/.test(R.call)?`${R.call} · BUY ${sideName(m,R.side)} @ ${c1(R.price)} · edge +${c1(R.edge)} · ${R.C} × = ${usd(R.C*R.cost)}`:`NO TRADE${R.edge!=null&&!R.reasons.some(x=>/stale|too far apart/.test(x))?` · best ${sideName(m,R.side)} edge ${R.edge>=0?'+':''}${c1(R.edge)}`:''}`;
  let det='';if(OPEN.has(m.id)&&R.q!=null){const sd=Math.sqrt(fwdVar(m.asset,Date.now(),m.close,R.w,VOL[m.asset].base,cfg.events));
@@ -488,7 +533,7 @@ function cardHTML(R){const m=R.m;const cc=callCls(R.call);const vn={K:m.man?'KAL
  ${R.q!=null?`<div class="nums"><div class="num"><span>Market ${m.type==='updown'?'UP':'YES'}</span><b>${pctS(R.mid)}</b></div><div class="num"><span>Model</span><b style="color:var(--vio)">${pctS(R.P)}</b></div><div class="num"><span>Fair</span><b>${pctS(R.q)}</b></div></div>`:''}
  <div class="call ${cc}">${esc(callTxt)}</div><div class="why">${esc(R.reason||'')}</div>${det}</div>`}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(!b)return;MK.delete(b.dataset.rm);saveMan();renderMan();render()});
-function renderEvid(){const EV=store.get('fl.ev',{});const ks=Object.keys(EV);if(!ks.length){$('#evid').innerHTML='<div class="warn">No backtest run yet. Run one in <b>Backtest</b> before trusting any entry. Research baseline: no public model beats these markets after fees.</div>';return}
+function renderEvid(){const EV=store.get('fl.ev',{});const ks=Object.keys(EV);if(!ks.length){$('#evid').innerHTML='<div class="warn">No backtest run yet. Run one from <b>Settings → Backtester</b> before trusting any model entry. Research baseline: no public model beats these markets after fees.</div>';return}
  $('#evid').innerHTML='<div class="card" style="padding:10px"><h3 style="margin-top:0">Evidence so far (backtests)</h3>'+ks.sort((a,b)=>EV[b].t-EV[a].t).slice(0,4).map(k=>{const e=EV[k];const[v,a,tf]=k.split('|');const good=e.lo!=null&&e.lo>0;return`<div class="mono" style="font-size:12px">${v==='K'?'Kalshi':'Poly'} ${a} ${tf}: <b class="${good?'ok':'bad'}">${e.n?(e.pc>=0?'+':'')+(e.pc*100).toFixed(2)+'¢/contract':'no trades'}</b>${e.lo!=null?` (CI ${(e.lo*100).toFixed(1)} to ${(e.hi*100).toFixed(1)})`:''} · ${good?'edge holding':'no proven edge: paper only'}</div>`}).join('')+'</div>'}
 function renderHeader(){const now=Date.now();renderEvid();
  $('#strip').innerHTML=act().map(a=>{const p=comp(a),v=VOL[a];const sd=v&&v.base?Math.sqrt(fwdVar(a,now,now+3600000,ivRate(a)!=null?cfg.wivShort:0,v.base,cfg.events)):null;
@@ -496,7 +541,7 @@ function renderHeader(){const now=Date.now();renderEvid();
  const b=bankroll();$('#kBank').textContent=usd(b);$('#kBank').style.color=b>=cfg.bank?'var(--lime)':'var(--cor)';
  const d=todayPnl();$('#kDay').textContent=(d>=0?'+':'')+usd(d);$('#kDay').style.color=d>=0?'var(--lime)':'var(--cor)';
  $('#kOpen').textContent=mtr().filter(r=>r.o==null).length;
- $('#kalshiNote').innerHTML=!cfg.worker&&cfg.showKalshi?`<div class="warn">Kalshi markets (the ones you can trade) need the free proxy. <a href="#" id="goSet">Set it up in Settings</a> (10 min), or type Kalshi prices in <b>Manual</b>. Polymarket intl is shown as reference.</div>`:'';
+ $('#kalshiNote').innerHTML=!cfg.worker&&cfg.showKalshi?`<div class="warn">Kalshi markets (the ones you can trade) need the free proxy. <a href="#" id="goSet">Set it up in Settings</a> (10 min), or type Kalshi prices into <b>Settings → Manual price checker</b>. Polymarket intl is shown as reference.</div>`:'';
  const g=$('#goSet');if(g)g.onclick=e=>{e.preventDefault();tab('set')}}
 
 /* ================= manual ================= */
@@ -533,9 +578,9 @@ function renderLed(){const rows=calRows();const seg=[['K','Kalshi'],['P','Poly']
  $('#trList').innerHTML=T.length?'<h3>Recent</h3>'+T.slice(-40).reverse().map(r=>`<div class="sig" style="cursor:default"><div class="top"><div><span class="ven ${r.v}">${{K:'KALSHI',P:'POLY·REF',U:'POLY US',O:'OTHER'}[r.v]}</span><b>${esc(r.ds)}</b><div class="muted">${new Date(r.t).toLocaleString()} · ${r.sd==='YES'?'YES/UP':'NO/DOWN'} ${r.C}× @ ${c1(r.px)} · fair ${pctS(r.qs??(r.sd==='YES'?r.q:1-r.q))} · edge ${c1(r.e)}</div></div><div class="tl ${r.pnl==null?'':r.pnl>=0?'ok':'bad'}">${r.pnl==null?'open':(r.pnl>=0?'+':'')+usd(r.pnl)}</div></div>
   ${r.o==null&&r.man&&r.cl<Date.now()?`<div class="row"><button class="btn sm" data-res="${r.t}" data-o="1">YES/UP won</button><button class="btn sm alt" data-res="${r.t}" data-o="0">NO/DOWN won</button></div>`:''}</div>`).join(''):'<p class="muted">No paper entries yet. That is normal: the rules are strict on purpose.</p>';
  $$('[data-res]').forEach(b=>b.onclick=()=>{const r=LED.find(x=>x.k==='t'&&String(x.t)===b.dataset.res);if(r){setOutcome(r.id,+b.dataset.o);renderLed()}})}
-$('#lCsv').onclick=()=>{const cols=['k','strat','t','v','a','tf','sl','ds','cl','cp','sd','px','fee','cost','C','mid','P','q','e','call','r','o','pnl'];
- const head='kind,strategy,time,venue,coin,timeframe,market,description,close,checkpoint_sec,side,price,fee,cost,contracts,market_mid,model_p,fair_q,edge,call,reason,outcome,pnl';
- const body=LED.map(r=>cols.map(c=>{let v=r[c];if((c==='t'||c==='cl')&&v)v=new Date(v).toISOString();if(c==='k')v=v==='t'?'paper_trade':'checkpoint';return'"'+String(v??'').replace(/"/g,'""')+'"'}).join(','));
+$('#lCsv').onclick=()=>{const cols=['k','strat','t','v','a','tf','sl','ds','cl','cp','sd','px','fee','cost','C','mid','P','q','e','call','r','o','pnl','tp','slx','te','xp','xt','xr','xfee'];
+ const head='kind,strategy,time,venue,coin,timeframe,market,description,close,checkpoint_sec,side,price,fee,cost,contracts,market_mid,model_p,fair_q,edge,call,reason,outcome,pnl,target,stop,time_stop,exit_price,exit_time,exit_reason,exit_fee';
+ const body=LED.map(r=>cols.map(c=>{let v=r[c];if((c==='t'||c==='cl'||c==='te'||c==='xt')&&v)v=new Date(v).toISOString();if(c==='k')v=v==='t'?'paper_trade':'checkpoint';return'"'+String(v??'').replace(/"/g,'""')+'"'}).join(','));
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([head+'\n'+body.join('\n')],{type:'text/csv'}));a.download='fairline-ledger.csv';a.click()};
 $('#lReset').onclick=()=>{if(!confirm('Delete every logged checkpoint and paper trade?'))return;LED=[];LOGGED.clear();store.set('fl.led',[]);computeGate();renderLed()};
 $('#lMC').onclick=()=>{const T=mtr().filter(r=>r.pnl!=null).map(r=>({day:etDay(r.cl),qs:r.qs??(r.sd==='YES'?r.q:1-r.q),cost:r.cost,win:(r.sd==='YES'?r.o:1-r.o)}));$('#lMCout').innerHTML=mcHTML(T)};
@@ -646,9 +691,10 @@ const WORKER=`export default {
 $('#wCode').textContent=WORKER;
 $('#wCopy').onclick=async()=>{try{await navigator.clipboard.writeText(WORKER);toast('Worker code copied')}catch(e){const r=document.createRange();r.selectNodeContents($('#wCode'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Selected: tap Copy')}};
 function loadSettings(){$$('[data-k]').forEach(el=>{const k=el.dataset.k;let v=cfg[k];if(el.type==='checkbox')el.checked=!!v;else if(el.dataset.pct&&typeof v==='number')el.value=+(v*100).toFixed(2);else el.value=v??''});
+ try{$('#stToggles').innerHTML=STRATS.map(x=>`<label class="chk"><input type="checkbox" data-st="${x.k}" ${stOn(x.k)?'checked':''}> ${x.ic} ${esc(x.n)}<span class="ev ${x.ev}">${EVL[x.ev]}</span></label>`).join('')}catch(e){}
  $('#sAssets').innerHTML=Object.keys(AS).map(a=>`<label class="chk"><input type="checkbox" data-asset="${a}" ${cfg.assets[a]?'checked':''}> ${a}</label>`).join('');renderEv()}
 function readSettings(){$$('[data-k]').forEach(el=>{const k=el.dataset.k;if(el.type==='checkbox')cfg[k]=el.checked;else if(el.tagName==='SELECT'||k==='worker')cfg[k]=el.value.trim();else{const n=parseFloat(el.value);if(!isNaN(n))cfg[k]=el.dataset.pct?n/100:n}});
- $$('[data-asset]').forEach(el=>cfg.assets[el.dataset.asset]=el.checked);if(!act().length)cfg.assets.BTC=true;cfg.cap=Math.min(cfg.cap,0.1);saveCfg()}
+ $$('[data-asset]').forEach(el=>cfg.assets[el.dataset.asset]=el.checked);$$('[data-st]').forEach(el=>{cfg.st={...(cfg.st||{}),[el.dataset.st]:el.checked}});if(!(cfg.scStake>0))cfg.scStake=100;if(!act().length)cfg.assets.BTC=true;cfg.cap=Math.min(cfg.cap,0.1);saveCfg()}
 function renderEv(){const ev=(cfg.events||[]).filter(e=>e>Date.now()-86400000).sort((a,b)=>a-b);cfg.events=ev;
  $('#evList').innerHTML=ev.length?ev.map((e,i)=>`<div class="row" style="margin-top:4px"><span class="mono">${new Date(e).toLocaleString([], {weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span><button class="btn sm alt" data-evx="${i}">×</button></div>`).join(''):'None. Add US data releases (8:30am ET) and Fed decisions (2pm ET) on days you trade.';
  $$('[data-evx]').forEach(b=>b.onclick=()=>{cfg.events.splice(+b.dataset.evx,1);saveCfg();renderEv()})}
@@ -700,6 +746,7 @@ function favLedger(){try{dfLedger()}catch(e){}const T=favT(),st=favStats();const
 // Once a day, 8am-2pm ET (3-9h before the 5pm close): buy NO on the BTC daily "above" strike whose NO costs 90-97c with a 1c spread (the most expensive one). Fades bullish lottery tickets.
 const DF={ev:null,open:0,close:0,ms:[],t:0,err:null};const dfT=()=>trades().filter(r=>r.strat==='favD');
 async function loadKD(){if(!cfg.dfOn||!cfg.worker||!cfg.showKalshi)return;const now=Date.now();
+ const L0=DLAD.BTC;if(L0&&L0.ev&&now-L0.t<90000){DF.ev=L0.ev;DF.close=L0.close;DF.open=L0.open||0;DF.ms=L0.ms.map(m=>({tk:m.ticker,K:m.floor_strike,b:+m.yes_bid_dollars,a:+m.yes_ask_dollars})).filter(m=>m.b>0&&m.a>0&&m.a<1&&m.K!=null);DF.t=now;DF.err=null;return}
  if(!DF.ev||DF.close<=now){const d=await kget('/events?series_ticker=KXBTCD&status=open&limit=100');
   const evs=(d.events||[]).filter(e=>/17$/.test(e.event_ticker)).map(e=>({t:e.event_ticker,close:Date.parse(e.strike_date)})).filter(e=>e.close>now).sort((x,y)=>x.close-y.close);
   if(!evs.length){DF.err='no 5pm BTC ladder open yet';DF.ev=null;return}DF.ev=evs[0].t;DF.close=evs[0].close;DF.ms=[]}
@@ -732,17 +779,11 @@ function dfLedger(){const T=dfT(),st=dfStats();
  <div class="kpis"><div class="kpi"><span>Settled</span><b>${st.n}</b></div><div class="kpi"><span>Lost</span><b>${st.n?st.lost:'–'}</b></div><div class="kpi"><span>P&amp;L · ROI</span><b class="${st.pnl>=0?'ok':'bad'}">${st.n?(st.pnl>=0?'+':'')+usd(st.pnl)+' · '+(st.roi*100).toFixed(1)+'%':'–'}</b></div></div>
  ${T.length?T.slice(-20).reverse().map(r=>`<div class="frow"><span class="fbad ${r.pnl==null?'in':r.pnl>=0?'go':'wt'}">${r.pnl==null?'OPEN':r.pnl>=0?'WON':'LOST'}</span><div style="flex:1;min-width:0"><b>NO · ${esc(r.ds)}</b><div class="muted">${new Date(r.t).toLocaleString()} · ${r.C}× @ ${c1(r.px)}</div></div><div class="tl ${r.pnl==null?'':r.pnl>=0?'ok':'bad'}">${r.pnl==null?'':(r.pnl>=0?'+':'')+usd(r.pnl)}</div></div>`).join(''):'<p class="muted">No daily bets yet. The first one is placed between 8am and 2pm ET while the app is open.</p>'}`}
 
-/* ================= live chart ================= */
-const HIST=new Map();const CH={a:null,id:null,tf:'1m',hx:null,ht:0,prev:null,opts:'',ck:''};
+/* ================= chart helpers ================= */
+const HIST=new Map();
 function histPush(R,now){if(R.P==null)return;const m=R.m;let h=HIST.get(m.id);if(!h)HIST.set(m.id,h=[]);const l=h[h.length-1];if(l&&now-l.t<4000)return;
- h.push({t:now,S:R.S,P:R.P,q:R.q??null,mid:R.mid??null,b:m.yesBid,a:m.yesAsk,e:R.edge??null,sd:R.side||null});if(h.length>1000)h.splice(0,h.length-1000)}
+ h.push({t:now,S:R.S,P:R.P,q:R.q??null,mid:R.mid??null,b:m.yesBid,a:m.yesAsk,e:R.edge??null,sd:R.side||null});if(h.length>1500)h.splice(0,h.length-1500)}
 let histT=0;function histGC(now){if(now-histT<60000)return;histT=now;for(const[id,h]of HIST)if(!MK.has(id)&&(!h.length||now-h[h.length-1].t>1800000))HIST.delete(id)}
-const ORD={ENTRY:0,'PAPER ENTRY':1,'REF ENTRY':2,HOLDING:3,'NO TRADE':4,WAIT:5};const nearHalf=R=>Math.abs((R.mid??.5)-.5);
-const vName=m=>({K:'Kalshi',P:'Poly',U:'Poly US',O:'Manual'}[m.v]||'');
-function chList(a,now){return LAST.filter(R=>R.m.asset===a&&R.m.close>now).sort((x,y)=>(ORD[x.call]-ORD[y.call])||(nearHalf(x)-nearHalf(y))||(x.m.close-y.m.close))}
-function chPick(L){let R=L.find(R=>R.m.id===CH.id);
- if(!R&&CH.prev)R=L.filter(x=>x.m.v===CH.prev.v&&x.m.tf===CH.prev.tf&&x.m.type===CH.prev.type).sort((x,y)=>nearHalf(x)-nearHalf(y))[0];
- R=R||L[0]||null;if(R){CH.id=R.m.id;CH.prev={v:R.m.v,tf:R.m.tf,type:R.m.type}}return R}
 function chCandles(a,g){const out=(VOL[a]?.c||[]).map(r=>r.slice());const by=new Map(out.map(r=>[r[0],r]));const last=out.length?out[out.length-1][0]:0;
  for(const[t,p]of SP[a]?.buf||[]){const mt=Math.floor(t/60000)*60000;if(mt<last)continue;const r=by.get(mt);if(!r){const n=[mt,p,p,p,p];by.set(mt,n);out.push(n)}else{r[2]=Math.max(r[2],p);r[3]=Math.min(r[3],p);r[4]=p}}
  out.sort((x,y)=>x[0]-y[0]);if(g===1)return out;const agg=[];let c=null;
@@ -751,102 +792,405 @@ const axP=p=>!isFinite(p)?'–':p>=1000?'$'+Math.round(p).toLocaleString('en-US'
 const niceStep=x=>{const p=Math.pow(10,Math.floor(Math.log10(x)));for(const k of[1,2,2.5,5,10])if(k*p>=x)return k*p;return 10*p};
 function tag(g,x,y,txt,bg,fg){const w=g.measureText(txt).width+8;g.fillStyle=bg;g.fillRect(x+1,y-7,w,14);g.fillStyle=fg;g.fillText(txt,x+5,y)}
 const chCallTxt=R=>{const m=R.m;return R.call==='WAIT'?'WAIT':R.call==='HOLDING'?'HOLDING (paper)':/ENTRY/.test(R.call)?`${R.call} · BUY ${sideName(m,R.side)} @ ${c1(R.price)} · edge +${c1(R.edge)}`:`NO TRADE${R.edge!=null?` · best ${sideName(m,R.side)} edge ${R.edge>=0?'+':''}${c1(R.edge)}`:''}`};
-function chCtl(L,R,now){const coins=act();const k=coins.join()+'|'+CH.a+'|'+CH.tf;
- if(CH.ck!==k){CH.ck=k;$('#chCoins').innerHTML=coins.map(a=>`<button data-cc="${a}" class="${CH.a===a?'on':''}">${a}</button>`).join('')+'<span style="flex:0 0 8px"></span>'+['1m','5m'].map(t=>`<button data-ctf="${t}" class="${CH.tf===t?'on':''}">${t} candles</button>`).join('')}
- const ids=CH.a+'|'+L.map(R=>R.m.id).join('|');if(CH.opts!==ids){CH.opts=ids;$('#chSel').innerHTML=L.length?L.map(R=>`<option value="${esc(R.m.id)}">${esc(vName(R.m)+' '+R.m.tf+' · '+desc(R.m))}</option>`).join(''):`<option value="">No open ${esc(CH.a)} markets yet</option>`}
- if(R&&$('#chSel').value!==R.m.id)$('#chSel').value=R.m.id;
- const a=CH.a,S=comp(a);
- if(!R){$('#chNums').innerHTML=`<div class="num"><span>${a} now</span><b>${S?axP(S):'…'}</b></div>`;$('#chCall').className='call WAIT';$('#chCall').textContent=VOL[a]?'Waiting for open markets':'Loading prices…';$('#chWhy').textContent='Markets show up a few seconds after they open (Kalshi needs the proxy in Settings).';return}
- const m=R.m,tau=Math.max(0,(m.close-now)/1000);const sd=S&&VOL[a]?.base?Math.sqrt(fwdVar(a,now,m.close,R.w||0,VOL[a].base,cfg.events)):null;
- const K=m.type==='range'?null:m.K;const gap=S&&K?((S/K-1)*100):null;
- $('#chNums').innerHTML=`<div class="num"><span>${a} now</span><b>${S?axP(S):'…'}</b></div>`+
-  (m.type==='range'?`<div class="num"><span>Range</span><b>${axP(m.L)}–${axP(m.U)}</b></div>`:`<div class="num"><span>${m.type==='updown'?'Beat':'Strike'}${gap!=null?` (${gap>=0?'+':''}${gap.toFixed(2)}%)`:''}</span><b>${K!=null?axP(K):'?'}</b></div>`)+
-  `<div class="num"><span>Left · exp. move</span><b>${left(tau)} · ${sd!=null?'±'+(sd*100).toFixed(2)+'%':'–'}</b></div>`+
-  `<div class="num"><span>Market ${m.type==='updown'?'UP':'YES'}</span><b class="cy">${R.mid!=null?pctS(R.mid):'–'}</b></div><div class="num"><span>Model</span><b style="color:var(--vio)">${R.P!=null?pctS(R.P):'–'}</b></div><div class="num"><span>Fair</span><b>${R.q!=null?pctS(R.q):'–'}</b></div>`;
- const cc=callCls(R.call);$('#chCall').className='call '+cc;$('#chCall').textContent=chCallTxt(R);$('#chWhy').textContent=R.reason||''}
-function drawChart(){if($('#t-ch').hidden)return;try{drawChart0()}catch(e){try{console.log('chart error',e)}catch(x){}}}
-function drawChart0(){const now=Date.now();const coins=act();if(!coins.includes(CH.a)){CH.a=coins[0];CH.id=null;CH.prev=null}const a=CH.a;
- const L=chList(a,now);const R=chPick(L);chCtl(L,R,now);const m=R?R.m:null;
- const cv=$('#chCv'),dpr=window.devicePixelRatio||1,W=cv.clientWidth||360,H=460;
+function drawChart(){try{scRender(Date.now())}catch(e){try{console.log('scalp render error',e)}catch(x){}}}
+
+/* ================= SCALPING DESK ================= */
+// Tables built from Kalshi BTC+ETH data, Sep 24 - Nov 23 2026: 11,593 fifteen-minute markets, 2,700 hourly ladders, 103 daily ladders.
+// truth[tf][side][priceBucket][timeLeftBucket] = [win rate, avg price in cents, observations, distinct markets/hours/days]
+// touch[tf][target][priceBucket][timeLeftBucket] = [share whose bid later reached the target, observations]
+const TBL={"v":1,"spr":5,"period":"2026-09-24..2026-11-23","coins":"BTC+ETH pooled","cb":[[1,2],[3,4],[5,7],[8,12],[13,20],[21,30],[31,40],[41,50],[51,60],[61,70],[71,80],[81,87],[88,92],[93,95],[96,97],[98,99]],"tl":{"15m":[[10,14],[6,9],[3,5],[1,2]],"1h":[[45,59],[30,44],[15,29],[6,14],[2,5]],"1d":[[18,23],[12,17],[6,11],[3,5],[1,2]]},"tg":["+3","+5","+10","x1.5","x2"],"meta":{"BTC":{"start":84380.99,"end":61007.87,"chg":-0.277},"ETH":{"start":2684.4,"end":1703.85,"chg":-0.3653},"m15":{"BTC":{"markets":5784,"up":0.4841},"ETH":{"markets":5809,"up":0.4925}}},"truth":{"15m":{"YES":[[[0.0,1.89,18,17],[0.0178,1.71,1070,654],[0.0117,1.48,3261,2182],[0.0114,1.42,1847,1741]],[[0.0403,3.67,124,96],[0.0216,3.53,1297,964],[0.0353,3.51,1702,1438],[0.0322,3.47,683,661]],[[0.0376,6.14,346,284],[0.0597,5.97,1791,1336],[0.0511,5.98,1664,1410],[0.0725,5.9,621,607]],[[0.081,10.19,1086,769],[0.0895,9.91,2603,1873],[0.0976,9.83,1732,1486],[0.1244,9.73,643,615]],[[0.1697,16.84,2958,1898],[0.1455,16.45,4103,2725],[0.1512,16.3,2295,1860],[0.1629,16.31,712,683]],[[0.2448,25.8,5924,3552],[0.2429,25.35,4628,3060],[0.2401,25.35,2182,1769],[0.2468,25.16,616,588]],[[0.3376,35.66,8838,5118],[0.3415,35.47,4082,2853],[0.3439,35.42,1835,1547],[0.3236,35.27,513,492]],[[0.4423,45.63,10120,5993],[0.4346,45.53,3925,2796],[0.4348,45.46,1649,1404],[0.4136,45.4,457,435]],[[0.5392,55.34,10246,6066],[0.5439,55.59,3999,2811],[0.5451,55.45,1664,1396],[0.5543,55.48,433,418]],[[0.6336,65.36,8187,4897],[0.6341,65.53,3985,2830],[0.6295,65.63,1760,1468],[0.6825,65.6,463,446]],[[0.7411,75.22,5697,3382],[0.7438,75.53,4423,2923],[0.7455,75.61,2071,1654],[0.744,75.49,582,552]],[[0.8382,83.76,2602,1742],[0.8412,84.06,3458,2386],[0.8288,84.16,1817,1524],[0.8539,84.15,527,509]],[[0.9021,89.82,1257,888],[0.8924,90.06,2751,1950],[0.8997,90.16,1865,1539],[0.918,90.22,610,586]],[[0.9482,93.92,386,306],[0.938,94.01,1725,1280],[0.9484,94.05,1414,1204],[0.9444,94.1,540,532]],[[0.9716,96.33,141,119],[0.9793,96.47,1254,891],[0.9674,96.52,1502,1277],[0.9744,96.48,624,602]],[[1.0,98.06,34,28],[0.9918,98.36,1213,701],[0.9895,98.6,3322,2182],[0.9856,98.63,1739,1642]]],"NO":[[[0.0,2.0,28,23],[0.0081,1.71,1116,661],[0.0098,1.45,3161,2109],[0.0146,1.42,1647,1564]],[[0.0308,3.65,130,105],[0.0205,3.53,1270,899],[0.0295,3.47,1558,1314],[0.0206,3.51,630,608]],[[0.0516,6.06,368,289],[0.0599,5.98,1704,1269],[0.0521,5.93,1439,1224],[0.0515,5.89,563,553]],[[0.0875,10.13,1006,728],[0.0975,9.91,2369,1728],[0.0935,9.82,1626,1377],[0.0836,9.75,562,545]],[[0.1586,16.82,2869,1826],[0.1565,16.46,3917,2577],[0.1642,16.31,2125,1716],[0.1352,16.27,614,587]],[[0.2582,25.77,5673,3363],[0.2563,25.47,4420,2921],[0.253,25.39,2051,1644],[0.2453,25.47,579,550]],[[0.3669,35.64,8171,4890],[0.3644,35.47,3982,2827],[0.3691,35.4,1772,1475],[0.3165,35.34,474,456]],[[0.4597,45.67,10244,6067],[0.4553,45.43,4006,2812],[0.4511,45.56,1656,1386],[0.4455,45.55,440,422]],[[0.5565,55.37,10113,5992],[0.5645,55.49,3913,2791],[0.5648,55.53,1650,1405],[0.5807,55.65,446,426]],[[0.6612,65.34,8857,5133],[0.6588,65.53,4085,2857],[0.657,65.6,1834,1541],[0.6712,65.74,514,492]],[[0.7553,75.19,5959,3570],[0.7561,75.66,4633,3064],[0.7574,75.65,2185,1773],[0.7545,75.81,611,585]],[[0.831,83.76,2692,1813],[0.8519,84.05,3598,2538],[0.8415,84.1,1950,1637],[0.8171,84.11,607,584]],[[0.8996,89.85,1345,917],[0.9015,90.08,3034,2101],[0.8982,90.12,2013,1679],[0.8788,90.25,685,652]],[[0.961,93.89,359,295],[0.9421,94.03,1796,1350],[0.9485,94.04,1651,1401],[0.9206,94.06,617,601]],[[0.9593,96.3,123,95],[0.9734,96.47,1276,942],[0.9631,96.49,1651,1407],[0.9635,96.53,657,640]],[[1.0,98.07,27,23],[0.9832,98.35,1188,702],[0.9874,98.57,3413,2253],[0.9878,98.63,1964,1849]]]},"1h":{"YES":[[[0.0123,2.0,35439,2272],[0.0109,2.0,35171,2419],[0.0085,2.0,27577,2548],[0.0062,2.0,10453,2444],[0.0135,2.0,2219,1510]],[[0.022,3.42,44744,2649],[0.0184,3.42,38019,2647],[0.0157,3.42,27829,2657],[0.0157,3.42,9696,2484],[0.0216,3.42,2172,1468]],[[0.0431,5.86,33509,2649],[0.0407,5.86,27740,2622],[0.0367,5.86,20824,2629],[0.0439,5.88,7519,2365],[0.0499,5.87,1704,1214]],[[0.0756,9.78,30787,2634],[0.0746,9.78,25604,2613],[0.0687,9.77,19107,2575],[0.0719,9.84,7027,2280],[0.0897,9.78,1527,1107]],[[0.1381,16.24,29911,2628],[0.1387,16.23,24797,2603],[0.1289,16.21,18639,2562],[0.1418,16.24,6931,2202],[0.1393,16.26,1536,1111]],[[0.2298,25.28,26580,2598],[0.2228,25.27,21921,2562],[0.2171,25.26,16597,2506],[0.2207,25.29,6053,2080],[0.2529,25.24,1360,1018]],[[0.3293,35.39,22047,2562],[0.3191,35.39,17970,2484],[0.3143,35.34,13482,2414],[0.3319,35.4,5025,1945],[0.3296,35.37,1074,824]],[[0.4237,45.46,20137,2539],[0.4186,45.45,16819,2466],[0.4407,45.47,12671,2372],[0.4379,45.41,4624,1839],[0.4067,45.48,1050,811]],[[0.5325,55.55,20446,2525],[0.529,55.52,16510,2463],[0.5528,55.51,12639,2374],[0.5487,55.51,4545,1840],[0.5226,55.57,1064,841]],[[0.6518,65.59,22100,2557],[0.6435,65.59,18014,2482],[0.6714,65.55,13557,2422],[0.6608,65.64,4918,1929],[0.648,65.72,1091,847]],[[0.759,75.7,26455,2569],[0.7569,75.72,21912,2544],[0.7685,75.7,16223,2480],[0.7665,75.81,6042,2081],[0.7709,75.74,1318,970]],[[0.8478,84.2,25395,2606],[0.8414,84.21,21278,2579],[0.8499,84.19,16026,2518],[0.8461,84.24,5848,2097],[0.8475,84.29,1239,940]],[[0.9057,90.22,28117,2634],[0.9038,90.24,23347,2606],[0.9141,90.22,17170,2574],[0.914,90.17,6057,2129],[0.9013,90.17,1266,969]],[[0.9467,94.11,28080,2626],[0.9407,94.11,23713,2622],[0.9465,94.11,17343,2594],[0.9482,94.1,6081,2206],[0.9434,94.11,1326,1028]],[[0.9659,96.59,33805,2648],[0.9653,96.59,28318,2648],[0.9695,96.57,19785,2611],[0.9687,96.58,6967,2313],[0.9726,96.57,1531,1139]],[[0.9827,98.61,64618,2669],[0.9849,98.64,61168,2677],[0.9863,98.68,47937,2687],[0.9835,98.68,17211,2623],[0.9857,98.69,3927,2058]]],"NO":[[[0.015,2.0,32347,2085],[0.0114,2.0,33367,2320],[0.0099,2.0,28041,2521],[0.0126,2.0,10719,2439],[0.0132,2.0,2421,1578]],[[0.0229,3.44,48591,2656],[0.0223,3.43,41750,2670],[0.0214,3.41,29015,2667],[0.0249,3.42,9849,2487],[0.0204,3.42,2161,1462]],[[0.0446,5.85,35878,2649],[0.0479,5.86,29958,2655],[0.0397,5.86,21881,2629],[0.0393,5.86,7472,2346],[0.0342,5.88,1668,1201]],[[0.0807,9.75,32160,2646],[0.085,9.75,26846,2624],[0.078,9.76,19656,2592],[0.0784,9.78,6885,2256],[0.0922,9.76,1465,1073]],[[0.1434,16.21,30140,2624],[0.1491,16.24,25151,2607],[0.1396,16.23,18885,2573],[0.1388,16.23,6890,2199],[0.1367,16.21,1485,1070]],[[0.2375,25.28,26572,2572],[0.2406,25.27,21884,2549],[0.2274,25.28,16277,2491],[0.2294,25.22,6111,2096],[0.2297,25.36,1328,974]],[[0.3447,35.39,21981,2564],[0.351,35.42,18058,2493],[0.3215,35.44,13582,2420],[0.3335,35.41,4900,1920],[0.3315,35.38,1080,837]],[[0.4615,45.46,20431,2519],[0.4666,45.48,16504,2465],[0.4409,45.48,12668,2384],[0.445,45.51,4548,1851],[0.4679,45.44,1060,839]],[[0.5708,55.55,20179,2528],[0.5763,55.55,16758,2472],[0.5524,55.53,12627,2372],[0.5513,55.58,4584,1841],[0.5846,55.54,1040,807]],[[0.6681,65.61,22197,2559],[0.6762,65.6,18035,2483],[0.6809,65.65,13544,2406],[0.6635,65.57,5023,1935],[0.6549,65.6,1081,820]],[[0.7669,75.71,26445,2592],[0.7741,75.74,21867,2561],[0.7782,75.76,16539,2498],[0.774,75.7,6057,2068],[0.7455,75.81,1348,1016]],[[0.8542,84.17,25227,2608],[0.8527,84.18,20914,2559],[0.8624,84.19,15612,2519],[0.8472,84.19,5800,2095],[0.8535,84.11,1263,944]],[[0.913,90.19,27126,2611],[0.9138,90.19,22765,2599],[0.9192,90.16,17027,2553],[0.9138,90.15,6430,2230],[0.8976,90.1,1358,1045]],[[0.9451,94.11,26444,2628],[0.9497,94.1,22126,2596],[0.9535,94.11,16758,2574],[0.9455,94.12,6032,2235],[0.9372,94.12,1385,1049]],[[0.9688,96.58,30080,2652],[0.9704,96.58,25595,2612],[0.9752,96.58,18922,2612],[0.9724,96.57,6892,2307],[0.9603,96.56,1535,1171]],[[0.9843,98.64,66372,2667],[0.987,98.66,60723,2672],[0.9893,98.68,46372,2685],[0.9913,98.68,16805,2623],[0.9836,98.67,3726,2044]]]},"1d":{"YES":[[[0.0102,2.0,589,77],[0.0,2.0,714,80],[0.0,2.0,771,88],[0.0,2.0,473,88],[0.0,2.0,204,83]],[[0.0106,3.43,1035,98],[0.0022,3.38,901,99],[0.0023,3.37,884,97],[0.0,3.42,286,85],[0.0,3.46,114,70]],[[0.0208,5.8,720,95],[0.035,5.86,600,91],[0.0153,5.82,523,92],[0.0111,5.94,180,83],[0.029,5.67,69,50]],[[0.0498,9.74,683,96],[0.0832,9.76,541,89],[0.0582,9.78,498,90],[0.0352,9.57,142,69],[0.0323,9.84,62,48]],[[0.0855,16.28,678,91],[0.1434,16.26,565,93],[0.0971,16.29,484,92],[0.071,15.95,155,72],[0.0769,16.12,52,42]],[[0.1879,25.33,596,94],[0.2153,25.32,483,90],[0.1899,25.19,416,84],[0.1875,25.19,128,63],[0.1957,25.76,46,41]],[[0.3198,35.4,469,85],[0.3359,35.38,390,82],[0.2775,35.73,346,82],[0.3173,35.52,104,63],[0.3333,35.79,39,33]],[[0.4307,45.55,462,92],[0.4362,45.48,376,82],[0.3742,45.5,326,88],[0.4021,45.26,97,57],[0.4848,45.27,33,29]],[[0.5579,55.58,475,90],[0.5459,55.6,381,87],[0.4903,55.49,308,80],[0.5234,55.71,107,64],[0.5938,55.12,32,26]],[[0.6232,65.69,475,89],[0.6561,65.63,410,87],[0.5769,65.49,338,82],[0.6827,65.43,104,59],[0.6275,66.06,51,39]],[[0.7435,75.76,577,89],[0.7367,75.77,471,85],[0.7248,75.79,436,92],[0.7674,75.39,129,67],[0.7632,75.55,38,33]],[[0.775,84.13,569,95],[0.7769,84.15,493,91],[0.7905,84.07,444,91],[0.8492,84.09,126,65],[0.7292,84.6,48,37]],[[0.8442,90.11,629,94],[0.8466,90.2,502,88],[0.8398,90.16,437,87],[0.9156,90.13,154,75],[0.9057,90.09,53,43]],[[0.8817,94.12,600,95],[0.8891,94.13,478,91],[0.8824,94.14,459,92],[0.9178,94.25,146,67],[0.9245,94.21,53,44]],[[0.9148,96.56,751,102],[0.9267,96.59,587,95],[0.9284,96.57,559,94],[0.9543,96.55,175,73],[0.942,96.59,69,52]],[[0.9565,98.66,1518,101],[0.9626,98.72,1579,101],[0.9708,98.74,1608,102],[0.9688,98.78,704,98],[0.9749,98.78,279,92]]],"NO":[[[0.0386,2.0,647,74],[0.0193,2.0,776,78],[0.0259,2.0,928,88],[0.0269,2.0,483,86],[0.0253,2.0,198,84]],[[0.0565,3.41,1257,101],[0.0541,3.41,1091,103],[0.0463,3.42,972,98],[0.0453,3.37,309,87],[0.0496,3.45,121,67]],[[0.1091,5.82,788,100],[0.0967,5.84,631,97],[0.0886,5.82,587,97],[0.0476,5.71,189,81],[0.0317,5.81,63,49]],[[0.1467,9.82,668,98],[0.1473,9.78,550,91],[0.1431,9.82,503,90],[0.0859,9.78,163,77],[0.1129,9.77,62,52]],[[0.2052,16.13,697,97],[0.2123,16.24,584,92],[0.2137,16.39,510,93],[0.15,16.11,160,74],[0.2105,15.91,57,41]],[[0.2595,25.2,582,89],[0.2643,25.23,473,87],[0.2754,25.29,443,93],[0.2362,25.54,127,65],[0.2368,25.37,38,33]],[[0.3734,35.35,474,88],[0.3449,35.35,403,86],[0.4222,35.56,334,82],[0.3113,35.53,106,62],[0.38,34.96,50,37]],[[0.4444,45.44,477,89],[0.4442,45.35,385,88],[0.5065,45.47,306,78],[0.4673,45.38,107,64],[0.4118,45.76,34,28]],[[0.5621,55.52,459,90],[0.5638,55.49,376,83],[0.625,55.51,328,89],[0.5938,55.79,96,56],[0.5161,55.74,31,28]],[[0.6817,65.53,465,82],[0.6581,65.61,389,79],[0.7225,65.29,346,83],[0.7019,65.45,104,62],[0.65,65.15,40,34]],[[0.8106,75.63,602,92],[0.784,75.67,486,88],[0.8064,75.74,408,84],[0.8,75.88,130,64],[0.8043,75.2,46,41]],[[0.9024,84.17,574,87],[0.852,84.16,473,89],[0.9061,84.18,426,91],[0.906,84.2,117,68],[0.9024,83.95,41,37]],[[0.9527,90.21,592,93],[0.9098,90.19,488,88],[0.9333,90.18,420,84],[0.9621,89.95,132,65],[0.9655,90.16,58,44]],[[0.9645,94.06,563,94],[0.9457,94.13,479,90],[0.9698,94.15,431,94],[0.9866,94.11,149,79],[1.0,94.2,46,35]],[[0.9893,96.55,654,96],[0.9844,96.57,513,89],[0.9898,96.58,488,95],[1.0,96.63,174,77],[0.9697,96.53,66,46]],[[0.9894,98.66,1327,99],[0.9993,98.72,1374,99],[0.9993,98.74,1407,102],[1.0,98.8,664,98],[1.0,98.79,291,96]]]}},"touch":{"15m":{"+3":[[[0.413,46],[0.193,2186],[0.159,6422],[0.1712,3494]],[[0.4803,254],[0.3658,2567],[0.4003,3260],[0.3656,1313]],[[0.6036,714],[0.5402,3495],[0.5411,3103],[0.4916,1184]],[[0.652,2092],[0.6255,4972],[0.6337,3358],[0.6,1205]],[[0.7688,5827],[0.7446,8020],[0.7195,4420],[0.6523,1326]],[[0.8319,11597],[0.8192,9048],[0.7942,4233],[0.7448,1195]],[[0.8672,17009],[0.8586,8064],[0.8345,3607],[0.7923,987]],[[0.886,20364],[0.881,7931],[0.8623,3305],[0.8227,897]],[[0.9093,20359],[0.9014,7912],[0.8826,3314],[0.8749,879]],[[0.9295,17044],[0.9264,8070],[0.904,3594],[0.8936,977]],[[0.9456,11656],[0.9395,9056],[0.9366,4256],[0.9237,1193]],[[0.9516,5294],[0.9501,7056],[0.9392,3767],[0.94,1134]],[[0.9666,2602],[0.9642,5785],[0.9569,3878],[0.9521,1295]],[[0.9785,745],[0.9727,3521],[0.9703,3065],[0.9663,1157]],[[0.9722,180],[0.9775,1334],[0.9706,1562],[0.9826,631]],[null,null,null,null]],"+5":[[[0.3043,46],[0.1098,2186],[0.1118,6422],[0.1265,3494]],[[0.3386,254],[0.2544,2567],[0.3031,3260],[0.2879,1313]],[[0.4286,714],[0.3928,3495],[0.4209,3103],[0.3995,1184]],[[0.5583,2092],[0.5412,4972],[0.5554,3358],[0.5361,1205]],[[0.6971,5827],[0.6747,8020],[0.6509,4420],[0.589,1326]],[[0.7738,11597],[0.7607,9048],[0.7408,4233],[0.6828,1195]],[[0.8256,17009],[0.8118,8064],[0.7935,3607],[0.7467,987]],[[0.852,20364],[0.844,7931],[0.8245,3305],[0.777,897]],[[0.878,20359],[0.8704,7912],[0.8491,3314],[0.8373,879]],[[0.9011,17044],[0.9001,8070],[0.8787,3594],[0.871,977]],[[0.9257,11656],[0.9169,9056],[0.9121,4256],[0.907,1193]],[[0.9297,5294],[0.9307,7056],[0.9238,3767],[0.9259,1134]],[[0.947,2602],[0.9454,5785],[0.9381,3878],[0.9413,1295]],[[0.9632,544],[0.9527,2391],[0.9564,2042],[0.9458,738]],[null,null,null,null],[null,null,null,null]],"+10":[[[0.1522,46],[0.0554,2186],[0.0623,6422],[0.0747,3494]],[[0.2126,254],[0.1488,2567],[0.1871,3260],[0.1805,1313]],[[0.3039,714],[0.2801,3495],[0.2888,3103],[0.2829,1184]],[[0.4168,2092],[0.4039,4972],[0.4244,3358],[0.4249,1205]],[[0.5667,5827],[0.5394,8020],[0.5256,4420],[0.4676,1326]],[[0.6522,11597],[0.6475,9048],[0.6326,4233],[0.5941,1195]],[[0.7327,17009],[0.7232,8064],[0.7034,3607],[0.6606,987]],[[0.775,20364],[0.7645,7931],[0.7461,3305],[0.7001,897]],[[0.8134,20359],[0.8081,7912],[0.7846,3314],[0.7941,879]],[[0.8426,17044],[0.8423,8070],[0.8261,3594],[0.8219,977]],[[0.8721,11656],[0.8647,9056],[0.8633,4256],[0.8583,1193]],[[0.8893,5294],[0.8938,7056],[0.8821,3767],[0.8792,1134]],[[0.8873,1083],[0.8933,1949],[0.8966,1267],[0.8938,405]],[null,null,null,null],[null,null,null,null],[null,null,null,null]],"x1.5":[[[0.8043,46],[0.5274,2186],[0.3924,6422],[0.3383,3494]],[[0.563,254],[0.4784,2567],[0.485,3260],[0.4235,1313]],[[0.5728,714],[0.5084,3495],[0.5201,3103],[0.478,1184]],[[0.5483,2092],[0.5364,4972],[0.5563,3358],[0.5378,1205]],[[0.5984,5827],[0.581,8020],[0.567,4420],[0.5008,1326]],[[0.5965,11597],[0.5984,9048],[0.5875,4233],[0.5531,1195]],[[0.6276,17009],[0.6164,8064],[0.598,3607],[0.5623,987]],[[0.6364,20364],[0.626,7931],[0.6073,3305],[0.5708,897]],[[0.6465,20359],[0.6476,7912],[0.6367,3314],[0.6382,879]],[[0.6578,10669],[0.6521,4815],[0.6536,2099],[0.6738,561]],[null,null,null,null],[null,null,null,null],[null,null,null,null],[null,null,null,null],[null,null,null,null],[null,null,null,null]],"x2":[[[0.6522,46],[0.393,2186],[0.3172,6422],[0.2905,3494]],[[0.437,254],[0.3362,2567],[0.3736,3260],[0.3481,1313]],[[0.402,714],[0.366,3495],[0.398,3103],[0.3708,1184]],[[0.4116,2092],[0.4085,4972],[0.4303,3358],[0.4274,1205]],[[0.4433,5827],[0.4303,8020],[0.4301,4420],[0.3906,1326]],[[0.4481,11597],[0.4528,9048],[0.4479,4233],[0.4151,1195]],[[0.4769,17009],[0.4732,8064],[0.466,3607],[0.4276,987]],[[0.4887,18158],[0.4859,7133],[0.4812,2951],[0.4673,811]],[null,null,null,null],[null,null,null,null],[null,null,null,null],[null,null,null,null],[null,null,null,null],[null,null,null,null],[null,null,null,null],[null,null,null,null]]},"1h":{"+3":[[[0.132,67786],[0.1194,68538],[0.1055,55618],[0.0879,21172],[0.055,4640]],[[0.2359,93335],[0.2362,79769],[0.2017,56844],[0.1729,19545],[0.1055,4333]],[[0.3948,69387],[0.395,57698],[0.3415,42705],[0.2926,14991],[0.18,3372]],[[0.5525,62947],[0.5381,52450],[0.4761,38763],[0.4066,13912],[0.2644,2992]],[[0.6711,60051],[0.6514,49948],[0.5879,37524],[0.5102,13821],[0.3492,3021]],[[0.7551,53152],[0.7267,43805],[0.6769,32874],[0.5983,12164],[0.4423,2688]],[[0.8094,44028],[0.7824,36028],[0.7389,27064],[0.672,9925],[0.5218,2154]],[[0.8472,40568],[0.8239,33323],[0.7917,25339],[0.7319,9172],[0.6066,2110]],[[0.8769,40625],[0.8561,33268],[0.8289,25266],[0.7826,9129],[0.6953,2104]],[[0.905,44297],[0.8862,36049],[0.873,27101],[0.831,9941],[0.7477,2172]],[[0.9264,52900],[0.9168,43779],[0.9044,32762],[0.8872,12099],[0.82,2666]],[[0.9438,50622],[0.9317,42192],[0.9291,31638],[0.912,11648],[0.8853,2502]],[[0.9535,55243],[0.9488,46112],[0.9511,34197],[0.9476,12487],[0.9204,2624]],[[0.9601,54524],[0.9593,45839],[0.9642,34101],[0.9586,12113],[0.9476,2711]],[[0.9626,26504],[0.9626,22341],[0.9692,16489],[0.9665,5885],[0.958,1332]],[null,null,null,null,null]],"+5":[[[0.0993,67786],[0.0899,68538],[0.0783,55618],[0.0647,21172],[0.0409,4640]],[[0.1849,93335],[0.18,79769],[0.1568,56844],[0.1333,19545],[0.0856,4333]],[[0.3198,69387],[0.3202,57698],[0.2781,42705],[0.2385,14991],[0.1548,3372]],[[0.4741,62947],[0.4658,52450],[0.4108,38763],[0.3538,13912],[0.24,2992]],[[0.6022,60051],[0.5913,49948],[0.5305,37524],[0.466,13821],[0.3247,3021]],[[0.7061,53152],[0.682,43805],[0.6355,32874],[0.5614,12164],[0.4252,2688]],[[0.7697,44028],[0.7449,36028],[0.7063,27064],[0.6451,9925],[0.5037,2154]],[[0.8159,40568],[0.7928,33323],[0.7642,25339],[0.7093,9172],[0.5938,2110]],[[0.8503,40625],[0.8281,33268],[0.8059,25266],[0.7635,9129],[0.6839,2104]],[[0.8835,44297],[0.8631,36049],[0.8549,27101],[0.8158,9941],[0.7385,2172]],[[0.9053,52900],[0.8973,43779],[0.8871,32762],[0.8726,12099],[0.8143,2666]],[[0.9251,50622],[0.914,42192],[0.9147,31638],[0.9003,11648],[0.8793,2502]],[[0.9364,55243],[0.9337,46112],[0.9386,34197],[0.934,12487],[0.9123,2624]],[[0.9462,33234],[0.9451,28070],[0.9473,20765],[0.945,7419],[0.9274,1625]],[null,null,null,null,null],[null,null,null,null,null]],"+10":[[[0.0691,67786],[0.0612,68538],[0.051,55618],[0.0414,21172],[0.0287,4640]],[[0.1253,93335],[0.1202,79769],[0.104,56844],[0.0859,19545],[0.0593,4333]],[[0.2282,69387],[0.2256,57698],[0.1965,42705],[0.1706,14991],[0.1133,3372]],[[0.357,62947],[0.3545,52450],[0.3096,38763],[0.2717,13912],[0.1945,2992]],[[0.4806,60051],[0.4773,49948],[0.4289,37524],[0.3828,13821],[0.2784,3021]],[[0.6016,53152],[0.5879,43805],[0.5464,32874],[0.4927,12164],[0.3895,2688]],[[0.6814,44028],[0.6614,36028],[0.6317,27064],[0.5871,9925],[0.4698,2154]],[[0.7408,40568],[0.7216,33323],[0.6979,25339],[0.6559,9172],[0.5621,2110]],[[0.7871,40625],[0.7674,33268],[0.7519,25266],[0.7195,9129],[0.6535,2104]],[[0.8279,44297],[0.8129,36049],[0.8115,27101],[0.7774,9941],[0.7205,2172]],[[0.8566,52900],[0.8519,43779],[0.8473,32762],[0.8349,12099],[0.7986,2666]],[[0.8826,50622],[0.8756,42192],[0.8826,31638],[0.8693,11648],[0.8665,2502]],[[0.8991,18893],[0.8957,15750],[0.9055,11953],[0.8979,4466],[0.8788,965]],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null]],"x1.5":[[[0.2094,67786],[0.1937,68538],[0.1665,55618],[0.1463,21172],[0.0845,4640]],[[0.2806,93335],[0.2801,79769],[0.2413,56844],[0.2119,19545],[0.1228,4333]],[[0.3825,69387],[0.3838,57698],[0.3311,42705],[0.2857,14991],[0.177,3372]],[[0.4733,62947],[0.4658,52450],[0.4104,38763],[0.3529,13912],[0.241,2992]],[[0.515,60051],[0.5111,49948],[0.4581,37524],[0.408,13821],[0.2877,3021]],[[0.5544,53152],[0.5445,43805],[0.5044,32874],[0.4572,12164],[0.3717,2688]],[[0.5775,44028],[0.5636,36028],[0.5374,27064],[0.5089,9925],[0.4276,2154]],[[0.5969,40568],[0.5897,33323],[0.5806,25339],[0.5536,9172],[0.4981,2110]],[[0.6263,40625],[0.6233,33268],[0.6158,25266],[0.5981,9129],[0.5813,2104]],[[0.6523,25925],[0.6508,21099],[0.6686,15916],[0.6457,5780],[0.6319,1236]],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null]],"x2":[[[0.159,67786],[0.1461,68538],[0.1282,55618],[0.1093,21172],[0.0657,4640]],[[0.2214,93335],[0.2211,79769],[0.1906,56844],[0.1626,19545],[0.1006,4333]],[[0.2969,69387],[0.2979,57698],[0.2585,42705],[0.2233,14991],[0.1412,3372]],[[0.362,62947],[0.3581,52450],[0.3126,38763],[0.2725,13912],[0.1959,2992]],[[0.3872,60051],[0.3906,49948],[0.348,37524],[0.3178,13821],[0.2367,3021]],[[0.413,53152],[0.4114,43805],[0.3815,32874],[0.3529,12164],[0.3155,2688]],[[0.4322,44028],[0.4306,36028],[0.4098,27064],[0.4045,9925],[0.3635,2154]],[[0.4639,36495],[0.4627,30031],[0.4584,22794],[0.4528,8250],[0.4408,1892]],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null]]},"1d":{"+3":[[[0.2184,1236],[0.1966,1490],[0.1307,1699],[0.0314,956],[0.0522,402]],[[0.3333,2292],[0.3268,1992],[0.2969,1856],[0.158,595],[0.1702,235]],[[0.5345,1508],[0.5012,1231],[0.4901,1110],[0.3388,369],[0.2348,132]],[[0.6366,1351],[0.6343,1091],[0.6004,1001],[0.5344,305],[0.5323,124]],[[0.7935,1375],[0.7894,1149],[0.7445,994],[0.7048,315],[0.6606,109]],[[0.8497,1178],[0.8337,956],[0.8044,859],[0.8118,255],[0.8214,84]],[[0.8982,943],[0.8827,793],[0.8735,680],[0.8857,210],[0.8539,89]],[[0.9148,939],[0.8922,761],[0.8924,632],[0.9216,204],[0.8507,67]],[[0.939,934],[0.9141,757],[0.9214,636],[0.931,203],[0.9206,63]],[[0.933,940],[0.9174,799],[0.9196,684],[0.9567,208],[0.9341,91]],[[0.9483,1179],[0.9258,957],[0.936,844],[0.973,259],[0.9286,84]],[[0.9493,1143],[0.9441,966],[0.9437,870],[0.963,243],[0.9663,89]],[[0.9525,1221],[0.9444,990],[0.937,857],[0.979,286],[0.982,111]],[[0.9484,1163],[0.9436,957],[0.9472,890],[0.9831,295],[0.9697,99]],[[0.9502,622],[0.9432,458],[0.9618,445],[0.9931,144],[0.9661,59]],[null,null,null,null,null]],"+5":[[[0.165,1236],[0.1362,1490],[0.0989,1699],[0.023,956],[0.0398,402]],[[0.2718,2292],[0.2706,1992],[0.243,1856],[0.1109,595],[0.1149,235]],[[0.4463,1508],[0.4102,1231],[0.4135,1110],[0.2656,369],[0.1894,132]],[[0.5574,1351],[0.5573,1091],[0.5195,1001],[0.4393,305],[0.4435,124]],[[0.7367,1375],[0.7111,1149],[0.671,994],[0.6222,315],[0.633,109]],[[0.7971,1178],[0.7762,956],[0.7451,859],[0.7569,255],[0.7619,84]],[[0.8706,943],[0.8411,793],[0.8265,680],[0.8524,210],[0.8202,89]],[[0.8871,939],[0.862,761],[0.8386,632],[0.902,204],[0.8209,67]],[[0.9111,934],[0.8864,757],[0.8836,636],[0.9163,203],[0.8571,63]],[[0.9096,940],[0.8911,799],[0.8743,684],[0.9375,208],[0.8791,91]],[[0.9288,1179],[0.9028,957],[0.9123,844],[0.9614,259],[0.8929,84]],[[0.9379,1143],[0.913,966],[0.9207,870],[0.9424,243],[0.9438,89]],[[0.9345,1221],[0.9172,990],[0.9207,857],[0.9685,286],[0.964,111]],[[0.9317,717],[0.92,575],[0.9382,518],[0.9695,164],[0.9615,52]],[null,null,null,null,null],[null,null,null,null,null]],"+10":[[[0.1149,1236],[0.0872,1490],[0.0695,1699],[0.0199,956],[0.0299,402]],[[0.202,2292],[0.2033,1992],[0.1756,1856],[0.0672,595],[0.0809,235]],[[0.313,1508],[0.3128,1231],[0.318,1110],[0.1247,369],[0.1212,132]],[[0.436,1351],[0.439,1091],[0.4086,1001],[0.3246,305],[0.2661,124]],[[0.5818,1375],[0.5622,1149],[0.5453,994],[0.4857,315],[0.4404,109]],[[0.6986,1178],[0.6684,956],[0.6158,859],[0.5843,255],[0.5714,84]],[[0.7911,943],[0.7541,793],[0.7426,680],[0.7381,210],[0.7416,89]],[[0.8243,939],[0.7871,761],[0.7627,632],[0.7892,204],[0.7612,67]],[[0.8576,934],[0.8217,757],[0.8082,636],[0.8325,203],[0.7302,63]],[[0.8606,940],[0.8135,799],[0.8012,684],[0.851,208],[0.8791,91]],[[0.8846,1179],[0.8401,957],[0.84,844],[0.9035,259],[0.8452,84]],[[0.8863,1143],[0.8499,966],[0.8747,870],[0.9012,243],[0.8652,89]],[[0.9101,434],[0.863,343],[0.8641,309],[0.9252,107],[0.9744,39]],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null]],"x1.5":[[[0.3123,1236],[0.2819,1490],[0.2172,1699],[0.0669,956],[0.0796,402]],[[0.3839,2292],[0.369,1992],[0.3416,1856],[0.2084,595],[0.217,235]],[[0.5133,1508],[0.4833,1231],[0.4829,1110],[0.3279,369],[0.2348,132]],[[0.5551,1351],[0.5591,1091],[0.5165,1001],[0.4393,305],[0.4435,124]],[[0.6276,1375],[0.604,1149],[0.5724,994],[0.527,315],[0.4862,109]],[[0.635,1178],[0.6088,956],[0.5669,859],[0.5451,255],[0.4405,84]],[[0.6766,943],[0.6431,793],[0.6368,680],[0.6048,210],[0.5506,89]],[[0.6603,939],[0.6058,761],[0.587,632],[0.6275,204],[0.5672,67]],[[0.6681,934],[0.609,757],[0.6164,636],[0.6256,203],[0.6032,63]],[[0.6529,556],[0.6362,470],[0.6465,413],[0.6692,133],[0.6863,51]],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null]],"x2":[[[0.246,1236],[0.2309,1490],[0.1642,1699],[0.0408,956],[0.0572,402]],[[0.3216,2292],[0.3072,1992],[0.2893,1856],[0.1445,595],[0.1532,235]],[[0.4218,1508],[0.3907,1231],[0.391,1110],[0.2276,369],[0.1742,132]],[[0.4441,1351],[0.439,1091],[0.4126,1001],[0.3377,305],[0.2742,124]],[[0.488,1375],[0.4526,1149],[0.4437,994],[0.4,315],[0.3394,109]],[[0.4745,1178],[0.4707,956],[0.4331,859],[0.4196,255],[0.3333,84]],[[0.4889,943],[0.4691,793],[0.4735,680],[0.4286,210],[0.4045,89]],[[0.4674,843],[0.4731,670],[0.4632,570],[0.4706,187],[0.4839,62]],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null]]}}};
+const CBI=(()=>{const a=[];TBL.cb.forEach(([lo,hi],i)=>{for(let c=lo;c<=hi;c++)a[c]=i});return a})();
+const tfKey=tf=>tf==='1d'?'1d':tf==='1h'?'1h':'15m';
+function tlIdx(tf,tau){const L=TBL.tl[tfKey(tf)];const x=Math.floor(tf==='1d'?tau/3600:tau/60);for(let i=0;i<L.length;i++)if(x>=L[i][0]&&x<=L[i][1])return i;return -1}
+// Truth: what a side bought at this price with this much time left actually won. Trend-neutral: averages the YES-side and NO-side bias,
+// so the period's big drop in BTC (-28%) and ETH (-37%), which flattered every NO, cancels out.
+function truth(m,side,cost,tau){if(m.type==='range'||m.type==='below')return null;const ci=CBI[Math.round(cost*100)],ti=tlIdx(m.tf,tau);if(ci==null||ti<0)return null;
+ const T=TBL.truth[tfKey(m.tf)],y=T.YES[ci][ti],n=T.NO[ci][ti],own=T[side][ci][ti];if(!y||!n)return null;if(Math.min(y[3],n[3])<(m.tf==='1d'?60:250))return null;
+ const bias=x=>x[0]-x[1]/100,b=(bias(y)+bias(n))/2;return{w:clamp(cost+b,0.001,0.999),bias:b,raw:own[0],rawBias:bias(own),ne:Math.min(y[3],n[3])}}
+function touchH(m,cost,tau,g){const ci=CBI[Math.round(cost*100)],ti=tlIdx(m.tf,tau);if(ci==null||ti<0||!g)return null;const x=TBL.touch[tfKey(m.tf)][g]?.[ci]?.[ti];return x&&x[1]>=150?{p:x[0],n:x[1]}:null}
+
+const SC={tf:['15m','1h','1d'].includes(store.get('fl.sctf','15m'))?store.get('fl.sctf','15m'):'15m',a:null,id:null,R:null,I:null,side:'YES',zoom:0,hx:null,ht:0,ck:'',opts:'',tixK:'',mcK:'',mc:null,mcT:null,
+ tix:{sd:'YES',C:0,tp:5,tpu:'c',sl:6,ts:3,...store.get('fl.tix',{})}};
+const HL={},DLAD={},PRESS={},TR={},KC={},KC60={},DAYC={},HEAT={},SCOOL={};let SCLAST={};
+const askOf=(m,sd)=>sd==='YES'?m.yesAsk:m.noAsk,bidOf=(m,sd)=>sd==='YES'?m.yesBid:m.noBid;
+const sprC=m=>Math.round((m.yesAsk-m.yesBid)*100);const r2=x=>Math.round(x*100)/100;
+function scPins(){const s=new Set();if(SC.id)s.add(SC.id);for(const r of LED)if(r.k==='t'&&r.o==null&&r.v==='K')s.add(r.id);return s}
+
+/* ---- data: daily 5pm ladders for BTC + ETH ---- */
+async function loadKDay(){if(!cfg.worker||!cfg.showKalshi)return;const now=Date.now();const pins=scPins();
+ for(const a of act()){if(a!=='BTC'&&a!=='ETH')continue;const ser=AS[a].kd;try{
+  let L=DLAD[a];if(!L||!L.ev||L.close<=now){const d=await kget(`/events?series_ticker=${ser}&status=open&limit=100`);
+   const evs=(d.events||[]).filter(e=>/17$/.test(e.event_ticker)).map(e=>({t:e.event_ticker,close:Date.parse(e.strike_date)})).filter(e=>e.close>now).sort((x,y)=>x.close-y.close);
+   if(!evs.length){DLAD[a]={ev:null,close:now+600000,t:now,ms:[]};continue}L=DLAD[a]={ev:evs[0].t,close:evs[0].close,t:0,ms:[]}}
+  const d=await kget(`/markets?event_ticker=${L.ev}&limit=300`);const all=d.markets||[];L.ms=all;L.t=now;if(all[0])L.open=Date.parse(all[0].open_time);
+  if(L.close-now<=65*60000)continue;   // final hour: the hourly loader owns these markets
+  const ms=all.map(m=>({m,mid:(+m.yes_bid_dollars+ +m.yes_ask_dollars)/2})).filter(x=>+x.m.yes_bid_dollars>0&&+x.m.yes_ask_dollars<1&&+x.m.yes_ask_dollars-(+x.m.yes_bid_dollars)<=0.10&&x.mid>=0.03&&x.mid<=0.97).sort((x,y)=>Math.abs(x.mid-.5)-Math.abs(y.mid-.5)).slice(0,10);
+  const fz=all.filter(m=>{const b=+m.yes_bid_dollars,y=+m.yes_ask_dollars;return b>0&&y<1&&y-b<=0.0301&&((y>=0.80&&y<=0.98)||(b>=0.02&&b<=0.20))}).slice(0,12);
+  const keep=new Set();for(const x of ms){kSet(x.m,a,'1d','above',now);keep.add('K:'+x.m.ticker);const z=MK.get('K:'+x.m.ticker);if(z)z.favOnly=false}
+  for(const m of[...fz,...all.filter(m=>pins.has('K:'+m.ticker))]){const id='K:'+m.ticker;if(keep.has(id))continue;kSet(m,a,'1d','above',now);keep.add(id);const z=MK.get(id);if(z)z.favOnly=true}
+  for(const[id,x]of MK)if(x.v==='K'&&!x.man&&x.asset===a&&x.tf==='1d'&&!keep.has(id)&&!pins.has(id))MK.delete(id)}catch(e){}}}
+
+/* ---- data: live order book, trade tape and contract candles ---- */
+async function scBook(id){const m=MK.get(id);if(!m||m.v!=='K'||m.man)return;try{const d=await kget(`/markets/${m.ticker}/orderbook?depth=12`);const ob=d.orderbook_fp||d.orderbook||{};
+ const pp=v=>{v=+v;return v>1?v/100:v},rw=a=>(a||[]).map(x=>[pp(x[0]),+x[1]]).filter(x=>x[0]>0&&x[0]<1&&x[1]>0).sort((p,q)=>p[0]-q[0]);
+ const yb=rw(ob.yes_dollars||ob.yes),nb=rw(ob.no_dollars||ob.no);
+ const m2=MK.get(id);if(!m2)return;const now=Date.now();const by=yb.length?yb[yb.length-1]:null,bn=nb.length?nb[nb.length-1]:null;
+ Object.assign(m2,{yesBid:by?by[0]:0,noBid:bn?bn[0]:0,yesAsk:bn?Math.round((1-bn[0])*100)/100:1,noAsk:by?Math.round((1-by[0])*100)/100:1,bt:now,depth:{t:now,YES:bn?bn[1]:0,NO:by?by[1]:0}});
+ const dy=by?yb.filter(x=>x[0]>=by[0]-0.0301).reduce((s,x)=>s+x[1],0):0,dn=bn?nb.filter(x=>x[0]>=bn[0]-0.0301).reduce((s,x)=>s+x[1],0):0;
+ const P=PRESS[id]=PRESS[id]||[];P.push({t:now,pr:dy+dn>0?(dy-dn)/(dy+dn):0,dy,dn});while(P.length&&now-P[0].t>3*3600000)P.shift()}catch(e){}}
+async function scTrades(id,init){const m=MK.get(id);if(!m||m.v!=='K'||m.man)return;const T=TR[id]=TR[id]||{t:0,last:0,a:[],ids:new Set()};const now=Date.now();
+ const min=T.last?Math.floor(T.last/1000)-2:Math.floor(Math.max(m.open||0,now-(m.tf==='15m'?1200000:3*3600000))/1000);let cur='',pg=0;
+ try{do{const d=await kget(`/markets/trades?ticker=${m.ticker}&limit=1000&min_ts=${min}${cur?'&cursor='+cur:''}`);
+  for(const x of d.trades||[]){const k=x.trade_id||(x.created_time+'|'+x.count_fp+'|'+x.yes_price_dollars);if(T.ids.has(k))continue;T.ids.add(k);const t=Date.parse(x.created_time);
+   T.a.push({t,c:+(x.count_fp??x.count??0),y:+(x.yes_price_dollars??(x.yes_price!=null?x.yes_price/100:0)),s:x.taker_side});if(t>T.last)T.last=t}
+  cur=d.cursor||'';pg++}while(cur&&pg<(init?2:1))}catch(e){}
+ T.a.sort((p,q)=>p.t-q.t);while(T.a.length&&now-T.a[0].t>4*3600000)T.a.shift();if(T.ids.size>30000)T.ids=new Set();T.t=now}
+const kcRow=c=>{const g=(o,k)=>{const v=o?.[k+'_dollars']??o?.[k];return v==null?null:+v};const yb=c.yes_bid||{},ya=c.yes_ask||{};
+ return{t:c.end_period_ts*1000,bo:g(yb,'open'),bh:g(yb,'high'),bl:g(yb,'low'),bc:g(yb,'close'),ao:g(ya,'open'),ah:g(ya,'high'),al:g(ya,'low'),ac:g(ya,'close'),v:+(c.volume_fp??c.volume??0)}};
+async function scCandles(id){const m=MK.get(id);if(!m||m.v!=='K'||m.man)return;const now=Date.now();const ok=c=>c.bc!=null&&c.ac!=null&&c.ac>0&&c.ac<=1;
+ try{const s=Math.floor(Math.max(m.open||0,now-(m.tf==='1d'?3*3600000:3*3600000))/1000);const d=await kget(`/series/${m.series}/markets/${m.ticker}/candlesticks?start_ts=${s}&end_ts=${Math.floor(now/1000)}&period_interval=1`);
+  KC[id]={t:now,c:(d.candlesticks||[]).map(kcRow).filter(ok)}}catch(e){KC[id]={t:now,c:KC[id]?.c||[]}}
+ if(m.tf==='1d'&&(!KC60[id]||now-KC60[id].t>300000)){try{const d=await kget(`/series/${m.series}/markets/${m.ticker}/candlesticks?start_ts=${Math.floor((m.open||now-90000000)/1000)}&end_ts=${Math.floor(now/1000)}&period_interval=60`);KC60[id]={t:now,c:(d.candlesticks||[]).map(kcRow).filter(ok)}}catch(e){}}}
+async function loadDayC(a){const now=Date.now();if(DAYC[a]&&now-DAYC[a].t<120000)return;try{const d=await J(`https://api.exchange.coinbase.com/products/${AS[a].cb}/candles?granularity=900&start=${new Date(now-28*3600000).toISOString()}&end=${new Date(now).toISOString()}`,10000);
+ DAYC[a]={t:now,c:d.map(r=>[r[0]*1000,r[3],r[2],r[1],r[4]]).sort((x,y)=>x[0]-y[0])}}catch(e){DAYC[a]={t:now-90000,c:DAYC[a]?.c||[]}}}
+let scN=0;
+async function scPoll(){if(!cfg.worker||!cfg.showKalshi)return;const now=Date.now();scN++;const vis=!$('#t-sc').hidden,fast=new Set(),slow=new Set();
+ if(SC.id&&MK.has(SC.id)&&vis)fast.add(SC.id);
+ for(const m of MK.values())if(m.v==='K'&&!m.man&&m.tf==='15m'&&m.close>now)fast.add(m.id);   // both 15m markets: quotes + pressure every 3 s
+ for(const r of LED)if(r.k==='t'&&r.o==null&&(r.tp!=null||r.te!=null||r.strat==='lock')&&MK.has(r.id))fast.add(r.id);   // anything with a live exit
+ for(const a of act()){const h=[...MK.values()].filter(m=>m.v==='K'&&!m.man&&m.asset===a&&m.tf==='1h'&&m.type==='above'&&m.close>now&&m.yesAsk<1&&m.yesBid>0).sort((x,y)=>Math.abs((x.yesBid+x.yesAsk)/2-.5)-Math.abs((y.yesBid+y.yesAsk)/2-.5))[0];if(h&&!fast.has(h.id))slow.add(h.id)}
+ const list=[...fast].slice(0,6).concat(scN%2?[]:[...slow]);await Promise.all(list.map(scBook));
+ if(scN%3===0){const tr=[...fast].filter(id=>MK.get(id)?.tf==='15m'||id===SC.id).slice(0,3);for(const id of tr)await scTrades(id,!TR[id])}
+ if(vis&&SC.id&&MK.has(SC.id)){const m=MK.get(SC.id),k=KC[SC.id];if(!k||now-k.t>(m.tf==='1d'?60000:30000))scCandles(SC.id);if(m.tf==='1d'||SC.tf==='1d')loadDayC(m.asset)}}
+
+/* ---- indicators ---- */
+function snapOf(id,now){const h=HIST.get(id);if(!h||h.length<3)return null;const p1=h[h.length-1];if(now-p1.t>15000||p1.mid==null)return null;let p0=null;
+ for(let i=h.length-2;i>=0;i--)if(p1.t-h[i].t>=55000){p0=h[i];break}
+ if(!p0||p1.t-p0.t>95000||p0.mid==null)return null;const jump=p1.mid-p0.mid,dP=p1.P-p0.P;return{jump,dP,snap:jump-dP}}
+function flowOf(id,now,win=120000){const T=TR[id];if(!T)return null;let y=0,n=0;for(let i=T.a.length-1;i>=0;i--){const x=T.a[i];if(now-x.t>win)break;if(x.s==='yes')y+=x.c;else n+=x.c}
+ return{y,n,fl:y+n>0?(y-n)/(y+n):0,rate:(y+n)/(win/60000),last:T.a[T.a.length-1]||null,fresh:now-T.t<20000}}
+const MOMC={};function momOf(a,now){const c=MOMC[a];if(c&&now-c.t<1500)return c.v;const v=favMom(a,'YES',now);MOMC[a]={t:now,v};return v}
+function pressOf(id,now){const P=PRESS[id];if(!P||!P.length)return null;const p=P[P.length-1];return now-p.t<15000?p:null}
+function scInd(m,R,now,full){const I={tau:R.tau};if(R.P==null)return I;const a=m.asset;
+ I.snap=snapOf(m.id,now);I.flow=flowOf(m.id,now);I.press=pressOf(m.id,now);I.mom=momOf(a,now);
+ for(const sd of['YES','NO']){const ask=askOf(m,sd);if(!(ask>0&&ask<1))continue;const fee=feeFor(m,ask,100),fair=sd==='YES'?R.P:1-R.P,tr=truth(m,sd,ask,R.tau);
+  I[sd]={ask,fee,fair,tr,hEdge:tr?tr.w-ask-fee:null,mEdge:fair-ask-fee}}
+ if(full&&R.x){const x=R.x;
+  if(R.tau>75)I.theta=modelP(m,{...x,now:now+60000})-R.P;
+  const dS=a==='BTC'?{'15m':25,'1h':100,'1d':250}[m.tf]||100:a==='ETH'?{'15m':1,'1h':5,'1d':10}[m.tf]||5:R.S*0.001;I.dS=dS;I.delta=modelP(m,{...x,S:x.S+dS})-R.P;
+  const sd=Math.sqrt(fwdVar(a,now,m.close,x.w,x.base,x.ev)*(x.scale||1));I.sd=sd;
+  if(m.type==='range'&&m.L&&m.U){I.z=Math.min(Math.log(R.S/m.L),Math.log(m.U/R.S))/sd;I.zr=true}else if(m.K)I.z=Math.log(R.S/m.K)/sd;
+  if(R.tau<60&&m.type!=='range'&&m.K){const b=(SP[a]?.buf||[]).filter(p=>p[0]>=m.close-60000);if(b.length){const avg=b.reduce((s,p)=>s+p[1],0)/b.length,e=60-R.tau;I.lock={e,avg,need:(60*m.K-e*avg)/Math.max(R.tau,1)}}}}
+ return I}
+// Heat: the volatility the market's prices imply, as a multiple of Fairline's own forecast (fit across the strikes near 50c)
+function heatFit(a,tf,now){const ms=[...MK.values()].filter(m=>m.v==='K'&&!m.man&&m.asset===a&&m.tf===tf&&(m.type==='above'||m.type==='updown')&&m.close>now+120000&&m.yesBid>0&&m.yesAsk<1&&m.yesAsk-m.yesBid<=0.04);
+ const pts=ms.map(m=>({m,mid:(m.yesBid+m.yesAsk)/2})).filter(p=>p.mid>=0.12&&p.mid<=0.88&&(tf!=='15m'||Math.abs(p.mid-.5)>=0.08));if(pts.length<(tf==='15m'?1:2))return null;
+ const S=comp(a),vb=VOL[a]?.base;if(!S||!vb)return null;const w=ivRate(a)!=null?wIV((pts[0].m.close-now)/1000):0;const x={a,S,now,w,base:vb,ev:(cfg.events||[]).filter(e=>e>now-300000),mKnown:null};
+ let best=null;for(let k=0.5;k<=2.5001;k+=0.05){let err=0;for(const p of pts)err+=(modelP(p.m,{...x,scale:k*k})-p.mid)**2;if(!best||err<best.err)best={k,err}}
+ if(best.k<0.51||best.k>2.49)return null;   // stuck at the edge of the search: the prices don't pin volatility down
+ return{k:Math.round(best.k*100)/100,n:pts.length,t:now}}
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function winAt(m,S){if(m.type==='range')return S>=m.L&&S<m.U?1:0;if(m.type==='below')return S<m.K?1:0;return S>=m.K?1:0}
+// Scalp simulator: random coin paths with Fairline's volatility, contract repriced by the model at each step, keeping today's market-vs-model gap and half-spread
+function scMC(m,R,side,entry,tp,sl,te,N){const x=R.x;if(!x||R.P==null||!(entry>0))return null;const now=x.now,end=Math.min(m.close,te||m.close),T=(end-now)/1000;if(T<3)return null;
+ const steps=clamp(Math.round(T/(m.tf==='1d'?240:m.tf==='1h'?20:6)),6,60),dt=T/steps*1000;const off=(R.mid??R.P)-R.P,hs=Math.max(0.005,(m.yesAsk-m.yesBid)/2);
+ const sv=[];for(let i=0;i<steps;i++){const t0=now+i*dt;sv.push(Math.sqrt(fwdVar(x.a,t0,t0+dt,x.w,x.base,x.ev)*(x.scale||1)))}
+ let nT=0,nS=0,ev=0;const xfT=tp!=null?makerFee(m,tp,100):0;
+ for(let p=0;p<N;p++){let ln=Math.log(x.S),out=null;
+  for(let i=0;i<steps;i++){ln+=sv[i]*gauss();const t=now+(i+1)*dt;if(t>=m.close-500)break;
+   const Py=modelP(m,{...x,S:Math.exp(ln),now:t,mKnown:null}),bid=clamp((side==='YES'?Py+off:1-Py-off)-hs,0.01,0.99);
+   if(tp!=null&&bid>=tp){out=tp-xfT;nT++;break}if(sl!=null&&bid<=sl){out=bid-feeFor(m,bid,100);nS++;break}if(te&&t>=te-1){out=bid-feeFor(m,bid,100);break}}
+  if(out==null){const w=winAt(m,Math.exp(ln));out=side==='YES'?w:1-w}ev+=out-entry}
+ return{pT:nT/N,pS:nS/N,pX:1-(nT+nS)/N,ev:ev/N-feeFor(m,entry,100)}}
+
+/* ---- strategies (paper) ---- */
+const EVL={ok:'TESTED +',data:'DATA-BACKED',new:'NEW · UNTESTED',neg:'TESTED −',model:'ORIGINAL',you:'MANUAL'};
+const STRATS=[
+ {k:'tru',ic:'⚖️',n:'Truth Fade',tfs:['15m','1h','1d'],ev:'data',d:'Buys the side the last two months say is underpriced at this exact price and time left (trend-neutral Truth), only when that beats Kalshi\'s fee by 0.5¢ or more and the spread is 1–2¢. In practice: 80–97¢ favorites. One bet per coin per event, held to settlement. Same price bias as ⭐ Favorites, broader rule, not separately backtested.'},
+ {k:'snap',ic:'🪃',n:'Snapback',tfs:['15m','1h'],ev:'new',d:'Fades a contract that moved 7¢+ (hourly: 6¢+) more than the coin\'s move justifies over the last minute. Contract 15–85¢, spread ≤2¢ (hourly ≤3¢), 3+ min left (hourly 8+). Target +3 to +8¢ (half the overshoot), stop −6¢, time stop 3 min (hourly 6).'},
+ {k:'lag',ic:'🏃',n:'Catch-up',tfs:['15m','1h'],ev:'new',d:'The coin moved and the contract hasn\'t followed: the model jumped 5¢+ in a minute, the contract moved less than half of that, and the model sits 4¢+ above the ask. Buys the lagging side. Target 60% of the gap (min +3¢), stop −5¢, time stop 2 min (hourly 4).'},
+ {k:'spk',ic:'⚡',n:'Spike Seller',tfs:['15m','1h'],ev:'new',d:'Your "sell into a quick spike either way" idea: after an 8¢+ move in a minute, take the other side. Contract 10–90¢, spread ≤3¢. Target +4¢, stop −6¢, time stop 2 min (hourly 4). Pure price, no model, so compare it with 🪃 Snapback.'},
+ {k:'brk',ic:'🚀',n:'Breakout',tfs:['15m'],ev:'new',d:'Coin momentum of 1.2σ+ over 5 minutes, takers buying the same way (flow +0.3 or more on 20+ contracts) and the book not leaning against it. Buys the momentum side at 30–70¢ with 4–12 min left. Target +6¢, stop −5¢, time stop 4 min.'},
+ {k:'lock',ic:'🔒',n:'Last-Minute Lock',tfs:['15m','1h'],ev:'new',d:'Final 75 seconds: Kalshi settles on a 60-second average, so most of the answer is already in. When the model (with the part of the average already locked) says 97%+ and that side still costs 95¢ or less with fresh quotes, buy it and hold. Bots race for this; paper tells you whether a phone can.'},
+ {k:'lot',ic:'🎟️',n:'Lottery (control)',tfs:['15m','1h','1d'],ev:'neg',d:'The 1–5¢ "sell it when it doubles" play, kept as a control: buys the closest-to-the-money 1–5¢ side early in the window with a resting sell at 2×. Backtest: +50% exits lost 40–70% of the stake per bet and doubling is worse. If this looks good for a week, the week was unusual.'}];
+const STR=Object.fromEntries(STRATS.map(s=>[s.k,s]));const stOn=k=>cfg.st?.[k]!==false;
+const SE={
+ tru(m,R,I,now){let best=null;for(const sd of['YES','NO']){const s=I[sd];if(!s||!s.tr)continue;if(!best||s.hEdge>best.e)best={sd,e:s.hEdge,ask:s.ask}}if(!best)return null;const why=[];
+  if(best.e<0.005)why.push(`best hist edge ${best.e>=0?'+':''}${(best.e*100).toFixed(1)}¢ (needs +0.5¢)`);if(sprC(m)>2)why.push(`spread ${sprC(m)}¢ (needs ≤2¢)`);if(best.ask<0.05||best.ask>0.97)why.push('price outside 5–97¢');
+  return{sd:best.sd,why,plan:{},score:best.e,note:`hist edge +${(best.e*100).toFixed(1)}¢`,grp:'tru|'+m.asset+'|'+m.tf+'|'+m.close}},
+ snap(m,R,I,now){const s=I.snap;if(!s)return null;const th=m.tf==='15m'?0.07:0.06,sd=s.snap>0?'NO':'YES',ask=askOf(m,sd),why=[];
+  if(Math.abs(s.snap)<th)why.push(`snap ${s.snap>=0?'+':''}${(s.snap*100).toFixed(1)}¢ (needs ±${Math.round(th*100)}¢)`);if(!(ask>=0.15&&ask<=0.85))why.push('price outside 15–85¢');
+  if(sprC(m)>(m.tf==='15m'?2:3))why.push(`spread ${sprC(m)}¢`);const minT=m.tf==='15m'?180:480;if(R.tau<minT)why.push(`under ${minT/60} min left`);
+  return{sd,why,score:Math.abs(s.snap),plan:{tp:r2(ask+clamp(Math.round(Math.abs(s.snap)*50)/100,0.03,0.08)),sl:r2(ask-0.06),te:now+(m.tf==='15m'?180000:360000)},note:`snap ${(s.snap*100).toFixed(1)}¢`,fast:1}},
+ lag(m,R,I,now){const s=I.snap;if(!s)return null;const sd=s.dP>=0?'YES':'NO',S=I[sd];if(!S)return null;const mv=Math.abs(s.dP),fol=sd==='YES'?s.jump:-s.jump,gap=S.fair-S.ask,why=[];
+  if(mv<0.05)why.push(`model moved ${(mv*100).toFixed(1)}¢ in a minute (needs 5¢)`);else if(fol>0.5*mv)why.push('contract already caught up');
+  if(gap<0.04)why.push(`model only ${c1(gap)} over the ask (needs 4¢)`);if(!(S.ask>=0.10&&S.ask<=0.90))why.push('price outside 10–90¢');if(sprC(m)>3)why.push(`spread ${sprC(m)}¢`);
+  const minT=m.tf==='15m'?120:300;if(R.tau<minT)why.push(`under ${minT/60} min left`);
+  return{sd,why,score:gap,plan:{tp:r2(S.ask+Math.max(0.03,Math.round(gap*60)/100)),sl:r2(S.ask-0.05),te:now+(m.tf==='15m'?120000:240000)},note:`gap ${c1(gap)}`,fast:1}},
+ spk(m,R,I,now){const s=I.snap;if(!s)return null;const j=s.jump,sd=j>0?'NO':'YES',ask=askOf(m,sd),why=[];
+  if(Math.abs(j)<0.08)why.push(`1-min move ${j>=0?'+':''}${(j*100).toFixed(1)}¢ (needs ±8¢)`);if(!(ask>=0.10&&ask<=0.90))why.push('price outside 10–90¢');if(sprC(m)>3)why.push(`spread ${sprC(m)}¢`);
+  const minT=m.tf==='15m'?180:480;if(R.tau<minT)why.push(`under ${minT/60} min left`);
+  return{sd,why,score:Math.abs(j),plan:{tp:r2(ask+0.04),sl:r2(ask-0.06),te:now+(m.tf==='15m'?120000:240000)},note:`jump ${(j*100).toFixed(1)}¢`,fast:1}},
+ brk(m,R,I,now){if(m.tf!=='15m'||I.mom==null)return null;const mo=I.mom,sd=mo>=0?'YES':'NO',ask=askOf(m,sd),f=I.flow,p=I.press,why=[];
+  if(Math.abs(mo)<1.2)why.push(`momentum ${mo>=0?'+':''}${mo.toFixed(1)}σ (needs ±1.2σ)`);
+  const fs=f&&f.y+f.n>=20?(sd==='YES'?f.fl:-f.fl):null;if(fs==null)why.push('fewer than 20 contracts traded in 2 min');else if(fs<0.3)why.push('takers not confirming');
+  const ps=p?(sd==='YES'?p.pr:-p.pr):null;if(ps!=null&&ps<0)why.push('book leaning the other way');
+  if(!(ask>=0.30&&ask<=0.70))why.push('price outside 30–70¢');if(sprC(m)>2)why.push(`spread ${sprC(m)}¢`);if(R.tau<240||R.tau>720)why.push('needs 4–12 min left');
+  return{sd,why,score:Math.abs(mo),plan:{tp:r2(ask+0.06),sl:r2(ask-0.05),te:now+240000},note:`momentum ${mo.toFixed(1)}σ`,fast:1}},
+ lock(m,R,I,now){if(m.type==='range'||R.tau>75||R.tau<8)return null;const sd=R.P>=0.5?'YES':'NO',fair=sd==='YES'?R.P:1-R.P,ask=askOf(m,sd),why=[];
+  if(fair<0.97)why.push(`model ${pctS(fair)} (needs 97%)`);if(!(ask>0&&ask<=0.95))why.push(`ask ${c1(ask)} (needs ≤95¢)`);if(sprC(m)>3)why.push(`spread ${sprC(m)}¢`);
+  return{sd,why,score:fair-ask,plan:{},note:`model ${pctS(fair)} vs ${c1(ask)}`,fast:1}},
+ lot(m,R,I,now){const L=TBL.tl[tfKey(m.tf)][0],x=Math.floor(m.tf==='1d'?R.tau/3600:R.tau/60);let best=null;
+  for(const sd of['YES','NO']){const a=askOf(m,sd);if(a>=0.01&&a<=0.05&&(!best||a>best.a))best={sd,a}}if(!best)return null;const why=[];
+  if(x<L[0]||x>L[1])why.push(`only with ${L[0]}–${L[1]} ${m.tf==='1d'?'h':'min'} left`);if(!(bidOf(m,best.sd)>0))why.push('no bid to sell into');
+  const tp=Math.min(0.99,Math.ceil(best.a*200-1e-9)/100);return{sd:best.sd,why,score:best.a,plan:{tp},note:`${c1(best.a)} → sell at ${c1(tp)}`,grp:'lot|'+m.asset+'|'+m.tf+'|'+m.close}}};
+function scEnter(k,m,R,x,now){const px=askOf(m,x.sd);if(!(px>0&&px<1))return null;const C=Math.max(1,Math.floor((cfg.scStake||100)/px)),fee=feeFor(m,px,C),p=x.plan||{};
+ const r={k:'t',strat:k,id:m.id,v:'K',a:m.asset,tf:m.tf,sl:m.ticker,cl:m.close,t:now,sd:x.sd,px,fee,cost:px+fee,C,tp:p.tp!=null?Math.min(0.99,p.tp):null,slx:p.sl!=null&&p.sl>0?p.sl:null,te:p.te??null,grp:x.grp||m.id,
+  q:R.q??null,P:R.P??null,mid:R.mid??null,e:null,call:STR[k]?STR[k].n:k,why:x.note||'',o:null,pnl:null,ds:desc(m)};
+ LED.push(r);saveLed();if(cfg.scAlert||m.id===SC.id){try{navigator.vibrate&&navigator.vibrate(80)}catch(e){}toast(`${STR[k]?.ic||''} ${STR[k]?.n||k} (paper): BUY ${sideName(m,x.sd)} ${desc(m)} @ ${c1(px)}`)}return r}
+function scRun(now,res){if(!cfg.worker||!cfg.showKalshi)return;const open=LED.filter(r=>r.k==='t'&&r.o==null&&r.strat);const by={};for(const r of open)(by[r.strat]=by[r.strat]||[]).push(r);const out={};
+ for(const R of res){const m=R.m;if(m.v!=='K'||m.man||m.close<=now||R.P==null||R.mid==null||!['15m','1h','1d'].includes(m.tf))continue;
+  const age=now-(m.bt||0),slow=age>(m.tf==='15m'?9000:m.tf==='1h'?25000:70000),spot=spotAge(m.asset)>5000;const I=scInd(m,R,now,false);
+  for(const s of STRATS){if(!s.tfs.includes(m.tf))continue;let x=null;try{x=SE[s.k](m,R,I,now)}catch(e){}if(!x)continue;
+   if(spot)x.why.unshift('coin price feed stale');else if(slow||(x.fast&&age>4500))x.why.unshift(`quotes ${Math.round(age/1000)}s old${x.fast?' (needs live order book)':''}`);
+   (out[s.k]=out[s.k]||[]).push({m,R,x})}}
+ SCLAST=out;
+ for(const s of STRATS){if(!stOn(s.k))continue;const L=(out[s.k]||[]).filter(e=>!e.x.why.length);if(!L.length)continue;const mine=by[s.k]=by[s.k]||[];const G={};
+  for(const e of L){const g=e.x.grp||e.m.id;if(!G[g]||(e.x.score??0)>(G[g].x.score??0))G[g]=e}
+  for(const[g,e]of Object.entries(G)){if(mine.length>=4)break;if(mine.some(r=>(r.grp||r.id)===g))continue;const ck=s.k+'|'+e.m.id;if(SCOOL[ck]>now)continue;
+   const r=scEnter(s.k,e.m,e.R,e.x,now);if(r){mine.push(r);SCOOL[ck]=now+(e.m.tf==='15m'?120000:300000)}}}}
+// Paper exits: targets are resting sells (filled once the bid reaches them, maker fee); stops and time stops sell at the bid (taker fee)
+function scExits(now){for(const r of LED){if(r.k!=='t'||r.o!=null||r.xp!=null||(r.tp==null&&r.slx==null&&r.te==null))continue;const m=MK.get(r.id);if(!m||now>=m.close)continue;
+ if(now-(m.bt||0)>(m.tf==='15m'?10000:30000))continue;const bid=bidOf(m,r.sd);if(!(bid>0))continue;let xr=null,xp=null,xf=0;
+ if(r.tp!=null&&bid>=r.tp-1e-9){xr='target';xp=r.tp;xf=makerFee(m,xp,r.C)}else if(r.slx!=null&&bid<=r.slx+1e-9){xr='stop';xp=bid;xf=feeFor(m,xp,r.C)}else if(r.te!=null&&now>=r.te){xr='time';xp=bid;xf=feeFor(m,xp,r.C)}
+ if(xr){Object.assign(r,{xp,xt:now,xr,xfee:xf,o:'x',pnl:r.C*(xp-r.px)-r.C*r.fee-r.C*xf});saveLed();if(r.strat==='tix'||m.id===SC.id&&cfg.scAlert)toast(`${r.strat==='tix'?'✋ Scalp':STR[r.strat]?.n||''} closed (${xr}): ${r.pnl>=0?'+':''}${usd(r.pnl)}`)}}}
+function scCloseTrade(t){const r=LED.find(x=>x.k==='t'&&x.t===t&&x.o==null);if(!r)return;const m=MK.get(r.id);if(!m){toast('That market is not loaded right now');return}const bid=bidOf(m,r.sd);if(!(bid>0)){toast('No bid to sell into');return}
+ const xf=feeFor(m,bid,r.C);Object.assign(r,{xp:bid,xt:Date.now(),xr:'manual',xfee:xf,o:'x',pnl:r.C*(bid-r.px)-r.C*r.fee-r.C*xf});saveLed();toast(`Closed at ${c1(bid)}: ${r.pnl>=0?'+':''}${usd(r.pnl)}`)}
+
+/* ---- Scalp tab UI ---- */
+function scMarkets(a,tf,now){const dc=DLAD[a]?.close;return LAST.filter(R=>{const m=R.m;if(m.v!=='K'||m.man||m.asset!==a||m.close<=now)return false;
+ if(tf==='1d')return m.tf==='1d'||(m.tf==='1h'&&dc&&m.close===dc&&m.type==='above');return m.tf===tf})}
+function scPick(x,isId){const now=Date.now(),id=isId?x:'K:'+x;
+ if(!MK.has(id)&&!isId){const dl=DLAD[SC.a],raw=(SC.tf==='1d'?dl?.ms:HL[SC.a+'|above']?.ms||[])?.find(m=>m.ticker===x);
+  if(raw){const tf=SC.tf==='1d'&&dl&&dl.close-now>65*60000?'1d':'1h';kSet(raw,SC.a,tf,'above',now);const z=MK.get(id);if(z)z.favOnly=true}}
+ if(MK.has(id)){SC.id=id;SC.opts='';SC.tixK='';SC.mcK='';scBook(id);scCandles(id);scTrades(id,true)}}
+function scFocus(now){const L=scMarkets(SC.a,SC.tf,now);let R=L.find(R=>R.m.id===SC.id)||null;
+ if(!R&&SC.id&&MK.has(SC.id)){const m=MK.get(SC.id),dc=DLAD[SC.a]?.close;if(m.asset===SC.a&&m.close>now&&(m.tf===SC.tf||(SC.tf==='1d'&&m.tf==='1h'&&m.close===dc)))R=evaluate(m,now)}
+ if(!R){R=SC.tf==='15m'?L.sort((x,y)=>x.m.close-y.m.close)[0]:L.filter(R=>R.m.type==='above'&&!R.m.favOnly&&R.mid!=null).sort((x,y)=>Math.abs(x.mid-.5)-Math.abs(y.mid-.5))[0]||L[0];R=R||null;
+  if(R){SC.id=R.m.id;SC.tixK='';SC.mcK='';scBook(R.m.id);scCandles(R.m.id);scTrades(R.m.id,true)}else if(SC.id&&!MK.has(SC.id))SC.id=null}
+ return R}
+function scHeadHTML(R,I,now){const m=R.m,f=I.flow,d=m.depth&&now-m.depth.t<20000?m.depth:null,q=now-(m.bt||0);
+ return `<div class="card" style="padding:10px"><div class="top"><div><span class="ven K">KALSHI ${m.tf==='1d'?'DAILY':m.tf==='1h'?'HOURLY':'15 MIN'}</span><b>${esc(desc(m))}</b>
+ <div class="muted">closes ${etT(m.close)} · spread ${sprC(m)}¢${d?` · size ${Math.floor(d.YES)} / ${Math.floor(d.NO)}`:''}${f&&f.last?` · last trade ${c1(f.last.y)} ${Math.max(0,Math.round((now-f.last.t)/1000))}s ago`:''}${q>12000?` · <span class="am">quotes ${Math.round(q/1000)}s old</span>`:''}</div></div><div class="tl">${left(R.tau)}</div></div>
+ <div class="qrow"><button class="qbtn y ${SC.tix.sd==='YES'?'on':''}" data-qb="YES">BUY ${sideName(m,'YES')} ${c1(m.yesAsk)}<small>bid ${c1(m.yesBid)}${R.P!=null?' · fair '+pctS(R.P):''}</small></button><button class="qbtn n ${SC.tix.sd==='NO'?'on':''}" data-qb="NO">BUY ${sideName(m,'NO')} ${c1(m.noAsk)}<small>bid ${c1(m.noBid)}${R.P!=null?' · fair '+pctS(1-R.P):''}</small></button></div>
+ <div class="call ${callCls(R.call)}" style="margin-top:8px">${esc(chCallTxt(R))}</div></div>`}
+function scTiles(m,R,I,now){if(R.P==null)return`<div class="tile" style="grid-column:1/-1"><span>Indicators</span><b>…</b><i>${esc(R.reason||'loading coin prices and volatility')}</i></div>`;
+ const t=[],T=(l,v,s,c)=>t.push(`<div class="tile ${c||''}"><span>${l}</span><b>${v}</b><i>${s}</i></div>`),sn=s=>sideName(m,s),sg=(v,d=1)=>(v>=0?'+':'')+v.toFixed(d);
+ if(R.mid!=null){const gap=R.P-R.mid;T('Fair (model)',`${sn('YES')} ${pctS(R.P)}`,`market ${pctS(R.mid)} · ${Math.abs(gap)<0.005?'in line':(gap>0?sn('YES'):sn('NO'))+' '+c1(Math.abs(gap))+' cheap'}`,Math.abs(gap)>=0.03?'a':'')}
+ else T('Fair (model)',`${sn('YES')} ${pctS(R.P)}`,'no two-sided market right now','');
+ const he=['YES','NO'].map(s=>I[s]&&I[s].tr?{s,e:I[s].hEdge,tr:I[s].tr}:null).filter(Boolean).sort((p,q)=>q.e-p.e);
+ if(he.length){const b=he[0];T('Truth (history)',`${sn(b.s)} ${sg(b.e*100)}¢`,`${sn(b.s)} at ${c1(I[b.s].ask)} won ${pctS(b.tr.w)} · ${b.tr.ne.toLocaleString()} ${m.tf==='15m'?'markets':m.tf==='1h'?'hours':'days'}`,b.e>=0.005?'g':b.e<-0.02?'r':'')}
+ else T('Truth (history)','–',R.tau<60?'not in the final minute':m.type==='range'?'not built for range contracts':'not enough history at this price & time','');
+ const th=m.tf==='15m'?0.07:0.06;if(I.snap){const s=I.snap.snap;T('Snap (1 min)',`${sg(s*100)}¢`,Math.abs(s)<0.02?'moving in step with the coin':s>0?`${sn('YES')} ran ahead of ${m.asset}`:`${sn('YES')} fell further than ${m.asset}`,Math.abs(s)>=th?'a':'')}
+ else T('Snap (1 min)','–','needs a minute of live prices','');
+ if(I.theta!=null)T('Θ decay',`${sg(I.theta*100,2)}¢/min`,`${sn('YES')} if ${m.asset} sits still`,'');
+ if(I.delta!=null)T(`Δ per $${I.dS}`,`${sg(I.delta*100)}¢`,`${sn('YES')} move per $${I.dS} of ${m.asset}`,'c');
+ if(I.z!=null&&isFinite(I.z))T('Z to strike',`${sg(I.z,2)}σ`,I.zr?'to the nearer edge of the range':`${m.asset} ${I.z>=0?'above':'below'} · ±${(I.sd*100).toFixed(2)}% expected to close`,Math.abs(I.z)>=2?'a':'');
+ const p=I.press;T('Pressure',p?sg(p.pr,2):'–',p?`${sn('YES')} bids ${Math.round(p.dy).toLocaleString()} vs ${sn('NO')} ${Math.round(p.dn).toLocaleString()} (3¢ deep)`:'order book loading','');
+ const f=I.flow;T('Flow (2 min)',f&&f.y+f.n>0?sg(f.fl,2):'–',f?(f.y+f.n>0?`${Math.round(f.rate).toLocaleString()}/min · takers buying ${f.fl>=0?sn('YES'):sn('NO')}`:'no trades in 2 min'):'trade tape loading',f&&Math.abs(f.fl)>=0.5&&f.y+f.n>=20?'a':'');
+ const h=HEAT[m.asset+'|'+m.tf]||HEAT[m.asset+'|1h'];T('Heat',h?h.k.toFixed(2)+'×':'–',h?(h.k>1.1?'market pricing more movement than the coin makes':h.k<0.9?'market pricing less movement than the coin makes':'market and coin volatility agree'):'needs strikes near 50¢',h&&(h.k>1.2||h.k<0.85)?'a':'');
+ const sd=SC.tix.sd,S=I[sd];if(S){const g=S.ask<0.15?'x2':'+5',hh=touchH(m,S.ask,R.tau,g),mc=SC.mcT&&SC.mcT.k===m.id+sd+g&&now-SC.mcT.t<20000?SC.mcT:null;
+  T(`Touch ${g==='x2'?'2×':'+5¢'} · ${sn(sd)}`,hh?pctS(hh.p):mc?pctS(mc.p):'–',`${hh?'history':'model'} · from ${c1(S.ask)}${hh&&mc?` · model ${pctS(mc.p)}`:''}`,'')}
+ if(I.mom!=null)T('Momentum 5m',`${sg(I.mom)}σ`,`${m.asset} ${I.mom>=0?'up':'down'} vs a normal 5 min`,Math.abs(I.mom)>=1.2?'a':'');
+ if(I.lock)T('Lock (avg)',`${Math.round(I.lock.e)}/60 s in`,`${sn('YES')} needs the rest ≥ ${axP(I.lock.need)} · now ${axP(R.S)}`,'a');
+ return t.join('')}
+function scStratHTML(m,R,now){const rows=[];
+ for(const s of STRATS){if(!s.tfs.includes(m.tf))continue;const e=(SCLAST[s.k]||[]).find(x=>x.m.id===m.id),held=LED.find(r=>r.k==='t'&&r.strat===s.k&&r.id===m.id&&r.o==null);let b,txt;
+  if(held){b='<span class="fbad in">IN</span>';txt=`${sideName(m,held.sd)} ${held.C}× @ ${c1(held.px)}${held.tp!=null?` · target ${c1(held.tp)}`:''}${held.slx!=null?` · stop ${c1(held.slx)}`:''}${held.te?` · ${left(Math.max(0,(held.te-now)/1000))} left`:' · holding to settlement'}`}
+  else if(!stOn(s.k)){b='<span class="fbad wt">OFF</span>';txt='switched off (Lab or Settings)'}
+  else if(!e){b='<span class="fbad wt">—</span>';txt=R.mid==null?'one side has no bids right now':s.k==='lot'?'no 1–5¢ side on this market':s.k==='lock'?'final 75 seconds only':s.k==='tru'?'no history for this price & time':s.k==='brk'?'needs 5 min of coin prices':'needs a minute of live prices'}
+  else if(!e.x.why.length){b='<span class="fbad go">ENTRY</span>';txt=`${sideName(m,e.x.sd)} @ ${c1(askOf(m,e.x.sd))} · ${esc(e.x.note||'')}`}
+  else{b='<span class="fbad wt">WATCH</span>';txt=`${sideName(m,e.x.sd)} · ${esc(e.x.why.slice(0,2).join(' · '))}`}
+  rows.push(`<div class="frow">${b}<div style="flex:1;min-width:0"><b>${s.ic} ${esc(s.n)}</b><span class="ev ${s.ev}">${EVL[s.ev]}</span><div class="muted">${txt}</div></div></div>`)}
+ return `<div class="card"><h2>Strategies on this market</h2><div class="muted">Paper only. They also run on every other loaded market; compare them in 🧪 Lab.</div>${rows.join('')}</div>`}
+function scTixPlan(R,now){const m=R.m,t=SC.tix,ask=askOf(m,t.sd),bid=bidOf(m,t.sd);if(!(ask>0&&ask<1))return null;const C=t.C>0?t.C:Math.max(1,Math.floor((cfg.scStake||100)/ask)),fee=feeFor(m,ask,C);
+ let tp=t.tp>0?(t.tpu==='%'?Math.ceil(ask*(1+t.tp/100)*100-1e-9)/100:Math.round((ask+t.tp/100)*100)/100):null;if(tp!=null)tp=Math.min(0.99,tp);
+ const sl=t.sl>0?Math.round((ask-t.sl/100)*100)/100:null;return{m,sd:t.sd,ask,bid,C,fee,tp,sl:sl!=null&&sl>0?sl:null,te:t.ts>0?now+t.ts*60000:null}}
+function scTix(R,now){const box=$('#scTix');box.hidden=false;const m=R.m,t=SC.tix;
+ if(SC.tixK!==m.id+'|'+t.sd){SC.tixK=m.id+'|'+t.sd;
+  box.innerHTML=`<h2>✋ Scalp ticket (paper)</h2><div class="row"><button class="btn sm ${t.sd==='YES'?'':'alt'}" data-tsd="YES" style="flex:1">Buy ${sideName(m,'YES')}</button><button class="btn sm ${t.sd==='NO'?'':'alt'}" data-tsd="NO" style="flex:1">Buy ${sideName(m,'NO')}</button></div>
+  <div class="g2"><div><label>Contracts (0 = $${cfg.scStake||100} worth)</label><input id="txC" inputmode="numeric" value="${t.C||0}"></div><div><label>Target</label><div style="display:flex;gap:6px"><input id="txTp" inputmode="decimal" value="${t.tp}" style="flex:1;min-width:0"><select id="txTu" style="width:72px"><option value="c"${t.tpu==='c'?' selected':''}>+¢</option><option value="%"${t.tpu==='%'?' selected':''}>+%</option></select></div></div>
+  <div><label>Stop (¢ under entry, 0 = none)</label><input id="txSl" inputmode="decimal" value="${t.sl}"></div><div><label>Time stop (min, 0 = none)</label><input id="txTs" inputmode="decimal" value="${t.ts}"></div></div>
+  <div id="txOut" class="det"></div><div class="row"><button class="btn" id="txGo" style="flex:1">Paper buy</button></div>`;
+  const upd=()=>{t.C=Math.max(0,Math.floor(+$('#txC').value||0));t.tp=Math.max(0,+$('#txTp').value||0);t.tpu=$('#txTu').value;t.sl=Math.max(0,+$('#txSl').value||0);t.ts=Math.max(0,+$('#txTs').value||0);store.set('fl.tix',{...t});SC.mcK='';scTixOut(SC.R,Date.now())};
+  for(const id of['txC','txTp','txTu','txSl','txTs']){$('#'+id).oninput=upd;$('#'+id).onchange=upd}$('#txGo').onclick=scTixBuy}
+ scTixOut(R,now)}
+function scTixOut(R,now){const o=$('#txOut');if(!o||!R)return;const p=scTixPlan(R,now),m=R.m;if(!p){o.innerHTML='<span class="bad">No ask to buy at right now.</span>';return}
+ const xf=p.tp!=null?makerFee(m,p.tp,p.C):0,be=Math.ceil((p.ask+p.fee+xf)*100-1e-9)/100;const g=SC.tix.tpu==='%'?({50:'x1.5',100:'x2'})[SC.tix.tp]:({3:'+3',5:'+5',10:'+10'})[SC.tix.tp],hh=touchH(m,p.ask,R.tau,g);
+ const key=[m.id,p.sd,p.ask,p.tp,p.sl,SC.tix.ts].join('|');if(SC.mcK!==key||now-(SC.mc?.t||0)>8000){SC.mcK=key;SC.mc={t:now,...(scMC(m,R,p.sd,p.ask,p.tp,p.sl,p.te,800)||{})}}const mc=SC.mc;
+ o.innerHTML=`Buy <b>${p.C}× ${sideName(m,p.sd)} @ ${c1(p.ask)}</b> = <b>${usd(p.C*(p.ask+p.fee))}</b> incl. ${c1(p.fee)}/contract fee<br>
+ Target <b>${p.tp!=null?c1(p.tp):'none'}</b>${p.sl!=null?` · stop <b>${c1(p.sl)}</b>`:''}${p.te?` · out after <b>${SC.tix.ts} min</b>`:''} · break-even sell <b>${c1(be)}</b><br>
+ ${p.tp!=null?`At target: <b class="ok">${usd(p.C*(p.tp-p.ask-p.fee)-p.C*xf)}</b>`:''}${p.sl!=null?` · at stop: <b class="bad">${usd(p.C*(p.sl-p.ask-p.fee)-p.C*feeFor(m,p.sl,p.C))}</b>`:''}<br>
+ ${mc&&mc.pT!=null?`Simulated: target first <b class="ok">${pctS(mc.pT)}</b>${p.sl!=null?` · stop first <b class="bad">${pctS(mc.pS)}</b>`:''} · neither ${pctS(mc.pX)} · EV <b class="${mc.ev>=0?'ok':'bad'}">${(mc.ev>=0?'+':'')+(mc.ev*100).toFixed(1)}¢</b> per contract`:'Simulation needs the coin price and volatility'}
+ ${hh?`<br>History: from this price and time left, the bid reached ${g[0]==='x'?g.slice(1)+'×':g+'¢'} ${pctS(hh.p)} of the time (${hh.n.toLocaleString()} cases)`:''}
+ <br><span class="muted">The simulation keeps today's gap between market and model and a ${c1(Math.max(0.005,(m.yesAsk-m.yesBid)/2))} half-spread. Paper only: nothing goes to Kalshi.</span>`}
+function scTixBuy(){const R=SC.R;if(!R)return;const now=Date.now(),p=scTixPlan(R,now),m=R.m;if(!p)return;if(now-(m.bt||0)>15000){toast('Prices are stale: wait a few seconds');return}
+ LED.push({k:'t',strat:'tix',id:m.id,v:'K',a:m.asset,tf:m.tf,sl:m.ticker,cl:m.close,t:now,sd:p.sd,px:p.ask,fee:p.fee,cost:p.ask+p.fee,C:p.C,tp:p.tp,slx:p.sl,te:p.te,grp:m.id,q:R.q??null,P:R.P??null,mid:R.mid??null,e:null,call:'SCALP',why:'manual',o:null,pnl:null,ds:desc(m)});saveLed();
+ try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}toast(`✋ Paper scalp: ${p.C}× ${sideName(m,p.sd)} @ ${c1(p.ask)}${p.tp!=null?' → '+c1(p.tp):''}`);scRender(now)}
+function scPosHTML(now){const open=LED.filter(r=>r.k==='t'&&r.o==null&&(r.strat==='tix'||(r.strat&&(r.tp!=null||r.te!=null)))),done=LED.filter(r=>r.k==='t'&&r.strat==='tix'&&r.pnl!=null).slice(-5).reverse();
+ if(!open.length&&!done.length)return'';
+ const row=r=>{const m=MK.get(r.id),bid=m?bidOf(m,r.sd):0,u=bid>0?r.C*(bid-r.px-r.fee)-r.C*feeFor(m,bid,r.C):null,st=STR[r.strat]||{ic:'✋',n:'Your scalp'};
+  return `<div class="pos"><div class="top"><div style="min-width:0"><b>${st.ic} ${esc(st.n)} · ${r.sd} ${r.C}× @ ${c1(r.px)}</b><div class="muted">${esc(r.ds)}${r.tp!=null?` · target ${c1(r.tp)}`:''}${r.slx!=null?` · stop ${c1(r.slx)}`:''}${r.te?` · ${left(Math.max(0,(r.te-now)/1000))} to time stop`:''}</div></div>
+  <div class="tl ${u==null?'':u>=0?'ok':'bad'}">${u==null?'–':(u>=0?'+':'')+usd(u)}<div class="muted" style="font-size:10.5px">bid ${bid>0?c1(bid):'–'}</div></div></div>
+  <div class="row" style="margin-top:6px">${r.strat==='tix'?`<button class="btn sm red" data-xclose="${r.t}">Close at bid</button>`:''}${m&&r.id!==SC.id?`<button class="btn sm alt" data-lad2="${esc(r.id)}">Chart it</button>`:''}</div></div>`};
+ return `<div class="card"><h2>Open scalps</h2>${open.length?open.map(row).join(''):'<div class="muted">None open.</div>'}${done.length?'<h3>Your last scalps</h3>'+done.map(r=>`<div class="frow"><span class="fbad ${r.pnl>=0?'go':'wt'}">${r.pnl>=0?'WON':'LOST'}</span><div style="flex:1;min-width:0"><b>${r.sd} · ${esc(r.ds)}</b><div class="muted">${r.C}× @ ${c1(r.px)} → ${r.xp!=null?c1(r.xp)+' ('+r.xr+')':'settled'}</div></div><div class="tl ${r.pnl>=0?'ok':'bad'}">${(r.pnl>=0?'+':'')+usd(r.pnl)}</div></div>`).join(''):''}</div>`}
+function scLadHTML(R,now){const m0=R.m,a=m0.asset,L=SC.tf==='1d'?DLAD[a]:HL[a+'|above'];if(!L||!L.ms||!L.ms.length)return'';
+ const rows=L.ms.map(x=>({tk:x.ticker,K:+x.floor_strike,b:+x.yes_bid_dollars,a:+x.yes_ask_dollars})).filter(x=>x.K&&x.b>0&&x.a<1&&x.a-x.b<=0.10).sort((p,q)=>q.K-p.K);if(!rows.length)return'';
+ const S=R.S;let i0=rows.findIndex(x=>x.K<=S);if(i0<0)i0=rows.length;const lo=Math.max(0,i0-8),sl=rows.slice(lo,i0+8),tau=(L.close-now)/1000,tf=SC.tf==='1d'&&tau>3900?'1d':'1h',pins=scPins();
+ const mm=K=>({type:'above',K,close:L.close,A:60,basis:cfg.bBrti,tf,v:'K'}),fk=p=>feeFor({v:'K'},p,100);
+ return `<div class="card"><h2>${a} ladder · ${etT(L.close)}${SC.tf==='1d'&&L.open&&L.close-L.open>30*3600000?' (weekly)':''}</h2><div class="muted">Tap a strike to chart and scalp it. "History" = the cheaper side by Truth, after the fee.</div>
+ <table class="lad"><tr><th>Strike</th><th>YES bid/ask</th><th>Fair</th><th>History</th></tr>${sl.map((x,i)=>{const id='K:'+x.tk,P=R.x?modelP(mm(x.K),{...R.x,mKnown:null}):null;
+  const ty=truth(mm(x.K),'YES',x.a,tau),tn=truth(mm(x.K),'NO',Math.round((1-x.b)*100)/100,tau),ey=ty?ty.w-x.a-fk(x.a):null,en=tn?tn.w-(1-x.b)-fk(1-x.b):null;
+  const best=ey==null&&en==null?null:(en==null||(ey!=null&&ey>en))?['YES',ey]:['NO',en];
+  return `<tr data-lad="${esc(x.tk)}" class="${id===SC.id?'on':''}"><td><b>${axP(x.K)}</b>${lo+i===i0?' <span class="cy">◂ now</span>':''}${pins.has(id)&&id!==SC.id?' <span class="am">•</span>':''}</td><td>${Math.round(x.b*100)}/${Math.round(x.a*100)}¢</td><td style="color:var(--vio)">${P!=null?Math.round(P*100)+'%':'–'}</td><td class="${best&&best[1]>0?'ok':'muted'}">${best?best[0]+' '+(best[1]>=0?'+':'')+(best[1]*100).toFixed(1)+'¢':'–'}</td></tr>`}).join('')}</table></div>`}
+function scRender(now){if($('#t-sc').hidden)return;const coins=act().filter(a=>a==='BTC'||a==='ETH');
+ if(!coins.length){$('#scHead').innerHTML='<div class="card muted">Turn on BTC or ETH in Settings.</div>';return}if(!coins.includes(SC.a))SC.a=coins[0];
+ const k=coins.join()+'|'+SC.a+'|'+SC.tf+'|'+SC.side+'|'+SC.zoom;
+ if(SC.ck!==k){SC.ck=k;$('#scTf').innerHTML=[['15m','15 min'],['1h','Hourly'],['1d','Daily 5pm']].map(([t,l])=>`<button data-stf="${t}" class="${SC.tf===t?'on':''}">${l}</button>`).join('')+'<span style="flex:0 0 8px"></span>'+coins.map(a=>`<button data-sca="${a}" class="${SC.a===a?'on':''}">${a}</button>`).join('');
+  const zl=SC.tf==='15m'?['Window','1 hour']:SC.tf==='1h'?['Hour','3 hours']:['3 hours','Day'];
+  $('#scView').innerHTML=['YES','NO'].map(s=>`<button data-ssd="${s}" class="${SC.side===s?'on':''}">${SC.tf==='15m'?(s==='YES'?'UP':'DOWN'):s}</button>`).join('')+'<span style="flex:0 0 8px"></span>'+zl.map((l,i)=>`<button data-szm="${i}" class="${SC.zoom===i?'on':''}">${l}</button>`).join('')}
+ const R=scFocus(now);SC.R=R;const L=scMarkets(SC.a,SC.tf,now).sort((x,y)=>(y.m.K??y.m.L??0)-(x.m.K??x.m.L??0)),ids=SC.a+SC.tf+'|'+L.map(R=>R.m.id).join('|');
+ if(SC.opts!==ids){SC.opts=ids;$('#scSel').innerHTML=L.length?L.map(R=>`<option value="${esc(R.m.id)}">${esc(desc(R.m))}</option>`).join(''):`<option value="">${cfg.worker?'Loading '+SC.a+' markets…':'Needs the Kalshi proxy (Settings)'}</option>`}
+ if(R&&$('#scSel').value!==R.m.id)$('#scSel').value=R.m.id;
+ if(!R){$('#scHead').innerHTML=`<div class="card muted">${!cfg.worker||!cfg.showKalshi?'Kalshi markets need the free proxy. <a href="#" data-go="set">Set it up in Settings</a>.':SC.tf==='1d'&&!DLAD[SC.a]?.ev?'Loading the 5pm ladder…':'Waiting for open markets (they appear a few seconds after opening)…'}</div>`;
+  for(const s of['#scInd','#scStrat','#scPos','#scLad'])$(s).innerHTML='';$('#scTix').hidden=true;scDraw();return}
+ const m=R.m,hk=m.asset+'|'+m.tf;if(!HEAT[hk]||now-HEAT[hk].t>15000){const h=heatFit(m.asset,m.tf,now);if(h)HEAT[hk]=h;else delete HEAT[hk]}
+ const I=scInd(m,R,now,true);SC.I=I;const sd=SC.tix.sd,S=I[sd];
+ if(S){const g=S.ask<0.15?'x2':'+5',kk=m.id+sd+g;if(!SC.mcT||SC.mcT.k!==kk||now-SC.mcT.t>10000){const tp=g==='x2'?Math.min(0.99,Math.ceil(S.ask*200-1e-9)/100):Math.min(0.99,r2(S.ask+0.05));const r=scMC(m,R,sd,S.ask,tp,null,null,500);SC.mcT=r?{k:kk,t:now,p:r.pT}:null}}
+ $('#scHead').innerHTML=scHeadHTML(R,I,now);$('#scInd').innerHTML=scTiles(m,R,I,now);$('#scStrat').innerHTML=scStratHTML(m,R,now);scTix(R,now);$('#scPos').innerHTML=scPosHTML(now);$('#scLad').innerHTML=m.tf==='15m'?'':scLadHTML(R,now);scDraw()}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-stf],[data-sca],[data-ssd],[data-szm],[data-qb],[data-tsd],[data-lad],[data-xclose],[data-go]');if(!b)return;const d=b.dataset;
+ if(d.go){e.preventDefault();tab(d.go);return}
+ if(d.stf){SC.tf=d.stf;store.set('fl.sctf',SC.tf);SC.id=null;SC.zoom=0}else if(d.sca){SC.a=d.sca;SC.id=null}else if(d.ssd)SC.side=d.ssd;else if(d.szm!=null)SC.zoom=+d.szm;
+ else if(d.qb||d.tsd){SC.tix.sd=d.qb||d.tsd;SC.tixK='';SC.mcK='';store.set('fl.tix',{...SC.tix});if(d.qb)setTimeout(()=>{try{$('#scTix').scrollIntoView({behavior:'smooth',block:'start'})}catch(x){}},60)}
+ else if(d.lad)scPick(d.lad,false);else if(d.xclose)scCloseTrade(+d.xclose);
+ SC.ck='';SC.opts='';scRender(Date.now())});
+$('#scSel').onchange=e=>{if(e.target.value){scPick(e.target.value,true);scRender(Date.now())}};
+
+/* ---- Scalp chart: coin · contract · snap · tape ---- */
+const FC=new Map();
+function coinAt(a,t){const c=VOL[a]?.c;if(c&&c.length&&t>=c[0][0]+60000){let lo=0,hi=c.length-1,ans=-1;while(lo<=hi){const md=(lo+hi)>>1;if(c[md][0]+60000<=t+1){ans=md;lo=md+1}else hi=md-1}if(ans>=0)return c[ans][4]}
+ const d=DAYC[a]?.c;if(d&&d.length){let ans=null;for(const r of d){if(r[0]+900000<=t+1)ans=r[4];else break}return ans}return null}
+function fairAt(m,R,t){if(!R.x||t>=m.close)return null;const k=m.id+'|'+t;if(FC.has(k))return FC.get(k);const S=coinAt(m.asset,t);if(!S)return null;const p=modelP(m,{...R.x,S,now:t,mKnown:null});if(FC.size>8000)FC.clear();FC.set(k,p);return p}
+function coinBars(a,g){if(g<15)return chCandles(a,g);const out=new Map();for(const r of DAYC[a]?.c||[])out.set(r[0],r.slice());for(const r of chCandles(a,15))out.set(r[0],r);return[...out.values()].sort((x,y)=>x[0]-y[0])}
+function scBars(m,g){const dur=g*60000,src=g>=60?KC60[m.id]?.c:KC[m.id]?.c,bars=[];let cur=null;
+ for(const c of src||[]){const t=Math.floor((c.t-60000*(g>=60?60:1))/dur)*dur,mo=(c.bo+c.ao)/2,mc=(c.bc+c.ac)/2,mh=c.bh!=null&&c.ah!=null?(c.bh+c.ah)/2:Math.max(mo,mc),ml=c.bl!=null&&c.al!=null?(c.bl+c.al)/2:Math.min(mo,mc);
+  if(!cur||cur.t!==t){cur={t,o:mo,h:Math.max(mh,mo,mc),l:Math.min(ml,mo,mc),c:mc,b:c.bc,a:c.ac,v:c.v};bars.push(cur)}else{cur.h=Math.max(cur.h,mh,mc);cur.l=Math.min(cur.l,ml,mc);cur.c=mc;cur.b=c.bc;cur.a=c.ac;cur.v+=c.v}}
+ const lastT=bars.length?bars[bars.length-1].t:-1;const add=(t0,b,a)=>{if(!(b>0&&a>0&&a<=1&&a>=b))return;const t=Math.floor(t0/dur)*dur;if(t<lastT)return;const mid=(b+a)/2;let x=bars.length&&bars[bars.length-1].t===t?bars[bars.length-1]:null;
+  if(!x){x={t,o:mid,h:mid,l:mid,c:mid,b,a,v:0,live:1};bars.push(x)}else{x.h=Math.max(x.h,mid);x.l=Math.min(x.l,mid);x.c=mid;x.b=b;x.a=a}};
+ for(const p of HIST.get(m.id)||[])add(p.t,p.b,p.a);if(Date.now()-(m.bt||0)<30000)add(Date.now(),m.yesBid,m.yesAsk);return bars}
+function scDraw(){if($('#t-sc').hidden)return;try{scDraw0()}catch(e){try{console.log('scalp chart error',e)}catch(x){}}}
+function scDraw0(){const now=Date.now(),cv=$('#scCv'),dpr=window.devicePixelRatio||1,W=cv.clientWidth||360,H=470;
  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
  const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);g.font='10px ui-monospace,Menlo,Consolas,monospace';g.textBaseline='middle';g.textAlign='left';
- const gran=CH.tf==='5m'?5:1,C=chCandles(a,gran);
- if(C.length<2){g.fillStyle='#8a97ab';g.fillText('Loading candles…',12,40);return}
- const fut=m?Math.max(0,m.close-now):0;const histMs=gran===5?290*60000:clamp(fut*1.3,60*60000,150*60000);
- const x0=now-histMs,xe=Math.max(now,m?m.close:now),x1=xe+(xe-x0)*.03;
- const PL=2,PR=62,pw=W-PL-PR;const X=t=>PL+(t-x0)/(x1-x0)*pw;
- const vis=C.filter(r=>r[0]+gran*60000>x0);if(!vis.length)return;
- const S=comp(a)||vis[vis.length-1][4];
- let lo=Math.min(...vis.map(r=>r[3])),hi=Math.max(...vis.map(r=>r[2]));
- const base=VOL[a]?.base;let cone=null;
- if(m&&fut>0&&base){cone=[];const n=48;for(let i=0;i<=n;i++){const t=now+fut*i/n;cone.push([t,Math.sqrt(fwdVar(a,now,t,R.w||0,base,cfg.events))])}const e=cone[n][1];lo=Math.min(lo,S*Math.exp(-2*e));hi=Math.max(hi,S*Math.exp(2*e))}
- const ks=m?(m.type==='range'?[m.L,m.U]:[m.K]).filter(k=>k!=null&&isFinite(k)):[];
- const sp0=hi-lo||S*.002;for(const k of ks)if(k>lo-1.2*sp0&&k<hi+1.2*sp0){lo=Math.min(lo,k);hi=Math.max(hi,k)}
- const pad=(hi-lo)*.06||S*.001;lo-=pad;hi+=pad;
- const T1=6,B1=262,T2=278,B2=372,T3=386,B3=436;const Y=p=>B1-(p-lo)/(hi-lo)*(B1-T1);const Yp=p=>B2-p*(B2-T2);
- // panes + price grid
- g.fillStyle='rgba(255,255,255,.015)';g.fillRect(PL,T2,pw,B2-T2);g.fillRect(PL,T3,pw,B3-T3);
- g.strokeStyle='#1a2130';g.lineWidth=1;const st=niceStep((hi-lo)/5);
- for(let p=Math.ceil(lo/st)*st;p<=hi;p+=st){const y=Y(p);g.beginPath();g.moveTo(PL,y);g.lineTo(PL+pw,y);g.stroke();g.fillStyle='#6f7b8f';g.fillText(axP(p),PL+pw+4,y)}
- const tS=[5,10,15,30,60,120,240].map(x=>x*60000).find(s=>s/(x1-x0)*pw>=64)||480*60000;
- for(let t=Math.ceil(x0/tS)*tS;t<x1;t+=tS){const x=X(t);g.strokeStyle='#151b26';g.beginPath();g.moveTo(x,T1);g.lineTo(x,B3);g.stroke();g.fillStyle='#6f7b8f';g.textAlign='center';g.fillText(etT(t).replace(/\s?(AM|PM)/,''),x,449);g.textAlign='left'}
- if(fut>0){g.fillStyle='rgba(255,255,255,.03)';g.fillRect(X(now),T1,X(m.close)-X(now),B1-T1)}
- // cone: Fairline's expected settlement range
- if(cone){for(const[k,al]of[[2,.08],[1,.15]]){g.beginPath();cone.forEach(([t,sd],i)=>{const y=Y(S*Math.exp(k*sd));i?g.lineTo(X(t),y):g.moveTo(X(t),y)});for(let i=cone.length-1;i>=0;i--)g.lineTo(X(cone[i][0]),Y(S*Math.exp(-k*cone[i][1])));g.closePath();g.fillStyle=`rgba(163,230,53,${al})`;g.fill()}
-  const e=cone[cone.length-1][1];g.fillStyle='#a3e635';g.textAlign='right';g.fillText('±1σ',X(m.close)-4,Y(S*Math.exp(e))-7);g.fillText('±2σ',X(m.close)-4,Y(S*Math.exp(2*e))-7);g.textAlign='left'}
- // strike / range
- let kY=[];if(m){if(m.type==='range'&&m.L!=null&&m.U!=null){const ya=clamp(Y(m.U),T1,B1),yb=clamp(Y(m.L),T1,B1);g.fillStyle='rgba(251,191,36,.10)';g.fillRect(PL,ya,pw,Math.max(1,yb-ya))}
-  g.strokeStyle='#fbbf24';g.lineWidth=1.4;const off={up:[],dn:[]};for(const k of ks){const y=Y(k);if(y<T1||y>B1){off[y<T1?'up':'dn'].push(k);continue}
-   g.setLineDash([6,4]);g.beginPath();g.moveTo(PL,y);g.lineTo(PL+pw,y);g.stroke();g.setLineDash([]);kY.push(y);tag(g,PL+pw,y,axP(k),'#fbbf24','#0b0f14')}g.lineWidth=1;
-  for(const[sd,v]of Object.entries(off))if(v.length){const nm=m.type==='updown'?'beat':m.type==='range'?'range':'strike';g.fillStyle='#fbbf24';g.fillText((sd==='up'?'▲ ':'▼ ')+nm+' '+(v.length>1?axP(Math.min(...v))+'–'+axP(Math.max(...v)):axP(v[0]))+' (off chart)',PL+6,sd==='up'?T1+8:B1-8)}}
- // candles
- const cw=Math.max(1,gran*60000/(x1-x0)*pw*.68);
- for(const r of vis){const x=X(r[0]+gran*30000),up=r[4]>=r[1];g.strokeStyle=g.fillStyle=up?'#84cc16':'#f43f5e';g.beginPath();g.moveTo(x,Y(r[2]));g.lineTo(x,Y(r[3]));g.stroke();const y1=Y(Math.max(r[1],r[4])),y2=Y(Math.min(r[1],r[4]));g.fillRect(x-cw/2,y1,cw,Math.max(1,y2-y1))}
- // coin now
- const yS=Y(S);g.setLineDash([2,3]);g.strokeStyle='#22d3ee';g.beginPath();g.moveTo(PL,yS);g.lineTo(PL+pw,yS);g.stroke();g.setLineDash([]);
- let ty=yS;for(const y of kY)if(Math.abs(ty-y)<14)ty=y+(yS>=y?14:-14);tag(g,PL+pw,clamp(ty,T1+7,B1-7),axP(S),'#22d3ee','#0b0f14');
- // now + close + settlement window
- g.strokeStyle='rgba(233,238,246,.35)';g.setLineDash([1,3]);g.beginPath();g.moveTo(X(now),T1);g.lineTo(X(now),B3);g.stroke();g.setLineDash([]);
- if(m){const xc=X(m.close),xa=X(m.close-(m.A||0)*1000);g.fillStyle='rgba(251,191,36,.22)';g.fillRect(xa,T1,Math.max(1.5,xc-xa),B3-T1);g.strokeStyle='#fbbf24';g.beginPath();g.moveTo(xc,T1);g.lineTo(xc,B3);g.stroke();g.fillStyle='#fbbf24';g.textAlign='right';g.fillText('close '+etT(m.close),xc-4,T1+8);g.textAlign='left'}
- // paper entries
- const tr=m?trades().filter(r=>r.id===m.id):[];const pxAt=t=>{const r=C.find(r=>t>=r[0]&&t<r[0]+gran*60000);return r?r[4]:null};
- for(const r of tr){const x=X(r.t),y=Y(pxAt(r.t)??S),yes=r.sd==='YES';g.fillStyle=yes?'#a3e635':'#fb7185';g.beginPath();if(yes){g.moveTo(x,y+4);g.lineTo(x-6,y+15);g.lineTo(x+6,y+15)}else{g.moveTo(x,y-4);g.lineTo(x-6,y-15);g.lineTo(x+6,y-15)}g.fill()}
- // odds pane
- g.strokeStyle='#1a2130';for(const p of[0,.25,.5,.75,1]){const y=Yp(p);g.beginPath();g.moveTo(PL,y);g.lineTo(PL+pw,y);g.stroke();g.fillStyle='#6f7b8f';g.fillText(Math.round(p*100)+'%',PL+pw+4,y)}
- const h=m?(HIST.get(m.id)||[]).filter(p=>p.t>=x0):[];
- if(m){const w=WIN[m.tf];if(w){const xa=X(m.close-w[1]*1000),xb=X(m.close-w[0]*1000);g.fillStyle='rgba(163,230,53,.08)';g.fillRect(xa,T2,xb-xa,B2-T2);g.fillRect(xa,T3,xb-xa,B3-T3)}
-  const hb=h.filter(p=>p.b>0&&p.a>0&&p.a<1&&p.a>=p.b);if(hb.length>1){g.beginPath();hb.forEach((p,i)=>i?g.lineTo(X(p.t),Yp(p.a)):g.moveTo(X(p.t),Yp(p.a)));for(let i=hb.length-1;i>=0;i--)g.lineTo(X(hb[i].t),Yp(hb[i].b));g.closePath();g.fillStyle='rgba(34,211,238,.18)';g.fill()}
-  const line=(k,col,wd)=>{const pts=h.filter(p=>p[k]!=null);if(!pts.length)return;g.strokeStyle=col;g.lineWidth=wd;g.beginPath();pts.forEach((p,i)=>i?g.lineTo(X(p.t),Yp(p[k])):g.moveTo(X(p.t),Yp(p[k])));if(pts.length===1)g.lineTo(X(pts[0].t)+2,Yp(pts[0][k]));g.stroke();g.lineWidth=1};
-  line('mid','#22d3ee',1.6);line('P','#a78bfa',1.6);line('q','#e9eef6',1.2);
-  for(const r of LED){if(r.k!=='c'||r.id!==m.id||r.mid==null||r.t<x0)continue;g.strokeStyle='#e9eef6';g.beginPath();g.arc(X(r.t),Yp(r.mid),3,0,7);g.stroke()}
-  for(const r of tr){const x=X(r.t);g.strokeStyle=r.sd==='YES'?'#a3e635':'#fb7185';g.beginPath();g.moveTo(x,T2);g.lineTo(x,B3);g.stroke()}}
- g.fillStyle='#22d3ee';g.fillText('market',PL+5,T2+7);g.fillStyle='#a78bfa';g.fillText('model',PL+52,T2+7);g.fillStyle='#e9eef6';g.fillText('fair',PL+94,T2+7);
- if(m&&!h.length){g.fillStyle='#8a97ab';g.fillText('odds history starts now (builds while the app is open)',PL+5,(T2+B2)/2)}
- // edge pane
- const he=h.filter(p=>p.e!=null);const em=Math.min(.15,Math.max(.05,...he.map(p=>Math.abs(p.e))));const Ye=e=>(T3+B3)/2-clamp(e,-em,em)/em*(B3-T3)/2;
- g.strokeStyle='#2a3444';g.beginPath();g.moveTo(PL,Ye(0));g.lineTo(PL+pw,Ye(0));g.stroke();g.fillStyle='#6f7b8f';g.fillText('0¢',PL+pw+4,Ye(0));
- const bar=cfg.minEdge;g.setLineDash([4,3]);g.strokeStyle='rgba(163,230,53,.7)';g.beginPath();g.moveTo(PL,Ye(bar));g.lineTo(PL+pw,Ye(bar));g.stroke();g.setLineDash([]);g.fillStyle='#a3e635';g.fillText('+'+(bar*100).toFixed(1).replace('.0','')+'¢ bar',PL+pw+4,Ye(bar));
- g.lineWidth=1.6;for(let i=1;i<he.length;i++){const p0=he[i-1],p1=he[i];g.strokeStyle=p1.e>=bar?'#a3e635':p1.e>=0?'#fbbf24':'#fb7185';g.beginPath();g.moveTo(X(p0.t),Ye(p0.e));g.lineTo(X(p1.t),Ye(p1.e));g.stroke()}g.lineWidth=1;
- g.fillStyle='#8a97ab';g.fillText('best edge after fees',PL+5,T3+7);
- // tap / hover readout
- if(CH.hx!=null&&now-CH.ht<8000){const x=clamp(CH.hx,PL,PL+pw),t=x0+(x-PL)/pw*(x1-x0);g.strokeStyle='rgba(233,238,246,.55)';g.beginPath();g.moveTo(x,T1);g.lineTo(x,B3);g.stroke();
-  const ln=[etT(t)];
-  if(t<=now){const c=C.find(r=>t>=r[0]&&t<r[0]+gran*60000);if(c)ln.push(`O ${axP(c[1])}  H ${axP(c[2])}`,`L ${axP(c[3])}  C ${axP(c[4])}`);
-   const hp=h.reduce((b,p)=>!b||Math.abs(p.t-t)<Math.abs(b.t-t)?p:b,null);if(hp&&Math.abs(hp.t-t)<90000)ln.push(`market ${hp.mid!=null?pctS(hp.mid):'–'}  model ${pctS(hp.P)}`,`fair ${hp.q!=null?pctS(hp.q):'–'}  edge ${hp.e!=null?(hp.e>=0?'+':'')+c1(hp.e):'–'}`)}
-  else if(cone){if(t>m.close)ln[0]=etT(m.close)+' (close)';const sd=cone[clamp(Math.round((Math.min(t,m.close)-now)/fut*(cone.length-1)),0,cone.length-1)][1];ln.push(`±1σ ${axP(S*Math.exp(-sd))}–${axP(S*Math.exp(sd))}`,`±2σ ${axP(S*Math.exp(-2*sd))}–${axP(S*Math.exp(2*sd))}`)}
-  const bw=Math.max(...ln.map(s=>g.measureText(s).width))+12,bh=ln.length*13+8;let bx=x+8;if(bx+bw>W-2)bx=x-8-bw;
-  g.fillStyle='rgba(10,13,18,.94)';g.fillRect(bx,T1+4,bw,bh);g.strokeStyle='#2a3444';g.strokeRect(bx,T1+4,bw,bh);g.fillStyle='#e9eef6';ln.forEach((s,i)=>g.fillText(s,bx+6,T1+12+i*13))}}
-document.addEventListener('click',e=>{const b=e.target.closest('[data-chart],[data-cc],[data-ctf]');if(!b)return;
- if(b.dataset.chart){const m=MK.get(b.dataset.chart);if(m){CH.a=m.asset;CH.id=m.id;CH.prev={v:m.v,tf:m.tf,type:m.type};tab('ch')}}
- else if(b.dataset.cc){CH.a=b.dataset.cc;CH.id=null;CH.prev=null;drawChart()}else if(b.dataset.ctf){CH.tf=b.dataset.ctf;drawChart()}});
-$('#chSel').onchange=e=>{CH.id=e.target.value;const m=MK.get(CH.id);if(m)CH.prev={v:m.v,tf:m.tf,type:m.type};drawChart()};
-(()=>{const cv=$('#chCv');const hv=e=>{const r=cv.getBoundingClientRect();CH.hx=e.clientX-r.left;CH.ht=Date.now();drawChart()};
- cv.addEventListener('pointerdown',hv);cv.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||e.buttons)hv(e)});cv.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){CH.hx=null;drawChart()}})})();
-window.addEventListener('resize',()=>drawChart());
+ const R=SC.R,m=R?R.m:null;if(!m){g.fillStyle='#8a97ab';g.fillText(cfg.worker?'Waiting for Kalshi markets…':'Add the Kalshi proxy in Settings to load markets.',12,40);return}
+ const a=m.asset,z=SC.zoom,side=SC.side,fl=v=>side==='YES'?v:1-v;let x0,x1,gb,gc;
+ if(m.tf==='15m'){gb=1;gc=1;if(z){x0=now-60*60000;x1=Math.max(now,m.close)+60000}else{x0=m.open-5*60000;x1=m.close+60000}}
+ else if(m.tf==='1h'){if(z){x0=now-3*3600000;x1=m.close+120000;gb=5;gc=5}else{x0=m.open;x1=m.close+120000;gb=1;gc=1}}
+ else{if(z){x0=m.open;x1=m.close+600000;gb=60;gc=15}else{x0=now-3*3600000;x1=Math.min(m.close,now+30*60000)+60000;gb=5;gc=5}}
+ const PL=2,PR=58,pw=W-PL-PR,X=t=>PL+(t-x0)/(x1-x0)*pw;const T1=6,B1=148,T2=160,B2=318,T3=330,B3=372,T4=384,B4=432;
+ g.fillStyle='rgba(255,255,255,.015)';g.fillRect(PL,T2,pw,B2-T2);g.fillRect(PL,T3,pw,B3-T3);g.fillRect(PL,T4,pw,B4-T4);
+ const tS=[5,10,15,30,60,120,240,480].map(x=>x*60000).find(s=>s/(x1-x0)*pw>=60)||960*60000;
+ for(let t=Math.ceil(x0/tS)*tS;t<x1;t+=tS){const x=X(t);g.strokeStyle='#151b26';g.beginPath();g.moveTo(x,T1);g.lineTo(x,B4);g.stroke();g.fillStyle='#6f7b8f';g.textAlign='center';g.fillText(etT(t).replace(/\s?(AM|PM)/,''),x,446);g.textAlign='left'}
+ const xn=X(now);g.strokeStyle='rgba(233,238,246,.35)';g.setLineDash([1,3]);g.beginPath();g.moveTo(xn,T1);g.lineTo(xn,B4);g.stroke();g.setLineDash([]);
+ if(m.close<=x1){const xc=X(m.close),xa=X(m.close-(m.A||0)*1000);g.fillStyle='rgba(251,191,36,.20)';g.fillRect(xa,T1,Math.max(1.5,xc-xa),B4-T1);g.strokeStyle='#fbbf24';g.beginPath();g.moveTo(xc,T1);g.lineTo(xc,B4);g.stroke()}
+ if(m.open>x0){g.strokeStyle='rgba(138,151,171,.4)';g.setLineDash([3,3]);g.beginPath();g.moveTo(X(m.open),T1);g.lineTo(X(m.open),B4);g.stroke();g.setLineDash([])}
+ // --- coin pane
+ const CC=coinBars(a,gc).filter(r=>r[0]+gc*60000>x0&&r[0]<x1),S=comp(a)||(CC.length?CC[CC.length-1][4]:null);let coinY=null;
+ if(CC.length&&S){let lo=Math.min(...CC.map(r=>r[3])),hi=Math.max(...CC.map(r=>r[2]));const base=VOL[a]?.base,fut=Math.max(0,Math.min(m.close,x1)-now);let cone=null;
+  if(fut>0&&base&&R.x){cone=[];for(let i=0;i<=32;i++){const t=now+fut*i/32;cone.push([t,Math.sqrt(fwdVar(a,now,t,R.x.w||0,base,cfg.events)*(R.x.scale||1))])}const e=cone[32][1];lo=Math.min(lo,S*Math.exp(-2*e));hi=Math.max(hi,S*Math.exp(2*e))}
+  const ks=(m.type==='range'?[m.L,m.U]:[m.K]).filter(k=>k!=null&&isFinite(k)),sp0=hi-lo||S*.002;for(const k of ks)if(k>lo-1.5*sp0&&k<hi+1.5*sp0){lo=Math.min(lo,k);hi=Math.max(hi,k)}
+  const pad=(hi-lo)*.06||S*.001;lo-=pad;hi+=pad;const Y=p=>B1-(p-lo)/(hi-lo)*(B1-T1);coinY=Y;
+  g.strokeStyle='#1a2130';const st=niceStep((hi-lo)/4);for(let p=Math.ceil(lo/st)*st;p<=hi;p+=st){const y=Y(p);g.beginPath();g.moveTo(PL,y);g.lineTo(PL+pw,y);g.stroke();g.fillStyle='#6f7b8f';g.fillText(axP(p),PL+pw+4,y)}
+  if(cone){for(const[k,al]of[[2,.07],[1,.14]]){g.beginPath();cone.forEach(([t,sd],i)=>{const y=Y(S*Math.exp(k*sd));i?g.lineTo(X(t),y):g.moveTo(X(t),y)});for(let i=cone.length-1;i>=0;i--)g.lineTo(X(cone[i][0]),Y(S*Math.exp(-k*cone[i][1])));g.closePath();g.fillStyle=`rgba(163,230,53,${al})`;g.fill()}}
+  if(m.type==='range'&&m.L&&m.U){const ya=clamp(Y(m.U),T1,B1),yb=clamp(Y(m.L),T1,B1);g.fillStyle='rgba(251,191,36,.10)';g.fillRect(PL,ya,pw,Math.max(1,yb-ya))}
+  g.strokeStyle='#fbbf24';g.lineWidth=1.3;for(const k of ks){const y=Y(k);if(y<T1||y>B1){g.fillStyle='#fbbf24';g.fillText((y<T1?'▲ ':'▼ ')+'strike '+axP(k),PL+6,y<T1?T1+8:B1-8);continue}g.setLineDash([6,4]);g.beginPath();g.moveTo(PL,y);g.lineTo(PL+pw,y);g.stroke();g.setLineDash([]);tag(g,PL+pw,y,axP(k),'#fbbf24','#0b0f14')}g.lineWidth=1;
+  const cw=Math.max(1,gc*60000/(x1-x0)*pw*.68);for(const r of CC){const x=X(r[0]+gc*30000),up=r[4]>=r[1];g.strokeStyle=g.fillStyle=up?'#84cc16':'#f43f5e';g.beginPath();g.moveTo(x,Y(r[2]));g.lineTo(x,Y(r[3]));g.stroke();const y1=Y(Math.max(r[1],r[4])),y2=Y(Math.min(r[1],r[4]));g.fillRect(x-cw/2,y1,cw,Math.max(1,y2-y1))}
+  const yS=Y(S);g.setLineDash([2,3]);g.strokeStyle='#22d3ee';g.beginPath();g.moveTo(PL,yS);g.lineTo(PL+pw,yS);g.stroke();g.setLineDash([]);let ty=yS;for(const k of ks){const y=Y(k);if(Math.abs(ty-y)<14)ty=y+(yS>=y?14:-14)}tag(g,PL+pw,clamp(ty,T1+7,B1-7),axP(S),'#22d3ee','#0b0f14')}
+ else{g.fillStyle='#8a97ab';g.fillText(`Loading ${a} candles…`,PL+6,(T1+B1)/2)}
+ g.fillStyle='#8a97ab';g.fillText(a+(gc>1?` ${gc}-min`:' 1-min'),PL+5,T1+8);
+ // --- contract pane
+ const bars=scBars(m,gb).filter(b=>b.t+gb*60000>x0&&b.t<x1),dur=gb*60000;const fair=bars.map(b=>{const te=Math.min(b.t+dur,now);return b.live&&te>=now-dur?R.P:fairAt(m,R,te)});
+ let lo2=1,hi2=0;bars.forEach((b,i)=>{lo2=Math.min(lo2,fl(b.l),fl(b.h));hi2=Math.max(hi2,fl(b.l),fl(b.h));if(fair[i]!=null){lo2=Math.min(lo2,fl(fair[i]));hi2=Math.max(hi2,fl(fair[i]))}});
+ const tr=trades().filter(r=>r.id===m.id),pos=tr.filter(r=>r.o==null);for(const r of pos)for(const v of[r.tp,r.slx]){if(v==null)continue;const y=r.sd===side?v:1-v;lo2=Math.min(lo2,y);hi2=Math.max(hi2,y)}
+ if(hi2<lo2){lo2=0;hi2=1}if(hi2-lo2<0.10){const c=(hi2+lo2)/2;lo2=c-0.05;hi2=c+0.05}const pd=(hi2-lo2)*0.08;lo2=Math.max(0,lo2-pd);hi2=Math.min(1,hi2+pd);const Y2=p=>B2-(p-lo2)/(hi2-lo2)*(B2-T2);
+ g.strokeStyle='#1a2130';const st2=niceStep((hi2-lo2)/4);for(let p=Math.ceil(lo2/st2)*st2;p<=hi2+1e-9;p+=st2){const y=Y2(p);g.beginPath();g.moveTo(PL,y);g.lineTo(PL+pw,y);g.stroke();g.fillStyle='#6f7b8f';g.fillText(Math.round(p*100)+'¢',PL+pw+4,y)}
+ if(bars.length){g.beginPath();bars.forEach((b,i)=>{const xa=X(b.t),xb=X(b.t+dur),y=Y2(side==='YES'?b.a:1-b.b);i?g.lineTo(xa,y):g.moveTo(xa,y);g.lineTo(xb,y)});
+  for(let i=bars.length-1;i>=0;i--){const b=bars[i],y=Y2(side==='YES'?b.b:1-b.a);g.lineTo(X(b.t+dur),y);g.lineTo(X(b.t),y)}g.closePath();g.fillStyle='rgba(34,211,238,.14)';g.fill();
+  const cw=Math.max(1,dur/(x1-x0)*pw*.62);for(const b of bars){const o=fl(b.o),c=fl(b.c),h=Math.max(fl(b.h),fl(b.l)),l=Math.min(fl(b.h),fl(b.l)),x=X(b.t+dur/2),up=c>=o;
+   g.strokeStyle=g.fillStyle=up?'#84cc16':'#f43f5e';g.beginPath();g.moveTo(x,Y2(h));g.lineTo(x,Y2(l));g.stroke();const y1=Y2(Math.max(o,c)),y2=Y2(Math.min(o,c));g.fillRect(x-cw/2,y1,cw,Math.max(1,y2-y1))}
+  g.strokeStyle='#e9eef6';g.lineWidth=1.4;g.beginPath();let st=false;bars.forEach((b,i)=>{if(fair[i]==null){st=false;return}const x=X(Math.min(b.t+dur,now)),y=Y2(fl(fair[i]));st?g.lineTo(x,y):g.moveTo(x,y);st=true});g.stroke();g.lineWidth=1;
+  g.fillStyle='#fbbf24';for(const b of bars){const te=Math.min(b.t+dur,now),tau=(m.close-te)/1000,ask=side==='YES'?b.a:1-b.b,t=truth(m,side,Math.round(ask*100)/100,tau);if(!t)continue;const x=X(b.t+dur/2),y=Y2(t.w);if(y>=T2&&y<=B2){g.beginPath();g.arc(x,y,1.6,0,7);g.fill()}}}
+ else{g.fillStyle='#8a97ab';g.fillText('Contract prices loading…',PL+6,(T2+B2)/2)}
+ for(const r of pos){for(const[v,col]of[[r.tp,'#a3e635'],[r.slx,'#fb7185']]){if(v==null)continue;const y=Y2(r.sd===side?v:1-v);g.strokeStyle=col;g.setLineDash([5,4]);g.beginPath();g.moveTo(X(r.t),y);g.lineTo(PL+pw,y);g.stroke();g.setLineDash([])}}
+ for(const r of tr){const y=Y2(r.sd===side?r.px:1-r.px),x=X(r.t);if(x<PL||x>PL+pw)continue;g.fillStyle=r.sd==='YES'?'#a3e635':'#fb7185';g.beginPath();g.moveTo(x,y-1);g.lineTo(x-5,y+9);g.lineTo(x+5,y+9);g.fill();
+  if(r.xt){const xx=X(r.xt),yy=Y2(r.sd===side?r.xp:1-r.xp);g.strokeStyle='#e9eef6';g.beginPath();g.arc(xx,yy,3.5,0,7);g.stroke()}}
+ const lbl=m.tf==='15m'?(side==='YES'?'UP':'DOWN'):side;g.fillStyle='#22d3ee';g.fillText(lbl+' price',PL+5,T2+8);g.fillStyle='#e9eef6';g.fillText('fair',PL+66,T2+8);g.fillStyle='#fbbf24';g.fillText('· truth',PL+92,T2+8);
+ // --- snap pane: contract move minus model move, per bar
+ const th=m.tf==='15m'?0.07:0.06,sn=[];for(let i=1;i<bars.length;i++){if(fair[i]==null||fair[i-1]==null)continue;const v=(bars[i].c-bars[i-1].c)-(fair[i]-fair[i-1]);sn.push([bars[i],side==='YES'?v:-v])}
+ const sm=Math.max(th*1.6,...sn.map(x=>Math.abs(x[1]))),Y3=v=>(T3+B3)/2-clamp(v,-sm,sm)/sm*(B3-T3)/2;g.strokeStyle='#2a3444';g.beginPath();g.moveTo(PL,Y3(0));g.lineTo(PL+pw,Y3(0));g.stroke();
+ g.setLineDash([3,3]);g.strokeStyle='rgba(251,191,36,.6)';for(const v of[th,-th]){g.beginPath();g.moveTo(PL,Y3(v));g.lineTo(PL+pw,Y3(v));g.stroke()}g.setLineDash([]);
+ const bw=Math.max(1,dur/(x1-x0)*pw*.7);for(const[b,v]of sn){const x=X(b.t+dur/2);g.fillStyle=Math.abs(v)>=th?'#fbbf24':v>=0?'rgba(163,230,53,.6)':'rgba(251,113,133,.6)';const y0=Y3(0),y1=Y3(v);g.fillRect(x-bw/2,Math.min(y0,y1),bw,Math.max(1,Math.abs(y1-y0)))}
+ g.fillStyle='#8a97ab';g.fillText('snap',PL+5,T3+7);g.fillText('±'+Math.round(th*100)+'¢',PL+pw+4,Y3(th));
+ // --- tape pane: taker flow per bar + book pressure
+ const TA=TR[m.id]?.a||[];const fb=new Map();for(const x of TA){if(x.t<x0||x.t>x1)continue;const t=Math.floor(x.t/dur)*dur;const o=fb.get(t)||{y:0,n:0};if(x.s==='yes')o.y+=x.c;else o.n+=x.c;fb.set(t,o)}
+ const fm=Math.max(1,...[...fb.values()].map(o=>Math.max(o.y,o.n))),mid4=(T4+B4)/2,h4=(B4-T4)/2-2;g.strokeStyle='#2a3444';g.beginPath();g.moveTo(PL,mid4);g.lineTo(PL+pw,mid4);g.stroke();
+ for(const[t,o]of fb){const x=X(t+dur/2),up=side==='YES'?o.y:o.n,dn=side==='YES'?o.n:o.y;g.fillStyle='rgba(163,230,53,.75)';g.fillRect(x-bw/2,mid4-up/fm*h4,bw,up/fm*h4);g.fillStyle='rgba(251,113,133,.75)';g.fillRect(x-bw/2,mid4,bw,dn/fm*h4)}
+ const PP=(PRESS[m.id]||[]).filter(p=>p.t>=x0);if(PP.length>1){g.strokeStyle='#22d3ee';g.lineWidth=1.3;g.beginPath();PP.forEach((p,i)=>{const v=side==='YES'?p.pr:-p.pr,x=X(p.t),y=mid4-v*h4;i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();g.lineWidth=1}
+ g.fillStyle='#8a97ab';g.fillText(`tape · takers buying ${lbl} ↑ / other side ↓ · pressure`,PL+5,T4+7);g.fillText(Math.round(fm).toLocaleString(),PL+pw+4,T4+6);
+ if(!TA.length&&!PP.length){g.fillStyle='#6f7b8f';g.fillText('trade tape and order book load for the market on screen',PL+5,mid4+10)}
+ // --- tap readout
+ if(SC.hx!=null&&now-SC.ht<8000){const x=clamp(SC.hx,PL,PL+pw),t=x0+(x-PL)/pw*(x1-x0);g.strokeStyle='rgba(233,238,246,.55)';g.beginPath();g.moveTo(x,T1);g.lineTo(x,B4);g.stroke();const ln=[etT(t)];
+  const c=CC.find(r=>t>=r[0]&&t<r[0]+gc*60000);if(c)ln.push(`${a} O ${axP(c[1])} C ${axP(c[4])}`,`   H ${axP(c[2])} L ${axP(c[3])}`);
+  const bi=bars.findIndex(b=>t>=b.t&&t<b.t+dur);if(bi>=0){const b=bars[bi];ln.push(`${lbl} bid ${c1(side==='YES'?b.b:1-b.a)} ask ${c1(side==='YES'?b.a:1-b.b)}`);if(fair[bi]!=null)ln.push(`fair ${pctS(fl(fair[bi]))}`);
+   const tt=truth(m,side,Math.round((side==='YES'?b.a:1-b.b)*100)/100,(m.close-Math.min(b.t+dur,now))/1000);if(tt)ln.push(`truth ${pctS(tt.w)}`);const s=sn.find(z=>z[0]===b);if(s)ln.push(`snap ${s[1]>=0?'+':''}${(s[1]*100).toFixed(1)}¢`);
+   const o=fb.get(b.t);if(o)ln.push(`takers ${Math.round(o.y)} YES / ${Math.round(o.n)} NO`)}
+  if(t>now&&t<m.close){const base=VOL[a]?.base;if(base&&R.x&&S){const sd=Math.sqrt(fwdVar(a,now,t,R.x.w||0,base,cfg.events)*(R.x.scale||1));ln.push(`${a} ±1σ ${axP(S*Math.exp(-sd))}–${axP(S*Math.exp(sd))}`,`${a} ±2σ ${axP(S*Math.exp(-2*sd))}–${axP(S*Math.exp(2*sd))}`)}else ln.push('(future)')}const bw2=Math.max(...ln.map(s=>g.measureText(s).width))+12,bh=ln.length*13+8;let bx=x+8;if(bx+bw2>W-2)bx=x-8-bw2;
+  g.fillStyle='rgba(10,13,18,.94)';g.fillRect(bx,T1+4,bw2,bh);g.strokeStyle='#2a3444';g.strokeRect(bx,T1+4,bw2,bh);g.fillStyle='#e9eef6';ln.forEach((s,i)=>g.fillText(s,bx+6,T1+12+i*13))}}
+(()=>{const cv=$('#scCv');const hv=e=>{const r=cv.getBoundingClientRect();SC.hx=e.clientX-r.left;SC.ht=Date.now();scDraw()};
+ cv.addEventListener('pointerdown',hv);cv.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||e.buttons)hv(e)});cv.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){SC.hx=null;scDraw()}})})();
+window.addEventListener('resize',()=>scDraw());
+document.addEventListener('click',e=>{const b=e.target.closest('[data-chart],[data-lad2]');if(!b)return;const m=MK.get(b.dataset.chart||b.dataset.lad2);if(!m)return;
+ if(m.v!=='K'||m.man||!['15m','1h','1d'].includes(m.tf)){toast('The Scalp tab covers live Kalshi 15m, hourly and daily markets');return}
+ SC.tf=m.tf;SC.a=m.asset;SC.id=m.id;SC.zoom=0;SC.tixK='';store.set('fl.sctf',SC.tf);scBook(m.id);scCandles(m.id);scTrades(m.id,true);tab('sc')});
+
+/* ---- Lab ---- */
+function labStats(f){const T=trades().filter(f),S=T.filter(r=>r.pnl!=null),pnl=S.reduce((s,r)=>s+r.pnl,0),cost=S.reduce((s,r)=>s+r.cost*r.C,0),hold=S.map(r=>(r.xt||r.cl)-r.t).filter(x=>x>0);
+ return{n:S.length,w:S.filter(r=>r.pnl>0).length,pnl,roi:cost?pnl/cost:null,avg:S.length?pnl/S.length:null,open:T.filter(r=>r.o==null).length,hold:hold.length?hold.reduce((s,x)=>s+x,0)/hold.length:null,T}}
+const LABS=()=>[...STRATS.map(s=>({...s,f:r=>r.strat===s.k,tog:'st.'+s.k,reset:1})),
+ {k:'fav',ic:'⭐',n:'Favorites',tfs:['1h'],ev:'ok',d:'Hourly BTC/ETH "above" markets: buys the 90–97¢ side with a 1¢ spread, 6–30 min left, coin not moving toward the strike (BTC: NO side only). Held to settlement. Backtest Aug 24–Nov 23 checked against real trade prints: about +1.2% per bet on both coins, positive in the month it never saw.',f:r=>r.strat==='fav',tog:'favOn'},
+ {k:'favD',ic:'☀️',n:'Daily Fade',tfs:['1d'],ev:'ok',d:'Once a day 8am–2pm ET: buys NO on the BTC 5pm strike whose NO costs 90–97¢ with a 1¢ spread, held to 5pm. Backtest: 77 days, 1 loss, +$191 on $100 bets. Small sample, lopsided risk.',f:r=>r.strat==='favD',tog:'dfOn'},
+ {k:'model',ic:'📐',n:'Fair-value edge',tfs:['15m','1h','1d'],ev:'model',d:'The original Fairline rule: buy when the blended fair value beats the price after fees by the safety margin, with every risk rule passing. Expect very few entries.',f:r=>!r.strat},
+ {k:'tix',ic:'✋',n:'Your scalps',tfs:['15m','1h','1d'],ev:'you',d:'Paper scalps you placed from the ticket on the Scalp tab.',f:r=>r.strat==='tix',reset:1}];
+const labOn=k=>k.startsWith('st.')?stOn(k.slice(3)):!!cfg[k];
+function labRender(){if($('#t-lab').hidden)return;const st=LABS().map(x=>({x,s:labStats(x.f)}));let tot=0,n=0,open=0;for(const{x,s}of st){if(x.k==='model')continue;tot+=s.pnl;n+=s.n;open+=s.open}
+ $('#labIntro').innerHTML=`Each strategy paper-trades about $${cfg.scStake||100} per bet (⭐ and ☀️ use their own stake) on every Kalshi BTC/ETH market the app has loaded, on screen or not, while the app is open. Only ⭐ Favorites and ☀️ Daily Fade passed a backtest. Give any strategy 100+ settled bets before believing its number.`;
+ $('#labK').innerHTML=`<div class="kpi"><span>Settled bets</span><b>${n}</b></div><div class="kpi"><span>Paper P&amp;L</span><b class="${tot>=0?'ok':'bad'}">${(tot>=0?'+':'')+usd(tot)}</b></div><div class="kpi"><span>Open now</span><b>${open}</b></div>`;
+ $('#labList').innerHTML=st.map(({x,s})=>{const byTf=['15m','1h','1d'].map(tf=>{const T=s.T.filter(r=>r.tf===tf&&r.pnl!=null);if(!T.length)return'';const p=T.reduce((a,r)=>a+r.pnl,0),c=T.reduce((a,r)=>a+r.cost*r.C,0);
+   return`<tr><td>${tf==='1d'?'daily':tf}</td><td>${T.length}</td><td>${Math.round(T.filter(r=>r.pnl>0).length/T.length*100)}%</td><td class="${p>=0?'ok':'bad'}">${usd(p)}</td><td>${c?(p/c*100).toFixed(1)+'%':'–'}</td></tr>`}).join('');
+  const rec=s.T.slice(-6).reverse().map(r=>`<div class="frow"><span class="fbad ${r.pnl==null?'in':r.pnl>=0?'go':'wt'}">${r.pnl==null?'OPEN':r.pnl>=0?'WON':'LOST'}</span><div style="flex:1;min-width:0"><b>${r.sd} · ${esc(r.ds)}</b><div class="muted">${new Date(r.t).toLocaleString([],{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})} · ${r.C}× @ ${c1(r.px)}${r.xp!=null?` → ${c1(r.xp)} (${r.xr})`:r.pnl!=null?' → settled':''}</div></div><div class="tl ${r.pnl==null?'':r.pnl>=0?'ok':'bad'}">${r.pnl==null?'':(r.pnl>=0?'+':'')+usd(r.pnl)}</div></div>`).join('');
+  return `<div class="card"><div class="top"><div><h2 style="margin:0">${x.ic} ${esc(x.n)}<span class="ev ${x.ev}">${EVL[x.ev]}</span></h2><div class="muted">${x.tfs.map(t=>t==='1d'?'daily':t).join(' · ')}</div></div>${x.tog?`<label class="chk" style="min-height:30px"><input type="checkbox" data-labtog="${x.tog}" ${labOn(x.tog)?'checked':''}> on</label>`:''}</div>
+  <div class="muted" style="margin-top:4px">${esc(x.d)}</div>
+  <div class="kpis" style="margin-top:8px"><div class="kpi"><span>Settled</span><b>${s.n}</b></div><div class="kpi"><span>Won</span><b>${s.n?Math.round(s.w/s.n*100)+'%':'–'}</b></div><div class="kpi"><span>P&amp;L · ROI</span><b class="${s.pnl>=0?'ok':'bad'}" style="font-size:14px">${s.n?(s.pnl>=0?'+':'')+usd(s.pnl)+(s.roi!=null?' · '+(s.roi*100).toFixed(1)+'%':''):'–'}</b></div></div>
+  ${s.n||s.open?`<div class="muted" style="margin-top:6px">${s.n?`avg ${(s.avg>=0?'+':'')+usd(s.avg)} per bet · avg hold ${s.hold?left(s.hold/1000):'–'}`:''}${s.open?`${s.n?' · ':''}${s.open} open`:''}</div>`:''}
+  ${byTf?`<table style="margin-top:6px"><tr><th></th><th>n</th><th>won</th><th>P&amp;L</th><th>ROI</th></tr>${byTf}</table>`:''}${rec}
+  ${x.reset&&s.T.length?`<div class="row"><button class="btn sm alt" data-labreset="${x.k}">Reset ${esc(x.n)}</button></div>`:''}</div>`}).join('')}
+document.addEventListener('change',e=>{const el=e.target.closest('[data-labtog]');if(!el)return;const k=el.dataset.labtog;if(k.startsWith('st.')){cfg.st={...(cfg.st||{}),[k.slice(3)]:el.checked}}else cfg[k]=el.checked;saveCfg();labRender()});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-labreset]');if(!b)return;const k=b.dataset.labreset;if(!confirm('Delete every paper trade for this strategy?'))return;LED=LED.filter(r=>!(r.k==='t'&&r.strat===k));store.set('fl.led',LED);labRender()});
+
 
 /* ================= tabs, loops, boot ================= */
-function tab(t){$$('main>section').forEach(s=>s.hidden=s.id!=='t-'+t);$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
- if(t==='led'){computeGate();renderLed()}if(t==='man')renderMan();if(t==='set')loadSettings();if(t==='ch'){CH.ck='';CH.opts='';drawChart()}try{history.replaceState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
+function tab(t){if(t==='ch')t='sc';$$('main>section').forEach(s=>s.hidden=s.id!=='t-'+t);$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+ if(t==='led'){computeGate();renderLed()}if(t==='man')renderMan();if(t==='set')loadSettings();if(t==='sc'){SC.ck='';SC.opts='';SC.tixK='';drawChart()}if(t==='lab')labRender();try{history.replaceState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
 $$('nav button').forEach(b=>b.onclick=()=>tab(b.dataset.t));
 let running=true;
 async function loop(fn,ms){for(;;){if(running&&!document.hidden){try{await fn()}catch(e){}}await sleep(ms)}}
@@ -855,11 +1199,11 @@ async function boot(re){for(const a of act()){await loadSeason(a).catch(()=>{});
  if(re){for(const[id,x]of MK)if(!x.man&&!cfg.assets[x.asset])MK.delete(id);pmDisc=0}renderFilters()}
 loadMan();renderFilters();
 (async()=>{await boot(false);
- loop(pollSpot,2000);loop(booksPoly,4000);loop(loadK15,5000);loop(loadKH,8000);loop(loadKD,60000);
+ loop(pollSpot,2000);loop(booksPoly,4000);loop(loadK15,8000);loop(loadKH,8000);loop(loadKD,60000);loop(loadKDay,20000);loop(scPoll,3000);
  loop(async()=>{for(const a of act()){await loadVol(a).catch(()=>{});await sleep(300)}},60000);
  loop(async()=>{for(const a of act())if(!VOL[a]){await loadVol(a).catch(()=>{});await sleep(800)}},5000);loop(loadIV,300000);
  loop(async()=>{await resolveAll();computeGate()},60000);loop(async()=>render(),2000)})();
-try{const h=location.hash.slice(1);if(['sig','ch','man','led','bt','set','guide'].includes(h))tab(h)}catch(e){}
+try{const h=location.hash.slice(1);if(['sc','sig','ch','lab','man','led','bt','set','guide'].includes(h))tab(h)}catch(e){}
 try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
 </script>
 </body></html>
