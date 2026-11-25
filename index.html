@@ -92,6 +92,7 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
  <div class="kpis" style="margin-top:6px"><div class="kpi"><span>Paper bank</span><b id="kBank">$0</b></div><div class="kpi"><span>Today</span><b id="kDay">$0</b></div><div class="kpi"><span>Open</span><b id="kOpen">0</b></div></div>
  <div id="evid"></div>
  <div id="kalshiNote"></div>
+ <div id="echoBox"></div>
  <div id="dfBox"></div>
  <div id="favBox"></div>
  <div class="filters" id="filt"></div>
@@ -196,8 +197,10 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
  <div class="card fav"><h2>⭐ Favorites strategy (paper test)</h2>
   <div class="muted">Paper-buys the 90–97¢ side of Kalshi hourly BTC/ETH "above" markets under the tested rule (see Guide). It never places real orders.</div>
   <label class="chk"><input type="checkbox" data-k="dfOn"> Run the ☀️ Daily Fade paper test (BTC 5pm ladder)</label>
+  <label class="chk"><input type="checkbox" data-k="echoOn"> Run the 📦 ETF Echo paper test (3pm ET after $200M+ ETF-flow days)</label>
+  <label class="chk"><input type="checkbox" data-k="echoXOn"> Also log 🔁 Echo extras (3:00 and 3:15 fifteen-minute legs, 4–5pm fade)</label>
   <label class="chk"><input type="checkbox" data-k="favOn"> Run the ⭐ hourly favorites paper test</label>
-  <div class="g3"><div><label>Paper $ per bet</label><input data-k="favStake" inputmode="decimal"></div><div><label>Sides</label><select data-k="favSide"><option value="auto">Tested default</option><option value="NO">NO side only</option><option value="both">Both sides</option></select></div></div></div>
+  <div class="g3"><div><label>Paper $ per bet</label><input data-k="favStake" inputmode="decimal"></div><div><label>📦 Echo $ per bet</label><input data-k="echoStake" inputmode="decimal"></div><div><label>Sides</label><select data-k="favSide"><option value="auto">Tested default</option><option value="NO">NO side only</option><option value="both">Both sides</option></select></div></div></div>
  <div class="card"><h2>🎯 Scalping desk</h2>
   <div class="muted">Paper strategies run on every Kalshi BTC/ETH 15m, hourly and daily market the app has loaded while it's open, on screen or not. Nothing is ever sent to Kalshi.</div>
   <div class="g2"><div><label>Paper $ per strategy bet</label><input data-k="scStake" inputmode="decimal"></div><div></div></div>
@@ -223,12 +226,14 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
   <h3>How paper exits are counted</h3>
   <p class="muted">Entries pay the ask plus Kalshi's taker fee. Every paper buy on Kalshi re-checks the live order book first and fills at that ask; if the signal is gone on the live book, the buy is skipped and counted on the strategy's Lab card. A target is a resting sell: it counts as filled once the bid reaches it and pays the maker fee from Settings. Stops and time stops sell at the bid and pay the taker fee. Quotes refresh every 3 seconds for both 15-minute markets, the hourly strike nearest 50¢, the market on screen and anything open, so spikes shorter than that are missed. Real fills can be worse: other sellers may be ahead of you at the target.</p>
   <h3>Honest status</h3>
-  <p class="muted">Only ⭐ Favorites and ☀️ Daily Fade passed a backtest. Truth Fade uses the same price bias with a broader rule. Snapback, Spike Seller, Breakout and Lock are new and untested. Catch-up lost in a two-month backtest and is off by default, and the Lottery control is a known loser. Strategies only run while the app is open on screen. The Lab is the test: give each one 100+ settled bets before trusting it. The free Cloudflare plan allows 100,000 proxy requests a day; the desk uses about 2–3 a second, so roughly 9–14 hours of screen time a day.</p></div>
+  <p class="muted">Only ⭐ Favorites and ☀️ Daily Fade passed a backtest on Kalshi prices; 📦 ETF Echo passed one on coin prices. Truth Fade uses the same price bias with a broader rule. Snapback, Spike Seller, Breakout and Lock are new and untested. Catch-up lost in a two-month backtest and is off by default, and the Lottery control is a known loser. Strategies only run while the app is open on screen. The Lab is the test: give each one 100+ settled bets before trusting it. The free Cloudflare plan allows 100,000 proxy requests a day; the desk uses about 2–3 a second, so roughly 9–14 hours of screen time a day.</p></div>
  <div class="card"><h2>What this is (and isn't)</h2>
   <p class="muted">The research verdict: <b>no public signal reliably beats the market price on 5-minute to 4-hour crypto contracts after fees.</b> Directional accuracy at the open is about 50–53% on every timeframe. A 75% win rate is easy by buying favorites, and it still loses money after fees.</p>
   <p class="muted">So Fairline is a <b>fair-value calculator plus a lie detector</b>. It prices every contract from how much the coin is likely to move before close, including the 60-second settlement averaging, volatility by time of day, fat tails and options-market volatility. It blends that with the market price, subtracts the exact fees, and only flags an entry when what's left clears a safety margin. Expect NO TRADE on almost everything. If it says TRADE often, something is wrong.</p>
   <h3>How to read a card</h3>
   <p class="muted"><b>Market</b> = the venue's price. <b>Model</b> = pure math probability. <b>Fair</b> = blended fair value (mostly market, a little model). <b>Edge</b> = fair value minus what you'd pay including fees.<br><b class="ok">ENTRY</b> = passed every rule and this venue/timeframe has proven calibration. <b class="am">PAPER ENTRY</b> = passed every rule but isn't proven yet, so it's logged only. <b class="cy">REF</b> = Polymarket international (not for US users, tracked for learning only).</p>
+  <h3>📦 ETF Echo (paper test)</h3>
+  <p class="muted">From the Edge Finder flow study (Nov 2026). Since in-kind ETF creations began on 29 Jul 2025, when the previous trading day's net spot-BTC-ETF flow was $200M or more either way, BTC moved the same way in the 3–4pm ET hour 61% of the time (166 days; ETH 60%). Before that it was a coin flip, so treat it as a regime that can end. Between 3:00 and 3:10pm ET on those days, Fairline paper-buys the matching side (inflow: YES, outflow: NO) on the 4pm BTC and ETH ladders, on the strike nearest 50¢ and only at 55¢ or less, and holds to 4pm. Every morning a regime guard replays the rule on the last 60 signal days with Coinbase prices and switches a coin off if fewer than 52% went the right way. Flows come from the TFTC tracker (CC-BY, sourced from SoSoValue). Pass mark: 56.75% or better and a paper profit after 60 BTC bets; drop it if it's under 50% after 40. 🔁 Echo extras logs the 3:00 and 3:15 fifteen-minute contracts and a 4–5pm fade separately.</p>
   <h3>☀️ Daily Fade (paper test)</h3>
   <p class="muted">The same overpricing shows up on Kalshi's once-a-day 5pm BTC ladder, where you have hours instead of minutes. Between 8am and 2pm ET, buy NO on the strike whose NO costs 90–97¢ (1¢ spread), choosing the most expensive one, and hold to 5pm. In other words you're betting BTC won't rally past a level the crowd gives about a 3–10% chance. Backtest, one $100 bet per day: 77 days across Aug 24–Nov 23, 1 loss, +$191, including +$19 on the month it was never tuned on. The risk is lopsided: one big afternoon rally costs about $97, roughly a month of wins. Fridays are skipped because Kalshi runs a weekly ladder at 5pm then, which wasn't tested. Paper only; Kalshi directly, never through an app that adds a per-contract fee.</p>
   <h3>⭐ Favorites (paper test)</h3>
@@ -273,7 +278,7 @@ let toastT=null;function toast(msg){let t=$('.toast');if(!t){t=document.createEl
 const DEF={bank:500,worker:'',assets:{BTC:true,ETH:true,SOL:false,XRP:false},showPoly:true,showKalshi:true,
  kFee:0.07,kMaker:0.0175,kRound:'cent',pusRate:0.095,mode:'taker',haircut:0.015,
  minEdge:0.02,lsEdge:0.015,lsPct:0.30,maxSpread:0.03,maxDiv:0.20,wm:0.25,wivShort:0.2,wivLong:0.4,bBrti:2,bCl:3,evMult:4,
- kelly:0.25,cap:0.02,corrCap:0.05,maxOpen:3,dayStop:0.06,events:[],vk:1,favOn:true,favStake:100,favSide:'auto',dfOn:true,
+ kelly:0.25,cap:0.02,corrCap:0.05,maxOpen:3,dayStop:0.06,events:[],vk:1,favOn:true,favStake:100,favSide:'auto',dfOn:true,echoOn:true,echoXOn:true,echoStake:100,echoThr:200,echoMax:0.55,
  scStake:100,scAlert:false,st:{tru:true,snap:true,lag:false,spk:true,brk:true,lock:true,lot:true}};
 let cfg={...DEF,...store.get('fl.cfg',{})};cfg.assets={...DEF.assets,...(cfg.assets||{})};cfg.st={...DEF.st,...(cfg.st||{})};if((cfg.stMig||0)<1){cfg.st.lag=false;cfg.stMig=1;try{store.set('fl.cfg',cfg)}catch(e){}}
 const saveCfg=()=>store.set('fl.cfg',cfg);
@@ -517,7 +522,7 @@ const callCls=c=>c==='ENTRY'?'ENTRY':c==='PAPER ENTRY'||c==='HOLDING'?'PAPER':c=
 let LAST=[];
 function render(){const now=Date.now();let res=[];
  for(const m of MK.values()){if(!cfg.assets[m.asset]||m.close<=now-5000)continue;const R=evaluate(m,now);res.push(R);if(!m.favOnly){cpLog(R,now);autoEnter(R)}histPush(R,now)}
- LAST=res;renderHeader();try{favRun(now)}catch(e){}try{dfRun(now)}catch(e){}try{scExits(now);scRun(now,res)}catch(e){try{console.log('strategies',e)}catch(x){}}const resAll=res;res=res.filter(R=>!R.m.favOnly);
+ LAST=res;renderHeader();try{favRun(now)}catch(e){}try{dfRun(now)}catch(e){}try{echoRun(now)}catch(e){}try{scExits(now);scRun(now,res)}catch(e){try{console.log('strategies',e)}catch(x){}}const resAll=res;res=res.filter(R=>!R.m.favOnly);
  const f=FILT;const shown=res.filter(R=>f==='all'||(f==='entry'?/ENTRY/.test(R.call):TFS[f]?R.m.tf===f:AS[f]?R.m.asset===f:R.m.v===f||(f==='P'&&R.m.v==='U')));
  const ord={ENTRY:0,'PAPER ENTRY':1,'REF ENTRY':2,HOLDING:3,'NO TRADE':4,WAIT:5};const bad=R=>R.reasons.some(x=>/stale|too far apart|display only/.test(x));shown.sort((a,b)=>(ord[a.call]-ord[b.call])||(bad(a)-bad(b))||(a.reasons.length-b.reasons.length)||((b.edge??-9)-(a.edge??-9)));
  const nE=res.filter(R=>/ENTRY/.test(R.call)).length;const rc={};res.filter(R=>R.call==='NO TRADE').forEach(R=>{const k=R.reason.split(/[\d(:]/)[0].replace(/[\s·-]+$/,'').trim();rc[k]=(rc[k]||0)+1});
@@ -792,6 +797,91 @@ function dfLedger(){const T=dfT(),st=dfStats();
  $('#dfSum').innerHTML=`<h2>☀️ Daily Fade paper test</h2><div class="muted">Backtest, one $100 bet per day: Aug 24–Sep 24 (unseen) 26 bets, 1 lost, +$19; Sep 24–Oct 24 25 bets, 0 lost, +$84; Oct 24–Nov 23 26 bets, 0 lost, +$88. A losing day costs about $97, roughly a month of wins, so the whole edge rests on big afternoon rallies staying rarer than the market prices them.</div>
  <div class="kpis"><div class="kpi"><span>Settled</span><b>${st.n}</b></div><div class="kpi"><span>Lost</span><b>${st.n?st.lost:'–'}</b></div><div class="kpi"><span>P&amp;L · ROI</span><b class="${st.pnl>=0?'ok':'bad'}">${st.n?(st.pnl>=0?'+':'')+usd(st.pnl)+' · '+(st.roi*100).toFixed(1)+'%':'–'}</b></div></div>
  ${T.length?T.slice(-20).reverse().map(r=>`<div class="frow"><span class="fbad ${r.pnl==null?'in':r.pnl>=0?'go':'wt'}">${r.pnl==null?'OPEN':r.pnl>=0?'WON':'LOST'}</span><div style="flex:1;min-width:0"><b>NO · ${esc(r.ds)}</b><div class="muted">${new Date(r.t).toLocaleString()} · ${r.C}× @ ${c1(r.px)}</div></div><div class="tl ${r.pnl==null?'':r.pnl>=0?'ok':'bad'}">${r.pnl==null?'':(r.pnl>=0?'+':'')+usd(r.pnl)}</div></div>`).join(''):'<p class="muted">No daily bets yet. The first one is placed between 8am and 2pm ET while the app is open.</p>'}`}
+
+/* ================= ETF Echo (paper test) ================= */
+// Edge Finder study, Nov 2026. Since in-kind ETF creations began (29 Jul 2025): when the previous trading day's total net spot-BTC-ETF flow was $200M+ either way,
+// BTC moved the same way in the 3-4pm ET hour 61% of days (ETH 60%, 166 days). Zero edge before that, so a regime guard can switch it off.
+// 3:00-3:10pm ET: buy the matching side on the 4pm BTC/ETH ladder, strike nearest 50c, only at 55c or less, hold to 4pm. Extras (log only): 15-min legs + 4-5pm fade.
+const ECMON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+// NYSE full-day closures. Update yearly; after 2027 only weekends are skipped.
+const NYSE_HOL=new Set(['2026-01-01','2026-01-19','2026-02-16','2026-04-03','2026-05-25','2026-06-19','2026-07-03','2026-09-07','2026-11-26','2026-12-25',
+ '2027-01-01','2027-01-18','2027-02-15','2027-03-26','2027-05-31','2027-06-18','2027-07-05','2027-09-06','2027-11-25','2027-12-24']);
+const ECHO={flow:null,ft:0,err:null,g:store.get('fl.echoG',null),gBusy:false,gErr:null,alert:store.get('fl.echoA','')};
+const echoT=()=>trades().filter(r=>r.strat==='echo');
+const isTD=d=>{const w=new Date(d+'T12:00:00Z').getUTCDay();return w>0&&w<6&&!NYSE_HOL.has(d)};
+function prevTD(d){let t=Date.parse(d+'T12:00:00Z');for(let i=0;i<10;i++){t-=86400000;const x=new Date(t).toISOString().slice(0,10);if(isTD(x))return x}return null}
+function etWall(t){const d=new Date(t+etOff(t));return{day:d.toISOString().slice(0,10),min:d.getUTCHours()*60+d.getUTCMinutes()}}
+function etAt(day,hh,mm){const W=Date.parse(day+'T00:00:00Z')+(hh*60+mm)*60000;return W-etOff(W+5*3600000)}
+const p2=n=>String(n).padStart(2,'0');
+function echoTick(a,day,hh,mm,q){const y=day.slice(2,4),mo=ECMON[+day.slice(5,7)-1],dd=day.slice(8,10);return q?`${AS[a].kq}-${y}${mo}${dd}${p2(hh)}${p2(mm)}`:`${AS[a].kd}-${y}${mo}${dd}${p2(hh)}`}
+const fmtFlow=F=>(F<0?'−':'+')+'$'+Math.round(Math.abs(F)/1e6).toLocaleString()+'M';
+const dLab=d=>new Date(d+'T12:00:00Z').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'UTC'});
+function echoSig(now){const w=etWall(now),today=w.day;if(!isTD(today))return{today,w,why:'today isn\'t a US trading day'};
+ const pd=prevTD(today),f=ECHO.flow;if(!f)return{today,w,pd,why:ECHO.err||'loading ETF flows…'};
+ const rows=[...(f.recentSessions||[]),f.latestSession||{}],row=rows.find(r=>r&&r.date===pd);
+ if(!row||row.netFlowUsd==null)return{today,w,pd,why:`ETF total for ${dLab(pd)} not published yet`};
+ const F=+row.netFlowUsd,thr=(cfg.echoThr||200)*1e6,s=Math.abs(F)>=thr?Math.sign(F):0;
+ return{today,w,pd,F,s,tier:Math.abs(F)>=400e6?'A+':'A',why:s?null:`under the $${cfg.echoThr||200}M bar`}}
+// Regime guard: once a day, replay the rule on the last 60 signal days with Coinbase hourly candles (3-4pm ET open vs close).
+async function echoGuard(today){const thr=cfg.echoThr||200;if(ECHO.gBusy||(ECHO.g&&ECHO.g.d===today&&ECHO.g.thr===thr))return;ECHO.gBusy=true;
+ try{const d=await J('https://www.tftc.io/bitcoin-etf-flows/data.json',20000);const days=(d.days||[]).filter(x=>x.netFlowUsd!=null&&x.netFlowUsd!==0);
+  const sig=[];for(let i=1;i<days.length;i++){const F=days[i-1].netFlowUsd;if(Math.abs(F)>=thr*1e6&&days[i].date<today)sig.push({d:days[i].date,s:Math.sign(F)})}
+  const last=sig.slice(-60);if(last.length<10)throw new Error('not enough flow history');
+  const g={d:today,thr,from:last[0].d,to:last[last.length-1].d};
+  for(const a of['BTC','ETH']){const want=new Map(last.map(x=>[Math.floor(etAt(x.d,15,0)/1000),x.s])),ts=[...want.keys()].sort((p,q)=>p-q);let n=0,h=0;
+   for(let i=0;i<ts.length;){const s0=ts[i],e0=s0+12*86400;
+    const c=await J(`https://api.exchange.coinbase.com/products/${AS[a].cb}/candles?granularity=3600&start=${new Date(s0*1000).toISOString()}&end=${new Date(e0*1000).toISOString()}`,12000);
+    const by=new Map((c||[]).map(r=>[r[0],r]));while(i<ts.length&&ts[i]<e0){const r=by.get(ts[i]);if(r&&r[3]>0){n++;if(Math.sign(r[4]-r[3])===want.get(ts[i]))h++}i++}await sleep(250)}
+   g[a]={n,h}}
+  ECHO.g=g;ECHO.gErr=null;store.set('fl.echoG',g)}catch(e){ECHO.gErr='guard check failed ('+e.message+')'}finally{ECHO.gBusy=false}}
+const echoGuardOk=a=>{const g=ECHO.g&&ECHO.g[a];if(!g||g.n<30)return null;return g.h/g.n>=0.52};
+function echoLegs(x){const L=[];for(const a of['BTC','ETH']){if(!cfg.assets[a])continue;
+  L.push({k:'echo',a,tf:'1h',ev:echoTick(a,x.today,16,0),from:900,to:910,dir:x.s,lab:'ETF ECHO'});
+  if(cfg.echoXOn){L.push({k:'echoX',a,tf:'15m',ev:echoTick(a,x.today,15,15,1),from:900,to:903,dir:x.s,lab:'ECHO 15M',q:1});
+   L.push({k:'echoX',a,tf:'15m',ev:echoTick(a,x.today,15,30,1),from:915,to:918,dir:x.s,lab:'ECHO 15M',q:1});
+   L.push({k:'echoX',a,tf:'1h',ev:echoTick(a,x.today,17,0),from:960,to:970,dir:-x.s,lab:'ECHO FADE'})}}return L}
+const echoHas=L=>trades().some(r=>r.strat===L.k&&r.a===L.a&&r.ev===L.ev);
+async function echoTry(L,x){const pk='echo|'+L.ev;if(PEND[pk]||echoHas(L))return;PEND[pk]=1;
+ try{const d=await kget(`/markets?event_ticker=${L.ev}&limit=300`);
+  const ms=(d.markets||[]).map(m=>({tk:m.ticker,K:m.floor_strike,b:+m.yes_bid_dollars,a:+m.yes_ask_dollars,cl:Date.parse(m.close_time),op:Date.parse(m.open_time)})).filter(m=>m.b>0&&m.a>0&&m.a<1&&m.op<=Date.now());
+  if(!ms.length){missNote(L.k,L.ev,'market not open or no quotes yet');return}
+  const m=ms.sort((p,q)=>Math.abs((p.a+p.b)/2-.5)-Math.abs((q.a+q.b)/2-.5))[0];
+  const t=await kTop(m.tk),sd=L.dir>0?'YES':'NO',px=sd==='YES'?t.ya:t.na,spr=Math.round((t.ya-t.yb)*100),max=cfg.echoMax||0.55;
+  if(!(t.yb>0)||!(px>0&&px<1)){missNote(L.k,m.tk,'no live order book');return}
+  if(px>max+1e-9){missNote(L.k,m.tk,`${sd} costs ${c1(px)}, over the ${c1(max)} cap`);return}
+  if(spr>3){missNote(L.k,m.tk,`spread ${spr}¢`);return}
+  const now=Date.now(),w=etWall(now);if(w.min<L.from||w.min>=L.to||echoHas(L))return;
+  const cost=Math.round(px*100)/100,C=Math.max(1,Math.floor((cfg.echoStake||100)/cost)),fee=Math.ceil(cfg.kFee*C*cost*(1-cost)*100-1e-9)/100/C;
+  const what=L.q?`${L.a} up, ${etT(m.cl-900000)}–${etT(m.cl)}`:`${L.a} above ${fmtP(m.K)} at ${etT(m.cl)}`;
+  LED.push({k:'t',strat:L.k,id:'K:'+m.tk,v:'K',a:L.a,tf:L.tf,sl:m.tk,ev:L.ev,cl:m.cl,t:now,sd,px:cost,fee,cost:cost+fee,C,q:null,P:null,mid:(t.ya+t.yb)/2,e:null,call:L.lab,o:null,pnl:null,ds:what,ef:x.F,tier:x.tier});saveLed();
+  if(L.k==='echo')try{navigator.vibrate&&navigator.vibrate(x.tier==='A+'?[120,60,120,60,120]:[120,60,120])}catch(e){}
+  toast(`${L.k==='echo'?'📦':'🔁'} ${L.lab} (paper): BUY ${sd} · ${what} @ ${c1(cost)}`)}
+ catch(e){missNote(L.k,L.ev,'Kalshi request failed')}finally{setTimeout(()=>{delete PEND[pk]},3000)}}
+async function loadEcho(){if(!cfg.echoOn)return;const now=Date.now(),w=etWall(now);let x=echoSig(now);
+ const stale=!ECHO.flow||now-ECHO.ft>(w.min>=360&&w.min<915?1800000:7200000)||(x.why&&/not published/.test(x.why)&&now-ECHO.ft>600000);
+ if(stale){try{ECHO.flow=await J('https://www.tftc.io/bitcoin-etf-flows/latest.json',12000);ECHO.ft=now;ECHO.err=null}catch(e){ECHO.err='ETF flow feed unreachable ('+e.message+')'}x=echoSig(now)}
+ echoGuard(w.day);
+ if(!x.s||!cfg.worker||!cfg.showKalshi)return;
+ if(!(ECHO.g&&ECHO.g.d===w.day)&&!ECHO.gErr)return;   // wait for today's regime check before any entry
+ for(const L of echoLegs(x)){if(w.min<L.from||w.min>=L.to||echoHas(L))continue;if(echoGuardOk(L.a)===false)continue;await echoTry(L,x)}}
+function echoRun(now){if(!cfg.echoOn){$('#echoBox').innerHTML='';return}const x=echoSig(now);
+ if(x.s&&x.w.min>=900&&x.w.min<910&&ECHO.alert!==x.today){const ok=['BTC','ETH'].filter(a=>cfg.assets[a]&&echoGuardOk(a)!==false);
+  if(ok.length){ECHO.alert=x.today;store.set('fl.echoA',x.today);if(x.tier==='A+')try{navigator.vibrate&&navigator.vibrate([200,80,200])}catch(e){}
+   toast(`📦 ETF Echo: ${ok.join(' + ')} ${x.s>0?'UP':'DOWN'} 3–4pm · ${dLab(x.pd)} ${fmtFlow(x.F)} · tier ${x.tier}`)}}
+ echoBox(x,now)}
+function echoBox(x,now){const st=labStats(r=>r.strat==='echo');
+ const sig=x.s?`<b>${x.s>0?'UP':'DOWN'} today 3–4pm</b> · ${dLab(x.pd)} ETF flow ${fmtFlow(x.F)} · tier ${x.tier}`:x.F!=null?`No bet today: ${dLab(x.pd)} ETF flow ${fmtFlow(x.F)} is ${esc(x.why)}`:esc(x.why);
+ const g=ECHO.g,gl=g&&g.thr===(cfg.echoThr||200)?['BTC','ETH'].filter(a=>cfg.assets[a]&&g[a]).map(a=>{const z=g[a],ok=echoGuardOk(a);return`${a} ${z.h}/${z.n} (${z.n?Math.round(z.h/z.n*100):0}%) ${ok===false?'<span class="bad">OFF</span>':ok?'<span class="ok">✓</span>':'?'}`}).join(' · '):ECHO.gBusy?'checking…':ECHO.gErr?esc(ECHO.gErr):'not checked yet';
+ const ms=MISS.echo,miss=ms&&ms.t&&etDay(ms.t)===x.today?esc(ms.why):'';
+ const rows=!cfg.worker||!cfg.showKalshi?'<div class="muted" style="margin-top:6px">Needs the Kalshi proxy (Settings).</div>':x.s?['BTC','ETH'].filter(a=>cfg.assets[a]).map(a=>{
+   const ev=echoTick(a,x.today,16,0),held=echoT().find(r=>r.a===a&&r.ev===ev),gok=echoGuardOk(a),m=x.w.min;
+   const b=held?`<span class="fbad ${held.pnl==null?'in':held.pnl>=0?'go':'wt'}">${held.pnl==null?'IN':held.pnl>=0?'WON':'LOST'}</span>`:gok===false?'<span class="fbad wt">OFF</span>':m>=900&&m<910?'<span class="fbad go">ENTRY</span>':'<span class="fbad wt">WATCH</span>';
+   const note=held?`paper ${held.C}× @ ${c1(held.px)}`:gok===false?'regime guard switched this coin off':m<900?'buys at 3:00pm ET if the app is open':m<910?`window open until 3:10pm${miss?' · last check: '+miss:''}`:`window closed${miss?' · '+miss:' (app wasn\'t open 3:00–3:10pm)'}`;
+   return`<div class="frow">${b}<div style="flex:1;min-width:0"><b>BUY ${x.s>0?'YES':'NO'} · ${held?esc(held.ds):`${a} 4pm ladder, strike nearest 50¢`}</b><div class="muted">${note}</div></div></div>`}).join(''):'';
+ $('#echoBox').innerHTML=`<div class="card fav"><h2>📦 ETF Echo (paper test)</h2>
+ <div class="muted">On US trading days after a $${cfg.echoThr||200}M+ net spot-ETF flow, buy the same direction (inflow: YES, outflow: NO) on the 4pm BTC and ETH ladders at 3:00–3:10pm ET, strike nearest 50¢, only at ${Math.round((cfg.echoMax||0.55)*100)}¢ or less, held to 4pm. Since Jul 2025 that won 61% (BTC) and 60% (ETH) of 166 days.</div>
+ <div style="margin-top:6px">${sig}</div><div class="muted">Regime guard, last 60 signal days: ${gl}</div>${rows}
+ <div class="muted" style="margin-top:6px">Paper results: ${st.n?`${st.n} settled · ${st.w} won (${Math.round(st.w/st.n*100)}%) · <b class="${st.pnl>=0?'ok':'bad'}">${(st.pnl>=0?'+':'')+usd(st.pnl)}</b>`:'none settled yet'}${st.open?` · ${st.open} open`:''} · pass mark 56.75% after 60 BTC bets</div></div>`}
 
 /* ================= chart helpers ================= */
 const HIST=new Map();
@@ -1249,7 +1339,7 @@ function lwDraw(){const now=Date.now(),R=SC.R,m=R?R.m:null;if(!LW.ch||LW.panes!=
   const pm=new Map();for(const p of PRESS[m.id]||[]){if(p.t<x0-dur)continue;pm.set(bt(p.t),side==='YES'?p.pr:-p.pr)}S.pr.setData([...pm].sort((p,q)=>p[0]-q[0]).map(([time,value])=>({time,value})))}
  // trades: strategy entries (arrow + icon) and exits (circle), open target / stop lines
  const mk=[],T=trades().filter(r=>r.id===m.id);
- if(LW.on.trades)for(const r of T){const px=(r.sd===side?r.px:1-r.px)*100,ic=STR[r.strat]?.ic||(r.strat==='tix'?'✋':r.strat==='fav'?'⭐':r.strat==='favD'?'☀️':'📐');
+ if(LW.on.trades)for(const r of T){const px=(r.sd===side?r.px:1-r.px)*100,ic=STR[r.strat]?.ic||(r.strat==='tix'?'✋':r.strat==='fav'?'⭐':r.strat==='favD'?'☀️':r.strat==='echo'?'📦':r.strat==='echoX'?'🔁':'📐');
   mk.push({time:bt(r.t),position:'atPriceMiddle',price:px,shape:'arrowUp',color:r.sd==='YES'?'#a3e635':'#fb7185',text:ic+' '+sideName(m,r.sd)});
   if(r.xt)mk.push({time:bt(r.xt),position:'atPriceMiddle',price:(r.sd===side?r.xp:1-r.xp)*100,shape:'circle',color:r.pnl>=0?'#a3e635':'#fb7185',text:(r.pnl>=0?'+':'')+usd(r.pnl)});
   if(r.o==null){if(r.tp!=null)pl(S.ct,{price:(r.sd===side?r.tp:1-r.tp)*100,color:'#a3e635',lineStyle:2,title:ic+' target'});if(r.slx!=null)pl(S.ct,{price:(r.sd===side?r.slx:1-r.slx)*100,color:'#fb7185',lineStyle:2,title:ic+' stop'})}}
@@ -1267,11 +1357,13 @@ function labStats(f){const T=trades().filter(f),S=T.filter(r=>r.pnl!=null),pnl=S
 const LABS=()=>[...STRATS.map(s=>({...s,f:r=>r.strat===s.k,tog:'st.'+s.k,reset:1})),
  {k:'fav',ic:'⭐',n:'Favorites',tfs:['1h'],ev:'ok',d:'Hourly BTC/ETH "above" markets: buys the 90–97¢ side with a 1¢ spread, 6–30 min left, coin not moving toward the strike (BTC: NO side only). Held to settlement. Backtest Aug 24–Nov 23 checked against real trade prints: about +1.2% per bet on both coins, positive in the month it never saw.',f:r=>r.strat==='fav',tog:'favOn'},
  {k:'favD',ic:'☀️',n:'Daily Fade',tfs:['1d'],ev:'ok',d:'Once a day 8am–2pm ET: buys NO on the BTC 5pm strike whose NO costs 90–97¢ with a 1¢ spread, held to 5pm. Backtest: 77 days, 1 loss, +$191 on $100 bets. Small sample, lopsided risk.',f:r=>r.strat==='favD',tog:'dfOn'},
+ {k:'echo',ic:'📦',n:'ETF Echo',tfs:['1h'],ev:'data',d:'US trading days after a $200M+ net spot-ETF flow: at 3:00–3:10pm ET buys the matching side (inflow YES, outflow NO) on the BTC and ETH 4pm ladders, strike nearest 50¢, only at 55¢ or less, held to 4pm. Coin-price backtest for the in-kind ETF era (Jul 2025–Nov 2026): BTC 61%, ETH 60% of 166 days, about +9¢ per contract after fees. No edge before Jul 2025, so a daily regime guard can switch a coin off. Pass mark: 56.75%+ and a profit after 60 BTC bets; drop it if under 50% after 40.',f:r=>r.strat==='echo',tog:'echoOn'},
+ {k:'echoX',ic:'🔁',n:'Echo extras (log)',tfs:['15m','1h'],ev:'new',d:'Logged next to ETF Echo to see where the move lives: the same side on the 3:00–3:15 and 3:15–3:30 fifteen-minute contracts (backtest 58% and 57%), and the opposite side from 4 to 5pm on the 5pm ladder, betting the push fades (58% BTC, 54% ETH, untuned). Not part of the ETF Echo score.',f:r=>r.strat==='echoX',tog:'echoXOn'},
  {k:'model',ic:'📐',n:'Fair-value edge',tfs:['15m','1h','1d'],ev:'model',d:'The original Fairline rule: buy when the blended fair value beats the price after fees by the safety margin, with every risk rule passing. Expect very few entries.',f:r=>!r.strat},
  {k:'tix',ic:'✋',n:'Your scalps',tfs:['15m','1h','1d'],ev:'you',d:'Paper scalps you placed from the ticket on the Scalp tab.',f:r=>r.strat==='tix',reset:1}];
 const labOn=k=>k.startsWith('st.')?stOn(k.slice(3)):!!cfg[k];
 function labRender(){if($('#t-lab').hidden)return;const st=LABS().map(x=>({x,s:labStats(x.f)}));let tot=0,n=0,open=0;for(const{x,s}of st){if(x.k==='model')continue;tot+=s.pnl;n+=s.n;open+=s.open}
- $('#labIntro').innerHTML=`Each strategy paper-trades about $${cfg.scStake||100} per bet (⭐ and ☀️ use their own stake) on every Kalshi BTC/ETH market the app has loaded, on screen or not, while the app is open. Only ⭐ Favorites and ☀️ Daily Fade passed a backtest. Give any strategy 100+ settled bets before believing its number.`;
+ $('#labIntro').innerHTML=`Each strategy paper-trades about $${cfg.scStake||100} per bet (⭐, ☀️ and 📦 use their own stake) on every Kalshi BTC/ETH market the app has loaded, on screen or not, while the app is open. Only ⭐ Favorites and ☀️ Daily Fade passed a backtest on Kalshi prices; 📦 ETF Echo passed one on coin prices and a 43-day Kalshi check. Give any strategy 100+ settled bets before believing its number.`;
  $('#labK').innerHTML=`<div class="kpi"><span>Settled bets</span><b>${n}</b></div><div class="kpi"><span>Paper P&amp;L</span><b class="${tot>=0?'ok':'bad'}">${(tot>=0?'+':'')+usd(tot)}</b></div><div class="kpi"><span>Open now</span><b>${open}</b></div>`;
  $('#labList').innerHTML=st.map(({x,s})=>{const byTf=['15m','1h','1d'].map(tf=>{const T=s.T.filter(r=>r.tf===tf&&r.pnl!=null);if(!T.length)return'';const p=T.reduce((a,r)=>a+r.pnl,0),c=T.reduce((a,r)=>a+r.cost*r.C,0);
    return`<tr><td>${tf==='1d'?'daily':tf}</td><td>${T.length}</td><td>${Math.round(T.filter(r=>r.pnl>0).length/T.length*100)}%</td><td class="${p>=0?'ok':'bad'}">${usd(p)}</td><td>${c?(p/c*100).toFixed(1)+'%':'–'}</td></tr>`}).join('');
@@ -1298,7 +1390,7 @@ async function boot(re){for(const a of act()){await loadSeason(a).catch(()=>{});
  if(re){for(const[id,x]of MK)if(!x.man&&!cfg.assets[x.asset])MK.delete(id);pmDisc=0}renderFilters()}
 loadMan();renderFilters();
 (async()=>{await boot(false);
- loop(pollSpot,2000);loop(booksPoly,4000);loop(loadK15,8000);loop(loadKH,8000);loop(loadKD,60000);loop(loadKDay,20000);loop(scPoll,3000);
+ loop(pollSpot,2000);loop(booksPoly,4000);loop(loadK15,8000);loop(loadKH,8000);loop(loadKD,60000);loop(loadEcho,15000);loop(loadKDay,20000);loop(scPoll,3000);
  loop(async()=>{for(const a of act()){await loadVol(a).catch(()=>{});await sleep(300)}},60000);
  loop(async()=>{for(const a of act())if(!VOL[a]){await loadVol(a).catch(()=>{});await sleep(800)}},5000);loop(loadIV,300000);
  loop(async()=>{await resolveAll();computeGate()},60000);loop(async()=>render(),2000)})();
