@@ -219,11 +219,11 @@ nav button{font-size:9.5px;min-width:0;white-space:nowrap}
   <h3>Custom indicators</h3>
   <p class="muted"><b>Fair:</b> Fairline's model probability. <b>Truth:</b> what a contract at this price with this much time left actually won from Sep 24 to Nov 23 (11,593 fifteen-minute markets, 2,700 hourly ladders and 103 daily ladders, BTC+ETH). It's trend-neutral: BTC fell 28% and ETH 37% in that stretch, which made every NO look great, so Truth averages the YES-side and NO-side results to cancel the trend. The tile shows the cheaper side's edge after the fee. <b>Snap:</b> contract move minus model move over the last minute. <b>Θ:</b> what YES gains or loses per minute if the coin sits still. <b>Δ:</b> how far YES moves for one step in the coin: BTC $25 / $100 / $250 and ETH $1 / $5 / $10 on 15m / hourly / daily. <b>Z:</b> distance to the strike in standard deviations of the move expected before close. <b>Pressure:</b> resting YES bids vs NO bids within 3¢ of the top (−1 to +1). <b>Flow:</b> takers buying YES vs NO over 2 minutes. <b>Heat:</b> the volatility the market's prices imply divided by Fairline's forecast; above 1 means cheap contracts are extra expensive. <b>Touch:</b> how often the sell price reached +5¢ (or 2× for contracts under 15¢) from this price and time left in that history, plus the model's estimate. <b>Momentum:</b> the coin's 5-minute move in σ. <b>Lock:</b> final minute only, how much of the 60-second average is already in and what the rest needs to average.</p>
   <h3>Strategies (all paper)</h3>
-  <p class="muted">⚖️ <b>Truth Fade</b> buys the side history says is underpriced after the fee, mostly 80–97¢ favorites, held to settlement. 🪃 <b>Snapback</b> fades contracts that outran the coin. 🏃 <b>Catch-up</b> buys contracts that haven't caught up to a coin move. ⚡ <b>Spike Seller</b> is your sell-into-the-spike idea, pure price. 🚀 <b>Breakout</b> rides 5-minute momentum when takers agree. 🔒 <b>Last-Minute Lock</b> buys near-certain outcomes in the final 75 seconds. 🎟️ <b>Lottery</b> is the 1–5¢ play, kept as a control. ⭐ Favorites and ☀️ Daily Fade keep running as before. The exact rules are on each Lab card.</p>
+  <p class="muted">⚖️ <b>Truth Fade</b> buys the side history says is underpriced after the fee, mostly 80–97¢ favorites, held to settlement. 🪃 <b>Snapback</b> fades contracts that outran the coin. 🏃 <b>Catch-up</b> buys contracts that haven't caught up to a coin move; it's off by default because it lost in a two-month backtest (Kalshi reprices within about a second). ⚡ <b>Spike Seller</b> is your sell-into-the-spike idea, pure price. 🚀 <b>Breakout</b> rides 5-minute momentum when takers agree. 🔒 <b>Last-Minute Lock</b> buys near-certain outcomes in the final 75 seconds. 🎟️ <b>Lottery</b> is the 1–5¢ play, kept as a control. ⭐ Favorites and ☀️ Daily Fade keep running as before. The exact rules are on each Lab card.</p>
   <h3>How paper exits are counted</h3>
-  <p class="muted">Entries pay the ask plus Kalshi's taker fee. A target is a resting sell: it counts as filled once the bid reaches it and pays the maker fee from Settings. Stops and time stops sell at the bid and pay the taker fee. Quotes refresh every 3 seconds for both 15-minute markets, the hourly strike nearest 50¢, the market on screen and anything open, so spikes shorter than that are missed. Real fills can be worse: other sellers may be ahead of you at the target.</p>
+  <p class="muted">Entries pay the ask plus Kalshi's taker fee. Every paper buy on Kalshi re-checks the live order book first and fills at that ask; if the signal is gone on the live book, the buy is skipped and counted on the strategy's Lab card. A target is a resting sell: it counts as filled once the bid reaches it and pays the maker fee from Settings. Stops and time stops sell at the bid and pay the taker fee. Quotes refresh every 3 seconds for both 15-minute markets, the hourly strike nearest 50¢, the market on screen and anything open, so spikes shorter than that are missed. Real fills can be worse: other sellers may be ahead of you at the target.</p>
   <h3>Honest status</h3>
-  <p class="muted">Only ⭐ Favorites and ☀️ Daily Fade passed a backtest. Truth Fade uses the same price bias with a broader rule. Snapback, Catch-up, Spike Seller, Breakout and Lock are new and untested, and the Lottery control is a known loser. Strategies only run while the app is open on screen. The Lab is the test: give each one 100+ settled bets before trusting it. The free Cloudflare plan allows 100,000 proxy requests a day; the desk uses about 2–3 a second, so roughly 9–14 hours of screen time a day.</p></div>
+  <p class="muted">Only ⭐ Favorites and ☀️ Daily Fade passed a backtest. Truth Fade uses the same price bias with a broader rule. Snapback, Spike Seller, Breakout and Lock are new and untested. Catch-up lost in a two-month backtest and is off by default, and the Lottery control is a known loser. Strategies only run while the app is open on screen. The Lab is the test: give each one 100+ settled bets before trusting it. The free Cloudflare plan allows 100,000 proxy requests a day; the desk uses about 2–3 a second, so roughly 9–14 hours of screen time a day.</p></div>
  <div class="card"><h2>What this is (and isn't)</h2>
   <p class="muted">The research verdict: <b>no public signal reliably beats the market price on 5-minute to 4-hour crypto contracts after fees.</b> Directional accuracy at the open is about 50–53% on every timeframe. A 75% win rate is easy by buying favorites, and it still loses money after fees.</p>
   <p class="muted">So Fairline is a <b>fair-value calculator plus a lie detector</b>. It prices every contract from how much the coin is likely to move before close, including the 60-second settlement averaging, volatility by time of day, fat tails and options-market volatility. It blends that with the market price, subtracts the exact fees, and only flags an entry when what's left clears a safety margin. Expect NO TRADE on almost everything. If it says TRADE often, something is wrong.</p>
@@ -274,8 +274,8 @@ const DEF={bank:500,worker:'',assets:{BTC:true,ETH:true,SOL:false,XRP:false},sho
  kFee:0.07,kMaker:0.0175,kRound:'cent',pusRate:0.095,mode:'taker',haircut:0.015,
  minEdge:0.02,lsEdge:0.015,lsPct:0.30,maxSpread:0.03,maxDiv:0.20,wm:0.25,wivShort:0.2,wivLong:0.4,bBrti:2,bCl:3,evMult:4,
  kelly:0.25,cap:0.02,corrCap:0.05,maxOpen:3,dayStop:0.06,events:[],vk:1,favOn:true,favStake:100,favSide:'auto',dfOn:true,
- scStake:100,scAlert:false,st:{tru:true,snap:true,lag:true,spk:true,brk:true,lock:true,lot:true}};
-let cfg={...DEF,...store.get('fl.cfg',{})};cfg.assets={...DEF.assets,...(cfg.assets||{})};cfg.st={...DEF.st,...(cfg.st||{})};
+ scStake:100,scAlert:false,st:{tru:true,snap:true,lag:false,spk:true,brk:true,lock:true,lot:true}};
+let cfg={...DEF,...store.get('fl.cfg',{})};cfg.assets={...DEF.assets,...(cfg.assets||{})};cfg.st={...DEF.st,...(cfg.st||{})};if((cfg.stMig||0)<1){cfg.st.lag=false;cfg.stMig=1;try{store.set('fl.cfg',cfg)}catch(e){}}
 const saveCfg=()=>store.set('fl.cfg',cfg);
 const AS={BTC:{cb:'BTC-USD',gm:'btcusd',cc:'BTC_USD',dc:'BTC',dp:'BTC-',pm:'btc',kq:'KXBTC15M',kd:'KXBTCD',kr:'KXBTC'},
  ETH:{cb:'ETH-USD',gm:'ethusd',cc:'ETH_USD',dc:'ETH',dp:'ETH-',pm:'eth',kq:'KXETH15M',kd:'KXETHD',kr:'KXETH'},
@@ -450,7 +450,8 @@ const WIN={'5m':null,'15m':[120,720],'1h':[300,3000],'4h':[900,12000],'1d':[3600
 const winTxt={'15m':'2–12 min left','1h':'5–50 min left','4h':'15–200 min left','1d':'1–24 h left'};
 function cpLog(R,now){const m=R.m;if(R.q==null||m.man)return;for(const cp of CPS[m.tf]||[]){const key=m.id+'@'+cp;if(LOGGED.has(key))continue;
  if(R.tau<=cp&&R.tau>cp-90){LOGGED.add(key);LED.push({k:'c',id:m.id,v:m.v,a:m.asset,tf:m.tf,sl:m.slug||m.ticker||'',cl:m.close,cp,t:now,mid:R.mid,P:R.P,q:R.q,sd:R.side,e:R.edge,call:R.call,r:R.reason,o:null,ds:desc(m)});saveLed()}}}
-function autoEnter(R){if(!/ENTRY/.test(R.call))return;const m=R.m;if(trades().some(r=>r.id===m.id&&r.o==null))return;
+function autoEnter(R,live){if(!/ENTRY/.test(R.call))return;const m=R.m;if(trades().some(r=>r.id===m.id&&r.o==null))return;
+ if(!live&&m.v==='K'&&!m.man){const pk='model|'+m.id;if(PEND[pk])return;PEND[pk]=1;liveBook(m.id).then(m2=>{if(!m2){missNote('model',m.id,'no live order book');return}const R2=evaluate(m2,Date.now());if(/ENTRY/.test(R2.call)&&R2.side===R.side)autoEnter(R2,1);else missNote('model',m.id,'gone on the live book')}).finally(()=>{delete PEND[pk]});return}
  LED.push({k:'t',id:m.id,v:m.v,a:m.asset,tf:m.tf,sl:m.slug||m.ticker||'',cl:m.close,t:Date.now(),sd:R.side,px:R.price,fee:R.fee,cost:R.cost,C:R.C,q:R.q,P:R.P,mid:R.mid,e:R.edge,qs:R.qs,call:R.call,o:null,pnl:null,ds:desc(m),man:!!m.man});saveLed();
  try{navigator.vibrate&&navigator.vibrate([120,60,120])}catch(e){}toast(`${R.call}: ${sideName(m,R.side)} ${desc(m)} @ ${c1(R.price)} · edge ${c1(R.edge)}`)}
 function setOutcome(id,o){for(const r of LED)if(r.id===id&&r.o==null){r.o=o;if(r.k==='t'){const win=r.sd==='YES'?o:1-o;r.pnl=r.C*(win-r.px)-r.C*r.fee}}saveLed()}
@@ -727,11 +728,13 @@ function favEval(m,now){if(!cfg.favOn||m.v!=='K'||m.man||m.tf!=='1h'||m.type!=='
 function favEnter(x,now){const m=x.m,C=Math.max(1,Math.floor(cfg.favStake/x.cost)),fee=Math.ceil(cfg.kFee*C*x.cost*(1-x.cost)*100-1e-9)/100/C;
  LED.push({k:'t',strat:'fav',id:m.id,v:'K',a:m.asset,tf:'1h',sl:m.ticker,cl:m.close,t:now,sd:x.sd,px:x.cost,fee,cost:x.cost+fee,C,q:null,P:null,mid:(m.yesBid+m.yesAsk)/2,e:null,call:'FAV ENTRY',o:null,pnl:null,ds:desc(m)});saveLed();
  try{navigator.vibrate&&navigator.vibrate([120,60,120])}catch(e){}toast(`⭐ FAV ENTRY (paper): BUY ${x.sd} ${desc(m)} @ ${c1(x.cost)}`)}
+async function favLive(x0){const a=x0.m.asset,pk='fav|'+a;PEND[pk]=1;try{const m=await liveBook(x0.m.id);if(!m){missNote('fav',x0.m.id,'no live order book');return}const now=Date.now(),x=favEval(m,now);
+ if(!x||!x.ok||x.sd!==x0.sd){missNote('fav',m.id,x&&x.why.length?x.why[0]:'gone on the live book');return}if(favT().some(r=>r.a===a&&r.cl===m.close))return;favEnter(x,now)}finally{delete PEND[pk]}}
 let FAVLAST=[];
 function favRun(now){if(!cfg.favOn){$('#favBox').innerHTML='';return}const C=[];
  for(const m of MK.values()){if(!cfg.assets[m.asset]||m.close<=now)continue;const x=favEval(m,now);if(x)C.push(x)}
  for(const a of Object.keys(FAVA)){if(!cfg.assets[a])continue;const ok=C.filter(x=>x.ok&&x.m.asset===a).sort((p,q)=>q.cost-p.cost);if(!ok.length)continue;
-  if(favT().some(r=>r.a===a&&r.cl===ok[0].m.close))continue;favEnter(ok[0],now);ok[0].held=favT().find(r=>r.id===ok[0].m.id)}
+  if(favT().some(r=>r.a===a&&r.cl===ok[0].m.close))continue;if(!PEND['fav|'+a])favLive(ok[0])}
  FAVLAST=C;favBox(C,now)}
 function favStats(){const T=favT().filter(r=>r.pnl!=null);const pnl=T.reduce((t,r)=>t+r.pnl,0),cost=T.reduce((t,r)=>t+r.cost*r.C,0);return{n:T.length,lost:T.filter(r=>r.pnl<0).length,pnl,roi:cost?pnl/cost:null,open:favT().filter(r=>r.o==null).length}}
 function favBox(C,now){const st=favStats();const rows=C.filter(x=>x.held||x.ok||x.why.length<=2).sort((p,q)=>(!!q.held-!!p.held)||(q.ok-p.ok)||(p.why.length-q.why.length)||(p.tl-q.tl)).slice(0,6);
@@ -766,10 +769,15 @@ function dfEval(now){if(!DF.ev)return null;const h=(DF.close-now)/3600000,weekly
  if(!c.length)why.push('no NO side at 90–97¢ with a 1¢ spread right now');
  return{h,best:c[0]||null,held,why,ok:!why.length&&!held}}
 function dfRun(now){if(!cfg.dfOn){$('#dfBox').innerHTML='';return}const x=dfEval(now);
- if(x&&x.ok&&x.best){const m=x.best,C=Math.max(1,Math.floor(cfg.favStake/m.cost)),fee=Math.ceil(cfg.kFee*C*m.cost*(1-m.cost)*100-1e-9)/100/C;
-  LED.push({k:'t',strat:'favD',id:'K:'+m.tk,v:'K',a:'BTC',tf:'1d',sl:m.tk,cl:DF.close,t:now,sd:'NO',px:m.cost,fee,cost:m.cost+fee,C,q:null,P:null,mid:(m.a+m.b)/2,e:null,call:'DAILY FADE',o:null,pnl:null,ds:`BTC above ${fmtP(m.K)} at ${etT(DF.close)}`});saveLed();
-  x.held=dfT().find(r=>r.cl===DF.close);x.ok=false;try{navigator.vibrate&&navigator.vibrate([120,60,120])}catch(e){}toast(`☀️ DAILY FADE (paper): BUY NO · BTC above ${fmtP(m.K)} at ${etT(DF.close)} @ ${c1(m.cost)}`)}
+ if(x&&x.ok&&x.best&&!PEND.favD)dfLive(x.best);
  dfBox(x,now)}
+async function dfLive(m0){PEND.favD=1;try{const t=await kTop(m0.tk),b=t.yb,a=t.ya,cost=Math.round((1-b)*100)/100,spr=Math.round((a-b)*100);
+  const z=DF.ms&&DF.ms.find(q=>q.tk===m0.tk);if(z&&b>0){z.b=b;z.a=a}
+  if(!(b>0)||cost<0.90||cost>0.97||spr!==1){missNote('favD',m0.tk,`live NO price ${c1(cost)}, spread ${spr}¢`);return}
+  const now=Date.now();if(!cfg.dfOn||dfT().some(r=>r.cl===DF.close))return;const C=Math.max(1,Math.floor(cfg.favStake/cost)),fee=Math.ceil(cfg.kFee*C*cost*(1-cost)*100-1e-9)/100/C;
+  LED.push({k:'t',strat:'favD',id:'K:'+m0.tk,v:'K',a:'BTC',tf:'1d',sl:m0.tk,cl:DF.close,t:now,sd:'NO',px:cost,fee,cost:cost+fee,C,q:null,P:null,mid:(a+b)/2,e:null,call:'DAILY FADE',o:null,pnl:null,ds:`BTC above ${fmtP(m0.K)} at ${etT(DF.close)}`});saveLed();
+  try{navigator.vibrate&&navigator.vibrate([120,60,120])}catch(e){}toast(`☀️ DAILY FADE (paper): BUY NO · BTC above ${fmtP(m0.K)} at ${etT(DF.close)} @ ${c1(cost)}`)}
+ catch(e){missNote('favD',m0.tk,'no live order book')}finally{setTimeout(()=>{delete PEND.favD},5000)}}
 function dfStats(){const T=dfT().filter(r=>r.pnl!=null);const pnl=T.reduce((t,r)=>t+r.pnl,0),cost=T.reduce((t,r)=>t+r.cost*r.C,0);return{n:T.length,lost:T.filter(r=>r.pnl<0).length,pnl,roi:cost?pnl/cost:null,open:dfT().filter(r=>r.o==null).length}}
 function dfBox(x,now){const st=dfStats();let row='';
  if(!cfg.worker||!cfg.showKalshi)row='<div class="muted" style="margin-top:6px">Needs the Kalshi proxy (Settings).</div>';
@@ -817,7 +825,7 @@ function touchH(m,cost,tau,g){const ci=CBI[Math.round(cost*100)],ti=tlIdx(m.tf,t
 
 const SC={tf:['15m','1h','1d'].includes(store.get('fl.sctf','15m'))?store.get('fl.sctf','15m'):'15m',a:null,id:null,R:null,I:null,side:'YES',zoom:0,hx:null,ht:0,ck:'',opts:'',tixK:'',mcK:'',mc:null,mcT:null,
  tix:{sd:'YES',C:0,tp:5,tpu:'c',sl:6,ts:3,...store.get('fl.tix',{})}};
-const HL={},DLAD={},PRESS={},TR={},KC={},KC60={},DAYC={},HEAT={},SCOOL={};let SCLAST={};
+const HL={},DLAD={},PRESS={},TR={},KC={},KC60={},DAYC={},HEAT={},SCOOL={},PEND={},MISSK={};let SCLAST={},MISS=store.get('fl.miss',{});
 const askOf=(m,sd)=>sd==='YES'?m.yesAsk:m.noAsk,bidOf=(m,sd)=>sd==='YES'?m.yesBid:m.noBid;
 const sprC=m=>Math.round((m.yesAsk-m.yesBid)*100);const r2=x=>Math.round(x*100)/100;
 function scPins(){const s=new Set();if(SC.id)s.add(SC.id);for(const r of LED)if(r.k==='t'&&r.o==null&&r.v==='K')s.add(r.id);return s}
@@ -914,7 +922,7 @@ const EVL={ok:'TESTED +',data:'DATA-BACKED',new:'NEW · UNTESTED',neg:'TESTED �
 const STRATS=[
  {k:'tru',ic:'⚖️',n:'Truth Fade',tfs:['15m','1h','1d'],ev:'data',d:'Buys the side the last two months say is underpriced at this exact price and time left (trend-neutral Truth), only when that beats Kalshi\'s fee by 0.5¢ or more and the spread is 1–2¢. In practice: 80–97¢ favorites. One bet per coin per event, held to settlement. Same price bias as ⭐ Favorites, broader rule, not separately backtested.'},
  {k:'snap',ic:'🪃',n:'Snapback',tfs:['15m','1h'],ev:'new',d:'Fades a contract that moved 7¢+ (hourly: 6¢+) more than the coin\'s move justifies over the last minute. Contract 15–85¢, spread ≤2¢ (hourly ≤3¢), 3+ min left (hourly 8+). Target +3 to +8¢ (half the overshoot), stop −6¢, time stop 3 min (hourly 6).'},
- {k:'lag',ic:'🏃',n:'Catch-up',tfs:['15m','1h'],ev:'new',d:'The coin moved and the contract hasn\'t followed: the model jumped 5¢+ in a minute, the contract moved less than half of that, and the model sits 4¢+ above the ask. Buys the lagging side. Target 60% of the gap (min +3¢), stop −5¢, time stop 2 min (hourly 4).'},
+ {k:'lag',ic:'🏃',n:'Catch-up',tfs:['15m','1h'],ev:'neg',d:'Off by default. The coin moved and the contract hasn\'t followed: the model jumped 5¢+ in a minute, the contract moved less than half of that, and the model sits 4¢+ above the ask. Buys the lagging side. Target 60% of the gap (min +3¢), stop −5¢, time stop 2 min (hourly 4). Backtest Sep 23–Nov 23: lost on all four markets (hourly −2.4¢ per contract, 15-min −3.2¢ to −4.4¢, 24–39% won). Kalshi reprices within about a second, so when the contract seems to lag, the model is usually what\'s wrong.'},
  {k:'spk',ic:'⚡',n:'Spike Seller',tfs:['15m','1h'],ev:'new',d:'Your "sell into a quick spike either way" idea: after an 8¢+ move in a minute, take the other side. Contract 10–90¢, spread ≤3¢. Target +4¢, stop −6¢, time stop 2 min (hourly 4). Pure price, no model, so compare it with 🪃 Snapback.'},
  {k:'brk',ic:'🚀',n:'Breakout',tfs:['15m'],ev:'new',d:'Coin momentum of 1.2σ+ over 5 minutes, takers buying the same way (flow +0.3 or more on 20+ contracts) and the book not leaning against it. Buys the momentum side at 30–70¢ with 4–12 min left. Target +6¢, stop −5¢, time stop 4 min.'},
  {k:'lock',ic:'🔒',n:'Last-Minute Lock',tfs:['15m','1h'],ev:'new',d:'Final 75 seconds: Kalshi settles on a 60-second average, so most of the answer is already in. When the model (with the part of the average already locked) says 97%+ and that side still costs 95¢ or less with fresh quotes, buy it and hold. Bots race for this; paper tells you whether a phone can.'},
@@ -954,6 +962,19 @@ function scEnter(k,m,R,x,now){const px=askOf(m,x.sd);if(!(px>0&&px<1))return nul
  const r={k:'t',strat:k,id:m.id,v:'K',a:m.asset,tf:m.tf,sl:m.ticker,cl:m.close,t:now,sd:x.sd,px,fee,cost:px+fee,C,tp:p.tp!=null?Math.min(0.99,p.tp):null,slx:p.sl!=null&&p.sl>0?p.sl:null,te:p.te??null,grp:x.grp||m.id,
   q:R.q??null,P:R.P??null,mid:R.mid??null,e:null,call:STR[k]?STR[k].n:k,why:x.note||'',o:null,pnl:null,ds:desc(m)};
  LED.push(r);saveLed();if(cfg.scAlert||m.id===SC.id){try{navigator.vibrate&&navigator.vibrate(80)}catch(e){}toast(`${STR[k]?.ic||''} ${STR[k]?.n||k} (paper): BUY ${sideName(m,x.sd)} ${desc(m)} @ ${c1(px)}`)}return r}
+// Paper buys re-check the live order book first. Kalshi reprices within about a second of the coin moving, so a quote even a few
+// seconds old can show a price that is already gone. If the signal no longer holds on the live book, the buy is skipped and counted.
+async function liveBook(id){await scBook(id);const m=MK.get(id);return m&&Date.now()-(m.bt||0)<2500?m:null}
+async function kTop(tk){const d=await kget(`/markets/${tk}/orderbook?depth=3`);const ob=d.orderbook_fp||d.orderbook||{},pp=v=>{v=+v;return v>1?v/100:v};
+ const top=a=>{const r=(a||[]).map(x=>[pp(x[0]),+x[1]]).filter(x=>x[0]>0&&x[0]<1&&x[1]>0).sort((p,q)=>p[0]-q[0]);return r.length?r[r.length-1][0]:0};
+ const yb=top(ob.yes_dollars||ob.yes),nb=top(ob.no_dollars||ob.no);return{yb,nb,ya:nb?Math.round((1-nb)*100)/100:1,na:yb?Math.round((1-yb)*100)/100:1}}
+function missNote(k,id,why){const now=Date.now(),q=k+'|'+id;if(MISSK[q]>now)return;MISSK[q]=now+60000;const z=MISS[k]=MISS[k]||{n:0};z.n++;z.t=now;z.why=String(why||'').slice(0,90);try{store.set('fl.miss',MISS)}catch(e){}}
+async function scLive(k,id,sd,ck){const m=await liveBook(id);if(!m){missNote(k,id,'no live order book');SCOOL[ck]=Date.now()+60000;return}const now=Date.now();if(m.close<=now||!stOn(k))return;
+ if(spotAge(m.asset)>5000){missNote(k,id,'coin price feed stale');return}
+ let R=null,x=null;try{R=evaluate(m,now);if(R&&R.P!=null&&R.mid!=null)x=SE[k](m,R,scInd(m,R,now,false),now)}catch(e){}
+ if(!x||x.why.length||x.sd!==sd){missNote(k,id,x&&x.why.length?x.why[0]:'signal gone on the live book');SCOOL[ck]=now+60000;return}
+ if(LED.some(r=>r.k==='t'&&r.o==null&&r.strat===k&&(r.grp||r.id)===(x.grp||m.id)))return;
+ const r=scEnter(k,m,R,x,now);if(r)SCOOL[ck]=now+(m.tf==='15m'?120000:300000)}
 function scRun(now,res){if(!cfg.worker||!cfg.showKalshi)return;const open=LED.filter(r=>r.k==='t'&&r.o==null&&r.strat);const by={};for(const r of open)(by[r.strat]=by[r.strat]||[]).push(r);const out={};
  for(const R of res){const m=R.m;if(m.v!=='K'||m.man||m.close<=now||R.P==null||R.mid==null||!['15m','1h','1d'].includes(m.tf))continue;
   const age=now-(m.bt||0),slow=age>(m.tf==='15m'?9000:m.tf==='1h'?25000:70000),spot=spotAge(m.asset)>5000;const I=scInd(m,R,now,false);
@@ -963,8 +984,8 @@ function scRun(now,res){if(!cfg.worker||!cfg.showKalshi)return;const open=LED.fi
  SCLAST=out;
  for(const s of STRATS){if(!stOn(s.k))continue;const L=(out[s.k]||[]).filter(e=>!e.x.why.length);if(!L.length)continue;const mine=by[s.k]=by[s.k]||[];const G={};
   for(const e of L){const g=e.x.grp||e.m.id;if(!G[g]||(e.x.score??0)>(G[g].x.score??0))G[g]=e}
-  for(const[g,e]of Object.entries(G)){if(mine.length>=4)break;if(mine.some(r=>(r.grp||r.id)===g))continue;const ck=s.k+'|'+e.m.id;if(SCOOL[ck]>now)continue;
-   const r=scEnter(s.k,e.m,e.R,e.x,now);if(r){mine.push(r);SCOOL[ck]=now+(e.m.tf==='15m'?120000:300000)}}}}
+  for(const[g,e]of Object.entries(G)){const pk=s.k+'|'+g,np=Object.keys(PEND).filter(q=>q.startsWith(s.k+'|')).length;if(mine.length+np>=4)break;if(PEND[pk]||mine.some(r=>(r.grp||r.id)===g))continue;const ck=s.k+'|'+e.m.id;if(SCOOL[ck]>now)continue;
+   PEND[pk]=1;SCOOL[ck]=now+15000;scLive(s.k,e.m.id,e.x.sd,ck).finally(()=>{delete PEND[pk]})}}}
 // Paper exits: targets are resting sells (filled once the bid reaches them, maker fee); stops and time stops sell at the bid (taker fee)
 function scExits(now){for(const r of LED){if(r.k!=='t'||r.o!=null||r.xp!=null||(r.tp==null&&r.slx==null&&r.te==null))continue;const m=MK.get(r.id);if(!m||now>=m.close)continue;
  if(now-(m.bt||0)>(m.tf==='15m'?10000:30000))continue;const bid=bidOf(m,r.sd);if(!(bid>0))continue;let xr=null,xp=null,xf=0;
@@ -1040,9 +1061,10 @@ function scTixOut(R,now){const o=$('#txOut');if(!o||!R)return;const p=scTixPlan(
  ${mc&&mc.pT!=null?`Simulated: target first <b class="ok">${pctS(mc.pT)}</b>${p.sl!=null?` · stop first <b class="bad">${pctS(mc.pS)}</b>`:''} · neither ${pctS(mc.pX)} · EV <b class="${mc.ev>=0?'ok':'bad'}">${(mc.ev>=0?'+':'')+(mc.ev*100).toFixed(1)}¢</b> per contract`:'Simulation needs the coin price and volatility'}
  ${hh?`<br>History: from this price and time left, the bid reached ${g[0]==='x'?g.slice(1)+'×':g+'¢'} ${pctS(hh.p)} of the time (${hh.n.toLocaleString()} cases)`:''}
  <br><span class="muted">The simulation keeps today's gap between market and model and a ${c1(Math.max(0.005,(m.yesAsk-m.yesBid)/2))} half-spread. Paper only: nothing goes to Kalshi.</span>`}
-function scTixBuy(){const R=SC.R;if(!R)return;const now=Date.now(),p=scTixPlan(R,now),m=R.m;if(!p)return;if(now-(m.bt||0)>15000){toast('Prices are stale: wait a few seconds');return}
+async function scTixBuy(){const R0=SC.R;if(!R0||PEND.tix)return;const id=R0.m.id,a0=askOf(R0.m,SC.tix.sd);PEND.tix=1;let m=null;try{m=await liveBook(id)}finally{delete PEND.tix}
+ if(!m){toast('Could not reach the live order book: try again');return}const now=Date.now(),R=evaluate(m,now),p=scTixPlan(R,now);if(!p){toast('No ask to buy right now');return}
  LED.push({k:'t',strat:'tix',id:m.id,v:'K',a:m.asset,tf:m.tf,sl:m.ticker,cl:m.close,t:now,sd:p.sd,px:p.ask,fee:p.fee,cost:p.ask+p.fee,C:p.C,tp:p.tp,slx:p.sl,te:p.te,grp:m.id,q:R.q??null,P:R.P??null,mid:R.mid??null,e:null,call:'SCALP',why:'manual',o:null,pnl:null,ds:desc(m)});saveLed();
- try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}toast(`✋ Paper scalp: ${p.C}× ${sideName(m,p.sd)} @ ${c1(p.ask)}${p.tp!=null?' → '+c1(p.tp):''}`);scRender(now)}
+ try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}toast(`✋ Paper scalp: ${p.C}× ${sideName(m,p.sd)} @ ${c1(p.ask)}${Math.abs(p.ask-a0)>=0.005?` (live price; screen showed ${c1(a0)})`:''}${p.tp!=null?' → '+c1(p.tp):''}`);scRender(now)}
 function scPosHTML(now){const open=LED.filter(r=>r.k==='t'&&r.o==null&&(r.strat==='tix'||(r.strat&&(r.tp!=null||r.te!=null)))),done=LED.filter(r=>r.k==='t'&&r.strat==='tix'&&r.pnl!=null).slice(-5).reverse();
  if(!open.length&&!done.length)return'';
  const row=r=>{const m=MK.get(r.id),bid=m?bidOf(m,r.sd):0,u=bid>0?r.C*(bid-r.px-r.fee)-r.C*feeFor(m,bid,r.C):null,st=STR[r.strat]||{ic:'✋',n:'Your scalp'};
@@ -1258,10 +1280,11 @@ function labRender(){if($('#t-lab').hidden)return;const st=LABS().map(x=>({x,s:l
   <div class="muted" style="margin-top:4px">${esc(x.d)}</div>
   <div class="kpis" style="margin-top:8px"><div class="kpi"><span>Settled</span><b>${s.n}</b></div><div class="kpi"><span>Won</span><b>${s.n?Math.round(s.w/s.n*100)+'%':'–'}</b></div><div class="kpi"><span>P&amp;L · ROI</span><b class="${s.pnl>=0?'ok':'bad'}" style="font-size:14px">${s.n?(s.pnl>=0?'+':'')+usd(s.pnl)+(s.roi!=null?' · '+(s.roi*100).toFixed(1)+'%':''):'–'}</b></div></div>
   ${s.n||s.open?`<div class="muted" style="margin-top:6px">${s.n?`avg ${(s.avg>=0?'+':'')+usd(s.avg)} per bet · avg hold ${s.hold?left(s.hold/1000):'–'}`:''}${s.open?`${s.n?' · ':''}${s.open} open`:''}</div>`:''}
+  ${MISS[x.k]?.n?`<div class="muted" style="margin-top:4px">🔎 ${MISS[x.k].n} signal${MISS[x.k].n>1?'s':''} skipped at the live-price check · last: ${esc(MISS[x.k].why||'')}</div>`:''}
   ${byTf?`<table style="margin-top:6px"><tr><th></th><th>n</th><th>won</th><th>P&amp;L</th><th>ROI</th></tr>${byTf}</table>`:''}${rec}
   ${x.reset&&s.T.length?`<div class="row"><button class="btn sm alt" data-labreset="${x.k}">Reset ${esc(x.n)}</button></div>`:''}</div>`}).join('')}
 document.addEventListener('change',e=>{const el=e.target.closest('[data-labtog]');if(!el)return;const k=el.dataset.labtog;if(k.startsWith('st.')){cfg.st={...(cfg.st||{}),[k.slice(3)]:el.checked}}else cfg[k]=el.checked;saveCfg();labRender()});
-document.addEventListener('click',e=>{const b=e.target.closest('[data-labreset]');if(!b)return;const k=b.dataset.labreset;if(!confirm('Delete every paper trade for this strategy?'))return;LED=LED.filter(r=>!(r.k==='t'&&r.strat===k));store.set('fl.led',LED);labRender()});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-labreset]');if(!b)return;const k=b.dataset.labreset;if(!confirm('Delete every paper trade for this strategy?'))return;LED=LED.filter(r=>!(r.k==='t'&&r.strat===k));store.set('fl.led',LED);delete MISS[k];store.set('fl.miss',MISS);labRender()});
 
 
 /* ================= tabs, loops, boot ================= */
